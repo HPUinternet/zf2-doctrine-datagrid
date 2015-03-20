@@ -1,0 +1,37 @@
+{
+    "name": "hpu/wms-admin-datagrid",
+    "description": "DataGrid module for the HPU WMS. provides the display of entities and relations in an accessible clear overview, linked to other modules. ",
+    "type": "zend-wms-admin-module",
+    "keywords": [ "hpu", "wms", "cms", "zf2", "data", "table", "grid", "overview"],
+    "homepage": "http://hpu.nl/",
+    "time": "2015-03-20",
+    "license" : "proprietary",
+    "authors": [
+        {
+            "name": "HPU Internet Services",
+            "email": "service@hpu.nl",
+            "homepage": "http://hpu.nl/"
+        }
+    ],
+    "support": {
+        "email": "service@hpu.nl"
+    },
+    "require": {
+        "hpu/wms-admin-base": "~0"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "http://packages.hpu.nl/"
+        },
+        {
+            "packagist": false
+        }
+    ],
+    "autoload": {
+        "classmap": [
+            "./Module.php"
+        ]
+    },
+    "version": "0.99-dev"
+}
