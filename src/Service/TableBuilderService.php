@@ -1,8 +1,12 @@
 <?php namespace Wms\Admin\DataGrid\Service;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Wms\Admin\DataGrid\Options\ModuleOptions;
 use Doctrine\ORM\EntityManager;
+use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator;
+use Doctrine\ORM\Tools\Pagination\Paginator as ORMPaginator;
+use Wms\Admin\DataGrid\Options\ModuleOptions;
+use Wms\Admin\DataGrid\Model\TableModel as Table;
+use Zend\Paginator\Paginator;
 
 class TableBuilderService
 {
@@ -17,16 +21,6 @@ class TableBuilderService
      */
     protected $entityManager;
 
-    /**
-     * @var Array
-     */
-    private $hiddenColumns;
-
-    /**
-     * @var Array
-     */
-    private $columns;
-
     public function __construct(ModuleOptions $moduleOptions, EntityManager $entityManager)
     {
         $this->setModuleOptions($moduleOptions);
@@ -35,21 +29,24 @@ class TableBuilderService
 
     public function getTable()
     {
-        $this->setColumns($this->getColumnsFromEntity());
+        $table = new Table();
+        $table->setHeaderRow($this->getTableHeaders());
+        $table->setRows($this->getTableData());
     }
 
-    public function getColumnsFromEntity()
+    public function getTableHeaders()
     {
         $entityClass = $this->getModuleOptions()->getEntityName();
         if (!$entityClass) {
-            throw \Exception("No Entity found for the dataGrid module");
+            throw new \Exception("No Entity found for the dataGrid module");
         }
 
         $metaData = $this->getEntityManager()->getClassMetadata($entityClass);
         return $this->parseMetaDataToFieldArray($metaData);
     }
 
-    protected function parseMetaDataToFieldArray(ClassMetadata $metaData){
+    protected function parseMetaDataToFieldArray(ClassMetadata $metaData)
+    {
         $columns = array();
         foreach ($metaData->reflFields as $fieldName => $reflectionData) {
             if (array_key_exists($fieldName, $metaData->fieldMappings)) {
@@ -63,7 +60,49 @@ class TableBuilderService
                 throw new \Exception(sprintf('Can\'t map %s in the %s Entity', $fieldName, $metaData->name));
             }
         }
+
         return $columns;
+    }
+
+    public function getTableData()
+    {
+        $entityClass = $this->getModuleOptions()->getEntityName();
+        if (!$entityClass) {
+            throw new \Exception("No Entity found for the dataGrid module");
+        }
+
+        $repository = $this->getEntityManager()->getRepository($entityClass);
+        $qb = $repository->createQueryBuilder('test');
+
+
+
+
+
+        echo '<pre>';
+        var_dump($qb);
+        echo '</pre>';
+        die('asdfasdf');
+
+        $reflectionClass = new \ReflectionClass($entityClass);
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+        $queryBuilder->select("*");
+        $queryBuilder->from($entityClass, $reflectionClass->getShortName());
+        $results = $queryBuilder->getQuery()->execute();
+
+        echo '<pre>';
+        print_r($results);
+        echo '</pre>';
+        die('asdfasdf');
+
+
+        // Create the paginator itself
+        $paginator = new Paginator(
+            new DoctrinePaginator(new ORMPaginator($query))
+        );
+
+        $paginator
+            ->setCurrentPageNumber(1)
+            ->setItemCountPerPage(5);
     }
 
     /**
@@ -80,38 +119,6 @@ class TableBuilderService
     public function setModuleOptions($moduleOptions)
     {
         $this->moduleOptions = $moduleOptions;
-    }
-
-    /**
-     * @return Array
-     */
-    public function getHiddenColumns()
-    {
-        return $this->hiddenColumns;
-    }
-
-    /**
-     * @param Array $hiddenColumns
-     */
-    public function setHiddenColumns($hiddenColumns)
-    {
-        $this->hiddenColumns = $hiddenColumns;
-    }
-
-    /**
-     * @return Array
-     */
-    public function getColumns()
-    {
-        return $this->columns;
-    }
-
-    /**
-     * @param Array $columns
-     */
-    public function setColumns($columns)
-    {
-        $this->columns = $columns;
     }
 
     /**
