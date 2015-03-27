@@ -43,7 +43,7 @@ class TableBuilderService
         $table = new Table();
         $this->setColumns($this->getEntityColumns());
         $table->setHeaderRow($this->getColumns());
-        $table->setRows($this->getTableData());
+        $table->setAndParseRows($this->getTableData());
         return $table;
     }
 
@@ -56,6 +56,7 @@ class TableBuilderService
 
         $metaData = $this->getEntityManager()->getClassMetadata($entityClass);
         $coloumns = $this->parseMetaDataToFieldArray($metaData);
+        return $this->parseColumnsForDisplay($coloumns);
     }
 
     protected function parseMetaDataToFieldArray(ClassMetadata $metaData)
@@ -76,17 +77,22 @@ class TableBuilderService
         return $columns;
     }
 
+    protected function parseColumnsForDisplay($originalColoumns) {
+        $returnData = array();
+        foreach($originalColoumns as $key => $columnData) {
+            $returnData[$key] = array(
+                'fieldName' => $columnData['fieldName'],
+                'type' => $columnData['type']
+            );
+        }
+        return $returnData;
+    }
+
     public function getTableData()
     {
         $tableData = $this->getQueryBuilderService()->getResult();
         return $tableData;
     }
-
-
-
-
-
-
 
 
 //        echo '<pre>';

@@ -59,6 +59,18 @@ class TableModel
         return isset($this->caption);
     }
 
+    public function setAndparseRows(array $rows) {
+        foreach($rows as $row) {
+            foreach($this->getHeaderRow() as $columnName => $columnProperties) {
+               echo '<pre>';
+                var_dump($row->$columnName);
+
+                echo '</pre>';
+            }
+        }
+        die("hier was ik gebleven, de insteek is om vriendelijke en leesbare table content te extraheren uit de al vriendeljike headers");
+    }
+
     /**
      * @param array $rows
      * @return Table

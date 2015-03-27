@@ -28,35 +28,8 @@ class QueryBuilderService {
 
     public function getResult() {
         $result = $this->getQueryBuilder()->getQuery()->execute();
-        foreach($result as $data) {
-            echo '<br/>' . 'kheb een '.get_class($data);
-            foreach($data as $field => $value) {
-                if(!is_object($value)) {
-                    echo '<br/>' . $field . ' heeft als value '.$value;
-                } else {
-                    echo '<br/>' . $field . ' is een object';
-                }
-            }
-        }
-        die('asdfasdfasdf');
         return $result;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     /**
      * @return QueryBuilder
