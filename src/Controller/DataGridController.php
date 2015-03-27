@@ -2,6 +2,7 @@
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Wms\Admin\DataGrid\Service\TableBuilderService;
+use Zend\View\Model\ViewModel;
 
 class DataGridController extends AbstractActionController {
 
@@ -15,8 +16,7 @@ class DataGridController extends AbstractActionController {
     }
 
     public function indexAction() {
-        $table = $this->getTableBuilderService()->getTable();
-        die('eind debug van de indexaction in de controller');
+        return new ViewModel(array('tableData' => $this->getTableBuilderService()->getTable()));
     }
 
     /**

@@ -21,6 +21,11 @@ return array(
             __NAMESPACE__ => '/',
         ),
     ),
+    'view_helpers' => array(
+        'invokables' => array(
+            'DataGridTable' => 'Wms\Admin\DataGrid\View\Helper\DataGridTable',
+        ),
+    ),
     'router' => array(
         'routes' => array(
             'zfcadmin' => array(

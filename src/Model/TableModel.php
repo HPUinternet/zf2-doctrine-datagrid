@@ -20,7 +20,7 @@ class TableModel
     protected $headerRow;
 
     /**
-     * @var arrray
+     * @var Array
      */
     protected $attributes;
 

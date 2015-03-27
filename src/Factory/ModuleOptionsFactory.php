@@ -13,7 +13,8 @@ class ModuleOptionsFactory implements FactoryInterface
         $module = explode('/', $route)[1];
         return new ModuleOptions(isset($config['wms-category'][$module]) ? $config['wms-category'][$module] : array()); */
 
-        $dummyOptions = array( 'entityName' => 'Wms\Admin\User\Entity\User');
+//        $dummyOptions = array( 'entityName' => 'Wms\Admin\User\Entity\User');
+        $dummyOptions = array( 'entityName' => 'Wms\Admin\MediaManager\Entity\File');
         return new ModuleOptions($dummyOptions);
     }
 }
