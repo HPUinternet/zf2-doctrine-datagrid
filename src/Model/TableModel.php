@@ -1,6 +1,6 @@
 <?php namespace Wms\Admin\DataGrid\Model;
 
-use Zend\Stdlib\ArrayUtils;
+use Doctrine\ORM\PersistentCollection;
 
 class TableModel
 {
@@ -10,66 +10,9 @@ class TableModel
     protected $rows;
 
     /**
-     * @var string
-     */
-    protected $caption;
-
-    /**
      * @var array
      */
     protected $headerRow;
-
-    /**
-     * @var Array
-     */
-    protected $attributes;
-
-    /**
-     * @param array $rows - Array of rows for the table
-     */
-    public function __construct(array $rows = array())
-    {
-        $this->rows = $rows;
-    }
-
-    /**
-     * @param string $caption Text for the HTML caption tag.
-     * @return Table
-     */
-    public function setCaption($caption)
-    {
-        $this->caption = (string)$caption;
-
-        return $this;
-    }
-
-    /**
-     * @return string The HTML caption tag text.
-     */
-    public function getCaption()
-    {
-        return $this->caption;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasCaption()
-    {
-        return isset($this->caption);
-    }
-
-    public function setAndparseRows(array $rows) {
-        foreach($rows as $row) {
-            foreach($this->getHeaderRow() as $columnName => $columnProperties) {
-               echo '<pre>';
-                var_dump($row->$columnName);
-
-                echo '</pre>';
-            }
-        }
-        die("hier was ik gebleven, de insteek is om vriendelijke en leesbare table content te extraheren uit de al vriendeljike headers");
-    }
 
     /**
      * @param array $rows
@@ -91,12 +34,34 @@ class TableModel
     }
 
     /**
+     * Set Rows from RAW object data.
+     * The model will parse every attribute of the data object to a printable value.
+     * Initially made for parsing doctrine result object to a table.
+     * @param array $rows
+     * @return $this
+     * @throws \Exception
+     */
+    public function setAndParseRows(array $rows)
+    {
+        foreach ($rows as $row) {
+            $newRow = array();
+            foreach ($this->getHeaderRow() as $columnName => $columnProperties) {
+                $cellValue = $this->extractProperty($row, $columnName);
+                $newRow[$columnName] = $this->preParseCellValue($cellValue);
+            }
+            $this->rows[] = $newRow;
+        }
+        return $this;
+    }
+
+    /**
      * @param array $headerRow
      * @return Table
      */
     public function setHeaderRow(array $headerRow)
     {
         $this->headerRow = $headerRow;
+
         return $this;
     }
 
@@ -118,47 +83,57 @@ class TableModel
     }
 
     /**
-     * Determines if table will has a header row.
+     * Get property of object using several ways of extraction
      *
-     * A header row can be set explicitly using setHeaderRow() or by passing an
-     * associative array for the table rows.
-     *
-     * @return bool
+     * @param $class
+     * @param $propertyName
+     * @return bool|mixed
+     * @throws \Exception
      */
-    public function hasHeaderRow()
+    private function extractProperty($class, $propertyName)
     {
-        // If no header row is provided, see if we can get headers from row keys.
-        if (!isset($this->headerRow)) {
-            return count($this->rows) ? ArrayUtils::hasStringKeys($this->rows[0]) : false;
+        if (!property_exists($class, $propertyName)) {
+            throw new \Exception (
+                sprintf("Expected %s to contain a property named: %s, but it didn't", get_class($class), $propertyName)
+            );
         }
 
-        return true;
+        $getter = sprintf('get%s', ucfirst($propertyName));
+        $propertyValue = method_exists($class, $getter) ? $class->$getter() : false;
+        if ($propertyValue !== false) {
+            return $propertyValue;
+        }
+
+        // if the normal getter method fails (due to weird naming conventions or sub-classed protected properties)
+        // try to retrieve the property value through reflection
+        $reflectionClass = new \ReflectionClass($class);
+        $reflectionProperty = $reflectionClass->getProperty($propertyName);
+        if (!$reflectionProperty->isPrivate()) {
+            $reflectionProperty->setAccessible(true);
+            return $reflectionProperty->getValue($class);
+        }
+
+        throw new \Exception (
+            sprintf("Cant get %s property in class %s. Is the property private?", $propertyName, get_class($class))
+        );
     }
 
     /**
-     * @param array $attributes An associative array of tag attributes. Each key-value pair is an attribute name and value.
-     * @return Table
-     */
-    public function setAttributes(array $attributes)
-    {
-        $this->attributes = $attributes;
-
-        return $this;
-    }
-
-    /**
+     * Prepare the data for parsing by the viewHelper
+     * Please note that, other parsing (like the datetime objects and arrays should be done in the viewHelper)
+     *
+     * @param $cellData
      * @return array
      */
-    public function getAttributes()
+    protected function preParseCellValue($cellData)
     {
-        return $this->attributes;
+        if (!is_object($cellData) && !is_array($cellData)) {
+            return $cellData;
+        }
+
+        if ($cellData instanceof PersistentCollection) {
+            return $cellData->getValues();
+        }
     }
 
-    /**
-     * @return bool
-     */
-    public function hasAttributes()
-    {
-        return isset($this->attributes);
-    }
 }
