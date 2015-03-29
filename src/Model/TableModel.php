@@ -1,6 +1,7 @@
 <?php namespace Wms\Admin\DataGrid\Model;
 
 use Doctrine\ORM\PersistentCollection;
+use Doctrine\ORM\Proxy\Proxy;
 
 class TableModel
 {
@@ -127,13 +128,15 @@ class TableModel
      */
     protected function preParseCellValue($cellData)
     {
-        if (!is_object($cellData) && !is_array($cellData)) {
-            return $cellData;
-        }
-
         if ($cellData instanceof PersistentCollection) {
             return $cellData->getValues();
         }
+
+        if ($cellData instanceof Proxy) {
+            return '@todo handle proxy classes';
+        }
+
+        return $cellData;
     }
 
 }
