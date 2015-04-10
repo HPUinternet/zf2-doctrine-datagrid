@@ -16,13 +16,24 @@ class TableModel
     protected $headerRow;
 
     /**
+     * @var array
+     */
+    protected $hiddenColumns = array('id', 'creator_id', 'creation_date', 'last_modifier_id', 'last_modified_date');
+
+
+    public function __construct($hiddenColumns = array()) {
+        if(!empty($hiddenColumns)) {
+            $this->setHiddenColumns($hiddenColumns);
+        }
+    }
+
+    /**
      * @param array $rows
      * @return Table
      */
     public function setRows(array $rows)
     {
         $this->rows = $rows;
-
         return $this;
     }
 
@@ -32,6 +43,22 @@ class TableModel
     public function getRows()
     {
         return $this->rows;
+    }
+
+    /**
+     * @return array
+     */
+    public function getHiddenColumns()
+    {
+        return $this->hiddenColumns;
+    }
+
+    /**
+     * @param array $hiddenColumns
+     */
+    public function setHiddenColumns(array $hiddenColumns)
+    {
+        $this->hiddenColumns = $hiddenColumns;
     }
 
     /**
@@ -135,7 +162,6 @@ class TableModel
         if ($cellData instanceof Proxy) {
             return '@todo handle proxy classes';
         }
-
         return $cellData;
     }
 

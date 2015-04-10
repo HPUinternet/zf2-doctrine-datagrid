@@ -49,6 +49,9 @@ class DataGridTable extends AbstractHelper
         echo sprintf('<thead>', $classes);
         echo '<tr>';
         foreach ($this->getTableModel()->getHeaderRow() as $column) {
+            if(in_array(strtolower($column['fieldName']), $this->getTableModel()->getHiddenColumns())) {
+                continue;
+            }
             echo sprintf('<th class="%s ">%s</th>', $classes . " " . $column['fieldName'], $column['fieldName']);
         }
         echo '</tr>';
@@ -66,6 +69,9 @@ class DataGridTable extends AbstractHelper
     {
         echo empty($trClass) ? "<tr>" : sprintf("<tr class=\"%s\"", $trClass);
         foreach ($rowData as $cellName => $cellValue) {
+            if(in_array(strtolower($cellName), $this->getTableModel()->getHiddenColumns())) {
+                continue;
+            }
             $this->printTableContentCell($cellValue, $cellName);
         }
         echo "</tr>";
