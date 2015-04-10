@@ -2,9 +2,10 @@
 
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Query\Expr;
 use Wms\Admin\DataGrid\Options\ModuleOptions;
 use Wms\Admin\DataGrid\Model\TableModel as Table;
-use Wms\Admin\DataGrid\Service\QueryBuilderService;
 
 class TableBuilderService
 {
@@ -23,26 +24,30 @@ class TableBuilderService
      * @var Array
      */
     protected $columns;
+
     /**
-     * @var QueryBuilderService
+     * @var Array;
      */
-    private $queryBuilderService;
+    protected $visibleColumns;
+
+    /**
+     * @var QueryBuilder
+     */
+    private $queryBuilder;
 
     public function __construct(ModuleOptions $moduleOptions, EntityManager $entityManager)
     {
         $this->setModuleOptions($moduleOptions);
         $this->setEntityManager($entityManager);
-        $this->setQueryBuilderService(new QueryBuilderService(
-            $this->getEntityManager(),
-            $this->getModuleOptions()->getEntityName()
-        ));
+        $this->setVisibleColumns($this->getModuleOptions()->getDefaultColumns());
+        $this->setQueryBuilder($entityManager->getRepository($moduleOptions->getEntityName())->createQueryBuilder($moduleOptions->getEntityShortName()));
     }
 
     public function getTable()
     {
         $table = new Table();
         $this->setColumns($this->getEntityColumns());
-        $table->setHeaderRow($this->getColumns());
+        $table->setHeaderRow($this->parseColumnsForDisplay($this->getColumns()));
         $table->setAndParseRows($this->getTableData());
         return $table;
     }
@@ -55,8 +60,7 @@ class TableBuilderService
         }
 
         $metaData = $this->getEntityManager()->getClassMetadata($entityClass);
-        $coloumns = $this->parseMetaDataToFieldArray($metaData);
-        return $this->parseColumnsForDisplay($coloumns);
+        return $this->parseMetaDataToFieldArray($metaData);
     }
 
     protected function parseMetaDataToFieldArray(ClassMetadata $metaData)
@@ -77,9 +81,10 @@ class TableBuilderService
         return $columns;
     }
 
-    protected function parseColumnsForDisplay($originalColoumns) {
+    protected function parseColumnsForDisplay($originalColoumns)
+    {
         $returnData = array();
-        foreach($originalColoumns as $key => $columnData) {
+        foreach ($originalColoumns as $key => $columnData) {
             $returnData[$key] = array(
                 'fieldName' => $columnData['fieldName'],
                 'type' => $columnData['type']
@@ -90,9 +95,52 @@ class TableBuilderService
 
     public function getTableData()
     {
-        $tableData = $this->getQueryBuilderService()->getResult();
+        $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
+        $tableData = $this->getQueryBuilder()->getQuery()->execute();
         return $tableData;
     }
+
+    public function selectColumns(array $columns)
+    {
+        $this->getQueryBuilder()->resetDQLPart(array('select', 'join'));
+        foreach ($columns as $selectColumn) {
+            $joinedEntities = array();
+            if (!array_key_exists($selectColumn, $this->getColumns())) {
+                continue;
+            }
+
+            $entityShortName = $this->getEntityShortName($this->moduleOptions->getEntityName());
+
+            // Make sure associations are joined by looking at the targetEntity and sourceToTargetKeyColumns fields
+            if ($selectColumn['association'] === 'association') {
+                if (!isset($selectColumn['association']['targetEntity']) || empty($selectColumn['association']['targetEntity'])) {
+                    throw new \Exception(sprintf('Can\'t create join query parameters for %s in Entity %s', $selectColumn, $entityShortName));
+                }
+
+                $joinedEntityShortName = $this->getEntityShortName($selectColumn['association']['targetEntity']);
+                if(!in_array($selectColumn['association']['targetEntity'], $joinedEntities)) {
+                    foreach ($selectColumn as $entityColumn => $joinedColumn) {
+                        $this->getQueryBuilder()->leftJoin(
+                            $selectColumn['association']['targetEntity'],
+                            $joinedEntityShortName,
+                            Expr\Join::WITH,
+                            sprintf("%s = %s", $entityShortName . '.' . $entityColumn, $joinedEntityShortName . '.' . $joinedColumn)
+                        );
+                    }
+                }
+                $entityShortName = $joinedEntityShortName;
+            }
+            $this->getQueryBuilder()->addSelect($entityShortName . '.' . $selectColumn);
+        }
+    }
+
+    public function setPage($pageNumber, $itemsPerPage = 30)
+    {
+        $offset = ($pageNumber == 0) ? 0 : ($pageNumber - 1) * $itemsPerPage;
+        $this->getQueryBuilder()->setMaxResults($itemsPerPage);
+        $this->getQueryBuilder()->setFirstResult($offset);
+    }
+
 
 
 //        echo '<pre>';
@@ -155,19 +203,19 @@ class TableBuilderService
     }
 
     /**
-     * @return QueryBuilderService
+     * @return QueryBuilder
      */
-    public function getQueryBuilderService()
+    public function getQueryBuilder()
     {
-        return $this->queryBuilderService;
+        return $this->queryBuilder;
     }
 
     /**
-     * @param QueryBuilderService $queryBuilderService
+     * @param QueryBuilder $queryBuilder
      */
-    public function setQueryBuilderService($queryBuilderService)
+    public function setQueryBuilder($queryBuilder)
     {
-        $this->queryBuilderService = $queryBuilderService;
+        $this->queryBuilder = $queryBuilder;
     }
 
     /**
@@ -184,5 +232,30 @@ class TableBuilderService
     public function setColumns($columns)
     {
         $this->columns = $columns;
+    }
+
+    /**
+     * @return Array
+     */
+    public function getVisibleColumns()
+    {
+        return $this->visibleColumns;
+    }
+
+    /**
+     * @param Array $visibleColumns
+     */
+    public function setVisibleColumns($visibleColumns)
+    {
+        $this->visibleColumns = $visibleColumns;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEntityShortName($entityName)
+    {
+        $nameSpaceSegments = explode('\\', $entityName);
+        return strtolower(end($nameSpaceSegments));
     }
 }

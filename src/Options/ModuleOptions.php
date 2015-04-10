@@ -11,6 +11,13 @@ class ModuleOptions extends AbstractOptions
     protected $entityName = '';
 
     /**
+     * Default visible columns in the dataGrid
+     *
+     * @var array
+     */
+    protected $defaultColumns = array();
+
+    /**
      * @param string $entityName
      */
     public function setEntityName($entityName)
@@ -24,5 +31,21 @@ class ModuleOptions extends AbstractOptions
     public function getEntityName()
     {
         return $this->entityName;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDefaultColumns()
+    {
+        return $this->defaultColumns;
+    }
+
+    /**
+     * @param array $defaultColumns
+     */
+    public function setDefaultColumns(array $defaultColumns)
+    {
+        $this->defaultColumns = $defaultColumns;
     }
 }

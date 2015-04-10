@@ -42,6 +42,9 @@ class TableModel
      */
     public function getRows()
     {
+        if (empty($this->rows)) {
+            return array();
+        }
         return $this->rows;
     }
 
