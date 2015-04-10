@@ -1,6 +1,8 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper;
 
 use Zend\Di\ServiceLocator;
+use Zend\Form\Element\MultiCheckbox;
+use Zend\Form\Form;
 use Zend\View\Helper\AbstractHelper;
 use Wms\Admin\DataGrid\Model\TableModel;
 use IntlDateFormatter;
@@ -8,6 +10,11 @@ use DateTime;
 
 class DataGridTable extends AbstractHelper
 {
+    /**
+     * @var array
+     */
+    private $displaySettings;
+
     /**
      * @var TableModel;
      */
@@ -24,9 +31,10 @@ class DataGridTable extends AbstractHelper
     /**
      * @param TableModel $tableModel
      */
-    public function setTableModel($tableModel)
+    public function setTableModel($tableModel, $displaySettings = array('hiddenColumns', 'pagination', 'searchFilters'))
     {
         $this->tableModel = $tableModel;
+        $this->displaySettings = $displaySettings;
     }
 
     /**
@@ -38,10 +46,45 @@ class DataGridTable extends AbstractHelper
     public function __invoke(TableModel $tableModel)
     {
         $this->setTableModel($tableModel);
+
+        $this->printColumnSettingsForm();
+
         $this->printTableStart();
         $this->printTableHeadRow();
         $this->printTableContent();
         $this->printTableEnd();
+    }
+
+    public function printColumnSettingsForm()
+    {
+        if (!in_array('hiddenColumns', $this->displaySettings)) return;
+
+        $columnSettingsForm = new Form();
+        $valueOptions = array();
+        $displayedColumns = new MultiCheckbox('multi-checkbox');
+        $displayedColumns->setLabel($this->view->translate('Show data'));
+
+        foreach ($this->getTableModel()->getHeaderRow() as $column) {
+            $columnName = $column['fieldName'];
+            $valueOption = array(
+                'value' => strtolower($columnName),
+                'label' => $this->view->translate($columnName),
+                'selected' => !$this->isHiddenColumn($columnName),
+            );
+            $valueOptions[] = $valueOption;
+        }
+        $displayedColumns->setValueOptions($valueOptions);
+        $columnSettingsForm->add($displayedColumns);
+        $columnSettingsForm->add(array(
+            'name' => 'submit',
+            'type' => 'Submit',
+            'attributes' => array(
+                'value' => $this->view->translate('Apply'),
+                'class' => 'btn',
+            ),
+        ));
+
+        echo $this->view->form($columnSettingsForm);
     }
 
     protected function printTableHeadRow($classes = "tabelHeader")
@@ -49,9 +92,7 @@ class DataGridTable extends AbstractHelper
         echo sprintf('<thead>', $classes);
         echo '<tr>';
         foreach ($this->getTableModel()->getHeaderRow() as $column) {
-            if(in_array(strtolower($column['fieldName']), $this->getTableModel()->getHiddenColumns())) {
-                continue;
-            }
+            if ($this->isHiddenColumn($column['fieldName'])) continue;
             echo sprintf('<th class="%s ">%s</th>', $classes . " " . $column['fieldName'], $column['fieldName']);
         }
         echo '</tr>';
@@ -69,9 +110,7 @@ class DataGridTable extends AbstractHelper
     {
         echo empty($trClass) ? "<tr>" : sprintf("<tr class=\"%s\"", $trClass);
         foreach ($rowData as $cellName => $cellValue) {
-            if(in_array(strtolower($cellName), $this->getTableModel()->getHiddenColumns())) {
-                continue;
-            }
+            if ($this->isHiddenColumn($cellName)) continue;
             $this->printTableContentCell($cellValue, $cellName);
         }
         echo "</tr>";
@@ -81,7 +120,7 @@ class DataGridTable extends AbstractHelper
     {
         echo sprintf("<td class=\"%s\">", $tdClass . " " . $cellName);
         switch (true) {
-            case is_bool($cellValue) || (($cellValue === 1 || $cellValue === 0) && strpos($cellName,'id') === false):
+            case is_bool($cellValue) || (($cellValue === 1 || $cellValue === 0) && strpos($cellName, 'id') === false):
                 $cellValue = $cellValue == true ? "yes" : "no";
                 echo $this->view->translate($cellValue);
                 break;
@@ -114,5 +153,13 @@ class DataGridTable extends AbstractHelper
     protected function printTableEnd()
     {
         echo '</table>';
+    }
+
+    private function isHiddenColumn($columnName)
+    {
+        if (in_array(strtolower($columnName), $this->getTableModel()->getHiddenColumns())) {
+            return true;
+        }
+        return false;
     }
 }
