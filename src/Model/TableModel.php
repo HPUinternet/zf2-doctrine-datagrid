@@ -21,8 +21,9 @@ class TableModel
     protected $hiddenColumns = array('id', 'creator_id', 'creation_date', 'last_modifier_id', 'last_modified_date');
 
 
-    public function __construct($hiddenColumns = array()) {
-        if(!empty($hiddenColumns)) {
+    public function __construct($hiddenColumns = array())
+    {
+        if (!empty($hiddenColumns)) {
             $this->setHiddenColumns($hiddenColumns);
         }
     }
@@ -34,6 +35,7 @@ class TableModel
     public function setRows(array $rows)
     {
         $this->rows = $rows;
+
         return $this;
     }
 
@@ -45,6 +47,7 @@ class TableModel
         if (empty($this->rows)) {
             return array();
         }
+
         return $this->rows;
     }
 
@@ -76,12 +79,13 @@ class TableModel
     {
         foreach ($rows as $row) {
             $newRow = array();
-            foreach ($this->getHeaderRow() as $columnName => $columnProperties) {
+            foreach ($this->getHeaderRow() as $columnName) {
                 $cellValue = $this->extractProperty($row, $columnName);
                 $newRow[$columnName] = $this->preParseCellValue($cellValue);
             }
             $this->rows[] = $newRow;
         }
+
         return $this;
     }
 
@@ -123,6 +127,15 @@ class TableModel
      */
     private function extractProperty($class, $propertyName)
     {
+        if (is_array($class)) {
+            $propertyName = str_replace(".", "", $propertyName);
+
+            return $class[$propertyName];
+        }
+
+        $propertyNameSegments = explode(".", $propertyName);
+        $propertyName = reset($propertyNameSegments);
+
         if (!property_exists($class, $propertyName)) {
             throw new \Exception (
                 sprintf("Expected %s to contain a property named: %s, but it didn't", get_class($class), $propertyName)
@@ -141,6 +154,7 @@ class TableModel
         $reflectionProperty = $reflectionClass->getProperty($propertyName);
         if (!$reflectionProperty->isPrivate()) {
             $reflectionProperty->setAccessible(true);
+
             return $reflectionProperty->getValue($class);
         }
 
@@ -165,6 +179,7 @@ class TableModel
         if ($cellData instanceof Proxy) {
             return '@todo handle proxy classes';
         }
+
         return $cellData;
     }
 
