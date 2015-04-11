@@ -17,11 +17,11 @@ class ModuleOptionsFactory implements FactoryInterface
         $dummyOptions = array(
             'entityName' => 'Wms\Admin\MediaManager\Entity\MediaItem',
             'defaultColumns' => array(
-                'id', 'title', 'caption', 'originalFile.mimetype', 'originalFile.size', 'thumbnailFile.savepath'
+                'id', 'title', 'caption', 'originalFile.mimetype', 'originalFile.size', 'thumbnailFile.imagepath'
             ),
             'joinableColumns' => array(
-                'originalFile' => array('savepath', 'mimetype', 'isactive', 'size'),
-                'thumbnailFile' => array('savepath')
+                'originalFile' => array('imagepath', 'mimetype', 'isactive', 'size'),
+                'thumbnailFile' => array('imagepath')
             )
         );
         return new ModuleOptions($dummyOptions);

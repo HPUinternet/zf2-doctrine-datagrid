@@ -131,13 +131,15 @@ class TableBuilderService
                     continue;
                 }
 
-                $joinedEntityAlias = $this->getEntityShortName($columnMetadata['targetEntity']) . count($joinedProperties);
-                if (!in_array($selectColumn, $joinedProperties)) {
+                if (!array_key_exists($selectColumn, $joinedProperties)) {
+                    $joinedEntityAlias = $this->getEntityShortName($columnMetadata['targetEntity']).count($joinedProperties);
                     $this->getQueryBuilder()->leftJoin(
                         $entityShortName . '.' . $selectColumn,
                         $joinedEntityAlias
                     );
-                    $joinedProperties[] = $selectColumn;
+                    $joinedProperties[$selectColumn] = $joinedEntityAlias;
+                } else {
+                    $joinedEntityAlias = $joinedProperties[$selectColumn];
                 }
 
                 $this->getQueryBuilder()->addSelect(
