@@ -23,12 +23,13 @@ class TableBuilderService
     /**
      * @var Array
      */
-    protected $columns;
+    protected $entityProperties;
 
     /**
      * @var Array;
      */
-    protected $visibleColumns;
+    protected $visibleTableColumns;
+
 
     /**
      * @var QueryBuilder
@@ -39,20 +40,24 @@ class TableBuilderService
     {
         $this->setModuleOptions($moduleOptions);
         $this->setEntityManager($entityManager);
-        $this->setVisibleColumns($this->getModuleOptions()->getDefaultColumns());
-        $this->setQueryBuilder($entityManager->getRepository($moduleOptions->getEntityName())->createQueryBuilder($moduleOptions->getEntityShortName()));
+        $this->setVisibleTableColumns($this->getModuleOptions()->getDefaultColumns());
+        $this->setQueryBuilder($entityManager->getRepository($moduleOptions->getEntityName())->createQueryBuilder($this->getEntityShortName($moduleOptions->getEntityName())));
     }
 
     public function getTable()
     {
+        // Retrieve data from Doctrine and the dataprovider
+        $this->setEntityProperties($this->resolveEntityProperties());
+        $tableData = $this->getTableData();
+
         $table = new Table();
-        $this->setColumns($this->getEntityColumns());
-        $table->setHeaderRow($this->parseColumnsForDisplay($this->getColumns()));
-        $table->setAndParseRows($this->getTableData());
+        $table->setHeaderRow($this->getVisibleTableColumns());
+        $table->setAndParseRows($tableData);
+
         return $table;
     }
 
-    public function getEntityColumns()
+    public function resolveEntityProperties()
     {
         $entityClass = $this->getModuleOptions()->getEntityName();
         if (!$entityClass) {
@@ -60,6 +65,7 @@ class TableBuilderService
         }
 
         $metaData = $this->getEntityManager()->getClassMetadata($entityClass);
+
         return $this->parseMetaDataToFieldArray($metaData);
     }
 
@@ -78,58 +84,68 @@ class TableBuilderService
                 throw new \Exception(sprintf('Can\'t map %s in the %s Entity', $fieldName, $metaData->name));
             }
         }
-        return $columns;
-    }
 
-    protected function parseColumnsForDisplay($originalColoumns)
-    {
-        $returnData = array();
-        foreach ($originalColoumns as $key => $columnData) {
-            $returnData[$key] = array(
-                'fieldName' => $columnData['fieldName'],
-                'type' => $columnData['type']
-            );
-        }
-        return $returnData;
+        return $columns;
     }
 
     public function getTableData()
     {
-        $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
+        $this->selectColumns($this->getVisibleTableColumns());
         $tableData = $this->getQueryBuilder()->getQuery()->execute();
+
         return $tableData;
     }
 
+    /**
+     * Builds the selectquery for the database, based on the available entity properties
+     *
+     * @param array $columns
+     * @throws \Exception
+     */
     public function selectColumns(array $columns)
     {
-        $this->getQueryBuilder()->resetDQLPart(array('select', 'join'));
+        $this->getQueryBuilder()->resetDQLPart('select');
+        $joinedProperties = array();
+
         foreach ($columns as $selectColumn) {
-            $joinedEntities = array();
-            if (!array_key_exists($selectColumn, $this->getColumns())) {
+            $selectColumnParts = explode(".", $selectColumn);
+            $selectColumn = reset($selectColumnParts);
+
+            if (!array_key_exists($selectColumn, $this->getEntityProperties())) {
                 continue;
             }
 
+            $columnMetadata = $this->getEntityProperties()[$selectColumn];
             $entityShortName = $this->getEntityShortName($this->moduleOptions->getEntityName());
 
             // Make sure associations are joined by looking at the targetEntity and sourceToTargetKeyColumns fields
-            if ($selectColumn['association'] === 'association') {
-                if (!isset($selectColumn['association']['targetEntity']) || empty($selectColumn['association']['targetEntity'])) {
-                    throw new \Exception(sprintf('Can\'t create join query parameters for %s in Entity %s', $selectColumn, $entityShortName));
+            if ($columnMetadata['type'] === 'association') {
+                if (!isset($columnMetadata['targetEntity']) || empty($columnMetadata['targetEntity'])) {
+                    throw new \Exception(sprintf('Can\'t create join query parameters for %s in Entity %s',
+                        $selectColumn['fieldName'], $entityShortName));
                 }
 
-                $joinedEntityShortName = $this->getEntityShortName($selectColumn['association']['targetEntity']);
-                if(!in_array($selectColumn['association']['targetEntity'], $joinedEntities)) {
-                    foreach ($selectColumn as $entityColumn => $joinedColumn) {
-                        $this->getQueryBuilder()->leftJoin(
-                            $selectColumn['association']['targetEntity'],
-                            $joinedEntityShortName,
-                            Expr\Join::WITH,
-                            sprintf("%s = %s", $entityShortName . '.' . $entityColumn, $joinedEntityShortName . '.' . $joinedColumn)
-                        );
-                    }
+                // @todo: OneToMany vanuit de huidige entity
+                // @todo: ManyToMany
+                if (!isset($columnMetadata['joinColumns']) || empty($columnMetadata['joinColumns'])) {
+                    continue;
                 }
-                $entityShortName = $joinedEntityShortName;
+
+                $joinedEntityAlias = $this->getEntityShortName($columnMetadata['targetEntity']) . count($joinedProperties);
+                if (!in_array($selectColumn, $joinedProperties)) {
+                    $this->getQueryBuilder()->leftJoin(
+                        $entityShortName . '.' . $selectColumn,
+                        $joinedEntityAlias
+                    );
+                    $joinedProperties[] = $selectColumn;
+                }
+
+                $this->getQueryBuilder()->addSelect(
+                    $joinedEntityAlias . '.' . end($selectColumnParts) . ' AS ' . implode($selectColumnParts)
+                );
+                continue;
             }
+
             $this->getQueryBuilder()->addSelect($entityShortName . '.' . $selectColumn);
         }
     }
@@ -140,7 +156,6 @@ class TableBuilderService
         $this->getQueryBuilder()->setMaxResults($itemsPerPage);
         $this->getQueryBuilder()->setFirstResult($offset);
     }
-
 
 
 //        echo '<pre>';
@@ -221,33 +236,33 @@ class TableBuilderService
     /**
      * @return Array
      */
-    public function getColumns()
+    public function getEntityProperties()
     {
-        return $this->columns;
+        return $this->entityProperties;
     }
 
     /**
-     * @param Array $columns
+     * @param Array $entityProperties
      */
-    public function setColumns($columns)
+    public function setEntityProperties($entityProperties)
     {
-        $this->columns = $columns;
+        $this->entityProperties = $entityProperties;
     }
 
     /**
      * @return Array
      */
-    public function getVisibleColumns()
+    public function getVisibleTableColumns()
     {
-        return $this->visibleColumns;
+        return $this->visibleTableColumns;
     }
 
     /**
-     * @param Array $visibleColumns
+     * @param Array $visibleTableColumns
      */
-    public function setVisibleColumns($visibleColumns)
+    public function setVisibleTableColumns($visibleTableColumns)
     {
-        $this->visibleColumns = $visibleColumns;
+        $this->visibleTableColumns = $visibleTableColumns;
     }
 
     /**
@@ -256,6 +271,7 @@ class TableBuilderService
     public function getEntityShortName($entityName)
     {
         $nameSpaceSegments = explode('\\', $entityName);
-        return strtolower(end($nameSpaceSegments));
+
+        return strtoupper(end($nameSpaceSegments));
     }
 }

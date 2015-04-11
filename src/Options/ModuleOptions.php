@@ -11,11 +11,18 @@ class ModuleOptions extends AbstractOptions
     protected $entityName = '';
 
     /**
-     * Default visible columns in the dataGrid
+     * Default visible properties of your entity in the dataGrid
      *
      * @var array
      */
     protected $defaultColumns = array();
+
+    /**
+     * Columns available in the associated properties of your entity in the dataGrid
+     *
+     * @var array
+     */
+    protected $joinableColumns = array();
 
     /**
      * @param string $entityName
@@ -48,4 +55,21 @@ class ModuleOptions extends AbstractOptions
     {
         $this->defaultColumns = $defaultColumns;
     }
+
+    /**
+     * @return array
+     */
+    public function getJoinableColumns()
+    {
+        return $this->joinableColumns;
+    }
+
+    /**
+     * @param array $joinableColumns
+     */
+    public function setJoinableColumns($joinableColumns)
+    {
+        $this->joinableColumns = $joinableColumns;
+    }
+
 }
