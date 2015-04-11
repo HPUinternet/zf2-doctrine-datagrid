@@ -26,6 +26,11 @@ class TableBuilderService
     protected $entityProperties;
 
     /**
+     * @var Array
+     */
+    protected $availableTableColumns;
+
+    /**
      * @var Array;
      */
     protected $visibleTableColumns;
@@ -47,7 +52,7 @@ class TableBuilderService
     public function getTable()
     {
         // Retrieve data from Doctrine and the dataprovider
-        $this->setEntityProperties($this->resolveEntityProperties());
+        $this->setAvailableTableColumns($this->resolveAvailableTableColumns());
         $tableData = $this->getTableData();
 
         $table = new Table();
@@ -57,11 +62,45 @@ class TableBuilderService
         return $table;
     }
 
-    public function resolveEntityProperties()
+    /**
+     * Resolve the available columns based on the configured entity.
+     * Will also resolve the available columns for the associated properties
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function resolveAvailableTableColumns() {
+        if(!$this->getEntityProperties()) {
+            $this->setEntityProperties($this->resolveEntityProperties());
+        }
+
+        $returnData = array();
+        $entityProperties = array();
+        foreach($this->getEntityProperties() as $property) {
+            if($property['type'] === "association" && isset($property['targetEntity'])) {
+                $targetEntity = $property['targetEntity'];
+                if(!array_key_exists($targetEntity, $entityProperties)) {
+                    $entityProperties[$targetEntity] = $this->resolveEntityProperties($targetEntity);
+                }
+                $targetEntityProperties = $entityProperties[$targetEntity];
+                foreach($targetEntityProperties as $targetEntityProperty) {
+                    $returnData[] = $property['fieldName'].'.'.$targetEntityProperty['fieldName'];
+                }
+            } else {
+                $returnData[] = $property['fieldName'];
+            }
+        }
+        return $returnData;
+    }
+
+    public function resolveEntityProperties($entityClass = "")
     {
-        $entityClass = $this->getModuleOptions()->getEntityName();
+        if($entityClass === "") {
+            $entityClass = $this->getModuleOptions()->getEntityName();
+        }
+
         if (!$entityClass) {
-            throw new \Exception("No Entity found for the dataGrid module");
+            throw new \Exception("No Entity configured for the dataGrid module");
         }
 
         $metaData = $this->getEntityManager()->getClassMetadata($entityClass);
@@ -108,15 +147,14 @@ class TableBuilderService
         $joinedProperties = array();
 
         foreach ($columns as $selectColumn) {
-            $selectColumnParts = explode(".", $selectColumn);
-            $selectColumn = reset($selectColumnParts);
-
-            if (!array_key_exists($selectColumn, $this->getEntityProperties())) {
+            if (!in_array($selectColumn, $this->getAvailableTableColumns())) {
                 continue;
             }
 
+            $selectColumnParts = explode(".", $selectColumn);
+            $selectColumn = reset($selectColumnParts);
             $columnMetadata = $this->getEntityProperties()[$selectColumn];
-            $entityShortName = $this->getEntityShortName($this->moduleOptions->getEntityName());
+            $entityShortName = $this->getEntityShortName($this->getModuleOptions()->getEntityName());
 
             // Make sure associations are joined by looking at the targetEntity and sourceToTargetKeyColumns fields
             if ($columnMetadata['type'] === 'association') {
@@ -158,34 +196,6 @@ class TableBuilderService
         $this->getQueryBuilder()->setMaxResults($itemsPerPage);
         $this->getQueryBuilder()->setFirstResult($offset);
     }
-
-
-//        echo '<pre>';
-//        var_dump($qb);
-//        echo '</pre>';
-//        die('asdfasdf');
-//
-//        $reflectionClass = new \ReflectionClass($entityClass);
-//        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
-//        $queryBuilder->select("*");
-//        $queryBuilder->from($entityClass, $reflectionClass->getShortName());
-//        $results = $queryBuilder->getQuery()->execute();
-//
-//        echo '<pre>';
-//        print_r($results);
-//        echo '</pre>';
-//        die('asdfasdf');
-//
-//
-//        // Create the paginator itself
-//        $paginator = new Paginator(
-//            new DoctrinePaginator(new ORMPaginator($query))
-//        );
-//
-//        $paginator
-//            ->setCurrentPageNumber(1)
-//            ->setItemCountPerPage(5);
-//    }
 
     /**
      * @return ModuleOptions
@@ -275,5 +285,21 @@ class TableBuilderService
         $nameSpaceSegments = explode('\\', $entityName);
 
         return strtoupper(end($nameSpaceSegments));
+    }
+
+    /**
+     * @return Array
+     */
+    public function getAvailableTableColumns()
+    {
+        return $this->availableTableColumns;
+    }
+
+    /**
+     * @param Array $availableTableColumns
+     */
+    public function setAvailableTableColumns($availableTableColumns)
+    {
+        $this->availableTableColumns = $availableTableColumns;
     }
 }
