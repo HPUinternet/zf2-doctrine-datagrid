@@ -57,7 +57,9 @@ class DataGridTable extends AbstractHelper
 
     public function printColumnSettingsForm()
     {
-        if (!in_array('hiddenColumns', $this->displaySettings)) return;
+        if (!in_array('hiddenColumns', $this->displaySettings)) {
+            return;
+        }
 
         $columnSettingsForm = new Form();
         $valueOptions = array();
@@ -72,6 +74,7 @@ class DataGridTable extends AbstractHelper
             );
             $valueOptions[] = $valueOption;
         }
+
         $displayedColumns->setValueOptions($valueOptions);
         $columnSettingsForm->add($displayedColumns);
         $columnSettingsForm->add(array(
@@ -91,7 +94,9 @@ class DataGridTable extends AbstractHelper
         echo sprintf('<thead>', $classes);
         echo '<tr>';
         foreach ($this->getTableModel()->getUsedHeaders() as $column) {
-            if ($this->isHiddenColumn($column)) continue;
+            if ($this->isHiddenColumn($column)) {
+                continue;
+            }
             echo sprintf('<th class="%s ">%s</th>', $classes . " " . $column, $column);
         }
         echo '</tr>';
@@ -109,7 +114,9 @@ class DataGridTable extends AbstractHelper
     {
         echo empty($trClass) ? "<tr>" : sprintf("<tr class=\"%s\"", $trClass);
         foreach ($rowData as $cellName => $cellValue) {
-            if ($this->isHiddenColumn($cellName)) continue;
+            if ($this->isHiddenColumn($cellName)) {
+                continue;
+            }
             $this->printTableContentCell($cellValue, $cellName);
         }
         echo "</tr>";
@@ -123,7 +130,7 @@ class DataGridTable extends AbstractHelper
                 $cellValue = $cellValue == true ? "yes" : "no";
                 echo $this->view->translate($cellValue);
                 break;
-            case $cellValue === NULL || $cellValue === "":
+            case $cellValue === null || $cellValue === "":
                 echo "&nbsp;";
                 break;
             case is_array($cellValue) == true:
@@ -156,9 +163,10 @@ class DataGridTable extends AbstractHelper
 
     private function isHiddenColumn($columnName)
     {
-        if(in_array($columnName, $this->getTableModel()->getUsedHeaders())) {
+        if (in_array($columnName, $this->getTableModel()->getUsedHeaders())) {
             return false;
         }
+
         return true;
     }
 }
