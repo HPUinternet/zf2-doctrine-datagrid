@@ -31,119 +31,46 @@ class TableBuilderService
     protected $availableTableColumns;
 
     /**
-     * @var Array;
+     * @var Array
      */
-    protected $visibleTableColumns;
-
+    protected $selectedTableColumns;
 
     /**
      * @var QueryBuilder
      */
     private $queryBuilder;
 
+    // --------------------------------------------------------------------
+    //                         SERVICE INTERACTIONS
+    // --------------------------------------------------------------------
+
+    /**
+     * @param ModuleOptions $moduleOptions
+     * @param EntityManager $entityManager
+     * @return TableBuilderService
+     */
     public function __construct(ModuleOptions $moduleOptions, EntityManager $entityManager)
     {
         $this->setModuleOptions($moduleOptions);
         $this->setEntityManager($entityManager);
-        $this->setVisibleTableColumns($this->getModuleOptions()->getDefaultColumns());
         $this->setQueryBuilder($entityManager->getRepository($moduleOptions->getEntityName())->createQueryBuilder($this->getEntityShortName($moduleOptions->getEntityName())));
-    }
 
-    public function getTable()
-    {
-        // Retrieve data from Doctrine and the dataprovider
+        // Make sure data retrieval is default when not configured
         $this->setAvailableTableColumns($this->resolveAvailableTableColumns());
-        $tableData = $this->getTableData();
-
-        $table = new Table();
-        $table->setHeaderRow($this->getVisibleTableColumns());
-        $table->setAndParseRows($tableData);
-
-        return $table;
-    }
-
-    /**
-     * Resolve the available columns based on the configured entity.
-     * Will also resolve the available columns for the associated properties
-     *
-     * @return array
-     * @throws \Exception
-     */
-    public function resolveAvailableTableColumns() {
-        if(!$this->getEntityProperties()) {
-            $this->setEntityProperties($this->resolveEntityProperties());
-        }
-
-        $returnData = array();
-        $entityProperties = array();
-        foreach($this->getEntityProperties() as $property) {
-            if($property['type'] === "association" && isset($property['targetEntity'])) {
-                $targetEntity = $property['targetEntity'];
-                if(!array_key_exists($targetEntity, $entityProperties)) {
-                    $entityProperties[$targetEntity] = $this->resolveEntityProperties($targetEntity);
-                }
-                $targetEntityProperties = $entityProperties[$targetEntity];
-                foreach($targetEntityProperties as $targetEntityProperty) {
-                    $returnData[] = $property['fieldName'].'.'.$targetEntityProperty['fieldName'];
-                }
-            } else {
-                $returnData[] = $property['fieldName'];
-            }
-        }
-        return $returnData;
-    }
-
-    public function resolveEntityProperties($entityClass = "")
-    {
-        if($entityClass === "") {
-            $entityClass = $this->getModuleOptions()->getEntityName();
-        }
-
-        if (!$entityClass) {
-            throw new \Exception("No Entity configured for the dataGrid module");
-        }
-
-        $metaData = $this->getEntityManager()->getClassMetadata($entityClass);
-
-        return $this->parseMetaDataToFieldArray($metaData);
-    }
-
-    protected function parseMetaDataToFieldArray(ClassMetadata $metaData)
-    {
-        $columns = array();
-        foreach ($metaData->reflFields as $fieldName => $reflectionData) {
-            if (array_key_exists($fieldName, $metaData->fieldMappings)) {
-                $fieldData = $metaData->getFieldMapping($fieldName);
-                $columns[$fieldName] = $fieldData;
-            } elseif (array_key_exists($fieldName, $metaData->associationMappings)) {
-                $fieldData = $metaData->getAssociationMapping($fieldName);
-                $fieldData['type'] = 'association';
-                $columns[$fieldName] = $fieldData;
-            } else {
-                throw new \Exception(sprintf('Can\'t map %s in the %s Entity', $fieldName, $metaData->name));
-            }
-        }
-
-        return $columns;
-    }
-
-    public function getTableData()
-    {
-        $this->selectColumns($this->getVisibleTableColumns());
-        $tableData = $this->getQueryBuilder()->getQuery()->execute();
-
-        return $tableData;
+        $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
     }
 
     /**
      * Builds the selectquery for the database, based on the available entity properties
      *
      * @param array $columns
+     * @return $this
      * @throws \Exception
      */
     public function selectColumns(array $columns)
     {
         $this->getQueryBuilder()->resetDQLPart('select');
+        $this->setSelectedTableColumns(array());
         $joinedProperties = array();
 
         foreach ($columns as $selectColumn) {
@@ -151,6 +78,7 @@ class TableBuilderService
                 continue;
             }
 
+            $this->addToSelectedTableColumns($selectColumn);
             $selectColumnParts = explode(".", $selectColumn);
             $selectColumn = reset($selectColumnParts);
             $columnMetadata = $this->getEntityProperties()[$selectColumn];
@@ -188,15 +116,45 @@ class TableBuilderService
 
             $this->getQueryBuilder()->addSelect($entityShortName . '.' . $selectColumn);
         }
+        return $this;
     }
 
+    /**
+     * Set the page for pagination
+     *
+     * @param $pageNumber
+     * @param int $itemsPerPage
+     * @return $this
+     */
     public function setPage($pageNumber, $itemsPerPage = 30)
     {
         $offset = ($pageNumber == 0) ? 0 : ($pageNumber - 1) * $itemsPerPage;
         $this->getQueryBuilder()->setMaxResults($itemsPerPage);
         $this->getQueryBuilder()->setFirstResult($offset);
+        return $this;
     }
 
+    /**
+     * Retrieve an new TableModel
+     * based on your data configuration in the object
+     * @return Table
+     */
+    public function getTable()
+    {
+        // Retrieve data from Doctrine and the dataprovider
+        $tableHeaders = $this->getSelectedTableColumns();
+        $tableData = $this->getQueryBuilder()->getQuery()->execute();
+
+        $table = new Table();
+        $table->setHeaderRow($tableHeaders);
+        $table->setAndParseRows($tableData);
+
+        return $table;
+    }
+
+    // --------------------------------------------------------------------
+    //                          GETTERS & SETTERS
+    // --------------------------------------------------------------------
     /**
      * @return ModuleOptions
      */
@@ -262,22 +220,6 @@ class TableBuilderService
     }
 
     /**
-     * @return Array
-     */
-    public function getVisibleTableColumns()
-    {
-        return $this->visibleTableColumns;
-    }
-
-    /**
-     * @param Array $visibleTableColumns
-     */
-    public function setVisibleTableColumns($visibleTableColumns)
-    {
-        $this->visibleTableColumns = $visibleTableColumns;
-    }
-
-    /**
      * @return string
      */
     public function getEntityShortName($entityName)
@@ -301,5 +243,97 @@ class TableBuilderService
     public function setAvailableTableColumns($availableTableColumns)
     {
         $this->availableTableColumns = $availableTableColumns;
+    }
+
+    /**
+     * @return Array
+     */
+    public function getSelectedTableColumns()
+    {
+        return $this->selectedTableColumns;
+    }
+
+    /**
+     * @param Array $selectedTableColumns
+     */
+    public function setSelectedTableColumns($selectedTableColumns)
+    {
+        $this->selectedTableColumns = $selectedTableColumns;
+    }
+
+    /**
+     * @param String $tableColumn
+     */
+    public function addToSelectedTableColumns($tableColumn) {
+        $this->selectedTableColumns[] = $tableColumn;
+    }
+
+    // --------------------------------------------------------------------
+    //                          INTERNAL LOGIC
+    // --------------------------------------------------------------------
+
+    /**
+     * Resolve the available columns based on the configured entity.
+     * Will also resolve the available columns for the associated properties
+     *
+     * @return array
+     * @throws \Exception
+     */
+    protected function resolveAvailableTableColumns() {
+        if(!$this->getEntityProperties()) {
+            $this->setEntityProperties($this->resolveEntityProperties());
+        }
+
+        $returnData = array();
+        $entityProperties = array();
+        foreach($this->getEntityProperties() as $property) {
+            if($property['type'] === "association" && isset($property['targetEntity'])) {
+                $targetEntity = $property['targetEntity'];
+                if(!array_key_exists($targetEntity, $entityProperties)) {
+                    $entityProperties[$targetEntity] = $this->resolveEntityProperties($targetEntity);
+                }
+                $targetEntityProperties = $entityProperties[$targetEntity];
+                foreach($targetEntityProperties as $targetEntityProperty) {
+                    $returnData[] = $property['fieldName'].'.'.$targetEntityProperty['fieldName'];
+                }
+            } else {
+                $returnData[] = $property['fieldName'];
+            }
+        }
+        return $returnData;
+    }
+
+    protected function resolveEntityProperties($entityClass = "")
+    {
+        if($entityClass === "") {
+            $entityClass = $this->getModuleOptions()->getEntityName();
+        }
+
+        if (!$entityClass) {
+            throw new \Exception("No Entity configured for the dataGrid module");
+        }
+
+        $metaData = $this->getEntityManager()->getClassMetadata($entityClass);
+
+        return $this->parseMetaDataToFieldArray($metaData);
+    }
+
+    protected function parseMetaDataToFieldArray(ClassMetadata $metaData)
+    {
+        $columns = array();
+        foreach ($metaData->reflFields as $fieldName => $reflectionData) {
+            if (array_key_exists($fieldName, $metaData->fieldMappings)) {
+                $fieldData = $metaData->getFieldMapping($fieldName);
+                $columns[$fieldName] = $fieldData;
+            } elseif (array_key_exists($fieldName, $metaData->associationMappings)) {
+                $fieldData = $metaData->getAssociationMapping($fieldName);
+                $fieldData['type'] = 'association';
+                $columns[$fieldName] = $fieldData;
+            } else {
+                throw new \Exception(sprintf('Can\'t map %s in the %s Entity', $fieldName, $metaData->name));
+            }
+        }
+
+        return $columns;
     }
 }
