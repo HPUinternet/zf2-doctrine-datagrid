@@ -61,12 +61,12 @@ class DataGridTable extends AbstractHelper
 
         $columnSettingsForm = new Form();
         $valueOptions = array();
-        $displayedColumns = new MultiCheckbox('multi-checkbox');
+        $displayedColumns = new MultiCheckbox('datagrid_columns');
         $displayedColumns->setLabel($this->view->translate('Show data'));
 
         foreach ($this->getTableModel()->getAvailableHeaders() as $columnName) {
             $valueOption = array(
-                'value' => strtolower($columnName),
+                'value' => $columnName,
                 'label' => $this->view->translate($columnName),
                 'selected' => !$this->isHiddenColumn($columnName),
             );
@@ -156,6 +156,9 @@ class DataGridTable extends AbstractHelper
 
     private function isHiddenColumn($columnName)
     {
-        return false;
+        if(in_array($columnName, $this->getTableModel()->getUsedHeaders())) {
+            return false;
+        }
+        return true;
     }
 }

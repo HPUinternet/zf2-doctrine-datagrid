@@ -70,6 +70,7 @@ class TableBuilderService
     public function selectColumns(array $columns)
     {
         $this->getQueryBuilder()->resetDQLPart('select');
+        $this->getQueryBuilder()->resetDQLPart('join');
         $joinedProperties = array();
 
         foreach ($columns as $selectColumn) {
@@ -268,7 +269,9 @@ class TableBuilderService
                 }
                 $targetEntityProperties = $entityProperties[$targetEntity];
                 foreach($targetEntityProperties as $targetEntityProperty) {
-                    $returnData[] = $property['fieldName'].'.'.$targetEntityProperty['fieldName'];
+                    if($targetEntityProperty['type'] !== "association") {
+                        $returnData[] = $property['fieldName'].'.'.$targetEntityProperty['fieldName'];
+                    }
                 }
             } else {
                 $returnData[] = $property['fieldName'];
