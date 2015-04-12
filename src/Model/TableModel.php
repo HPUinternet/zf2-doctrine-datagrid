@@ -41,7 +41,7 @@ class TableModel
         foreach ($rows as $row) {
             $newRow = array();
             foreach ($this->getUsedHeaders() as $columnName) {
-                $cellValue = $this->extractProperty($row, $columnName);
+                $cellValue = $this->extractProperty($row, str_replace(".", "", $columnName));
                 $newRow[$columnName] = $this->preParseCellValue($cellValue);
             }
             $this->rows[] = $newRow;
@@ -55,10 +55,17 @@ class TableModel
      * @return array
      */
     private function buildTableHeaderFromRow(array $row) {
+        // To prevent nested foreach loops, first rebuild the available headers
+        $availableHeaders = array();
+        foreach($this->availableHeaders as $availableHeader) {
+            $availableHeaders[] = str_replace(".", "", $availableHeader);
+        }
+
         $tableHeaders = array();
         foreach ($row as $property => $value) {
-            if(in_array($property, $this->availableHeaders)) {
-                $tableHeaders[] = $property;
+            $indexKey = array_search($property, $availableHeaders);
+            if($indexKey) {
+                $tableHeaders[] = $this->availableHeaders[$indexKey];
             }
         }
         return $tableHeaders;
@@ -179,9 +186,7 @@ class TableModel
      */
     public function setAvailableHeaders($availableHeaders)
     {
-        foreach($availableHeaders as $tableheader) {
-            $this->availableHeaders[] = str_replace(".", "", $tableheader);
-        }
+        $this->availableHeaders = $availableHeaders;
     }
 
 }
