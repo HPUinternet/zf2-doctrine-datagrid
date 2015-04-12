@@ -13,58 +13,18 @@ class TableModel
     /**
      * @var array
      */
-    protected $headerRow;
+    protected $usedHeaders;
 
     /**
-     * @var array
+     * @var Array
      */
-    protected $hiddenColumns = array('id', 'creator_id', 'creation_date', 'last_modifier_id', 'last_modified_date');
+    protected $availableHeaders;
 
-
-    public function __construct($hiddenColumns = array())
+    public function __construct()
     {
-        if (!empty($hiddenColumns)) {
-            $this->setHiddenColumns($hiddenColumns);
-        }
-    }
-
-    /**
-     * @param array $rows
-     * @return Table
-     */
-    public function setRows(array $rows)
-    {
-        $this->rows = $rows;
-
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getRows()
-    {
-        if (empty($this->rows)) {
-            return array();
-        }
-
-        return $this->rows;
-    }
-
-    /**
-     * @return array
-     */
-    public function getHiddenColumns()
-    {
-        return $this->hiddenColumns;
-    }
-
-    /**
-     * @param array $hiddenColumns
-     */
-    public function setHiddenColumns(array $hiddenColumns)
-    {
-        $this->hiddenColumns = $hiddenColumns;
+        $this->rows = array();
+        $this->availableHeaders = array();
+        $this->usedHeaders = array();
     }
 
     /**
@@ -77,9 +37,10 @@ class TableModel
      */
     public function setAndParseRows(array $rows)
     {
+        $this->setUsedHeaders($this->buildTableHeaderFromRow($rows[0]));
         foreach ($rows as $row) {
             $newRow = array();
-            foreach ($this->getHeaderRow() as $columnName) {
+            foreach ($this->getUsedHeaders() as $columnName) {
                 $cellValue = $this->extractProperty($row, $columnName);
                 $newRow[$columnName] = $this->preParseCellValue($cellValue);
             }
@@ -90,31 +51,17 @@ class TableModel
     }
 
     /**
-     * @param array $headerRow
-     * @return Table
-     */
-    public function setHeaderRow(array $headerRow)
-    {
-        $this->headerRow = $headerRow;
-
-        return $this;
-    }
-
-    /**
+     * @param array $row
      * @return array
      */
-    public function getHeaderRow()
-    {
-        // If no header row is provided, get headers from 1st rows row.
-        if (!isset($this->headerRow)) {
-            if (!count($this->rows)) {
-                return array();
+    private function buildTableHeaderFromRow(array $row) {
+        $tableHeaders = array();
+        foreach ($row as $property => $value) {
+            if(in_array($property, $this->availableHeaders)) {
+                $tableHeaders[] = $property;
             }
-
-            return array_combine(array_keys($this->rows[0]), array_keys($this->rows[0]));
         }
-
-        return $this->headerRow;
+        return $tableHeaders;
     }
 
     /**
@@ -181,6 +128,60 @@ class TableModel
         }
 
         return $cellData;
+    }
+
+
+    /**
+     * @param array $rows
+     * @return Table
+     */
+    public function setRows(array $rows)
+    {
+        $this->rows = $rows;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRows()
+    {
+        return $this->rows;
+    }
+
+    /**
+     * @return array
+     */
+    public function getUsedHeaders()
+    {
+        return $this->usedHeaders;
+    }
+
+    /**
+     * @param array $usedHeaders
+     */
+    public function setUsedHeaders($usedHeaders)
+    {
+        $this->usedHeaders = $usedHeaders;
+    }
+
+    /**
+     * @return Array
+     */
+    public function getAvailableHeaders()
+    {
+        return $this->availableHeaders;
+    }
+
+    /**
+     * @param Array $availableHeaders
+     */
+    public function setAvailableHeaders($availableHeaders)
+    {
+        foreach($availableHeaders as $tableheader) {
+            $this->availableHeaders[] = str_replace(".", "", $tableheader);
+        }
     }
 
 }

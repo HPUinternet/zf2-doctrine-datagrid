@@ -70,7 +70,6 @@ class TableBuilderService
     public function selectColumns(array $columns)
     {
         $this->getQueryBuilder()->resetDQLPart('select');
-        $this->setSelectedTableColumns(array());
         $joinedProperties = array();
 
         foreach ($columns as $selectColumn) {
@@ -78,7 +77,6 @@ class TableBuilderService
                 continue;
             }
 
-            $this->addToSelectedTableColumns($selectColumn);
             $selectColumnParts = explode(".", $selectColumn);
             $selectColumn = reset($selectColumnParts);
             $columnMetadata = $this->getEntityProperties()[$selectColumn];
@@ -142,11 +140,10 @@ class TableBuilderService
     public function getTable()
     {
         // Retrieve data from Doctrine and the dataprovider
-        $tableHeaders = $this->getSelectedTableColumns();
         $tableData = $this->getQueryBuilder()->getQuery()->execute();
-
+        
         $table = new Table();
-        $table->setHeaderRow($tableHeaders);
+        $table->setAvailableHeaders($this->getAvailableTableColumns());
         $table->setAndParseRows($tableData);
 
         return $table;
@@ -243,29 +240,6 @@ class TableBuilderService
     public function setAvailableTableColumns($availableTableColumns)
     {
         $this->availableTableColumns = $availableTableColumns;
-    }
-
-    /**
-     * @return Array
-     */
-    public function getSelectedTableColumns()
-    {
-        return $this->selectedTableColumns;
-    }
-
-    /**
-     * @param Array $selectedTableColumns
-     */
-    public function setSelectedTableColumns($selectedTableColumns)
-    {
-        $this->selectedTableColumns = $selectedTableColumns;
-    }
-
-    /**
-     * @param String $tableColumn
-     */
-    public function addToSelectedTableColumns($tableColumn) {
-        $this->selectedTableColumns[] = $tableColumn;
     }
 
     // --------------------------------------------------------------------
