@@ -19,9 +19,15 @@ class ModuleOptionsFactory implements FactoryInterface
             'defaultColumns' => array(
                 'id', 'title', 'caption', 'originalFile.mimetype', 'originalFile.size', 'thumbnailFile.imagepath'
             ),
-            'joinableColumns' => array(
-                'originalFile' => array('imagepath', 'mimetype', 'isactive', 'size'),
-                'thumbnailFile' => array('imagepath')
+        );
+
+        $dummyOptions = array(
+            'entityName' => 'Wms\Admin\User\Entity\User',
+            'defaultColumns' => array(
+                'id',
+            ),
+            'prohibitedColumns' => array(
+                'password'
             )
         );
         return new ModuleOptions($dummyOptions);

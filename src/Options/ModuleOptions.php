@@ -18,11 +18,9 @@ class ModuleOptions extends AbstractOptions
     protected $defaultColumns = array();
 
     /**
-     * Columns available in the associated properties of your entity in the dataGrid
-     *
      * @var array
      */
-    protected $joinableColumns = array();
+    protected $prohibitedColumns = array();
 
     /**
      * @param string $entityName
@@ -59,17 +57,17 @@ class ModuleOptions extends AbstractOptions
     /**
      * @return array
      */
-    public function getJoinableColumns()
+    public function getProhibitedColumns()
     {
-        return $this->joinableColumns;
+        return $this->prohibitedColumns;
     }
 
     /**
-     * @param array $joinableColumns
+     * @param array $prohibitedColumns
      */
-    public function setJoinableColumns($joinableColumns)
+    public function setProhibitedColumns($prohibitedColumns)
     {
-        $this->joinableColumns = $joinableColumns;
+        $this->prohibitedColumns = $prohibitedColumns;
     }
 
 }

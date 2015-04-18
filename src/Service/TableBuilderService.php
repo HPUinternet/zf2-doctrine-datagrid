@@ -142,7 +142,7 @@ class TableBuilderService
     {
         // Retrieve data from Doctrine and the dataprovider
         $tableData = $this->getQueryBuilder()->getQuery()->execute();
-        
+
         $table = new Table();
         $table->setAvailableHeaders($this->getAvailableTableColumns());
         $table->setAndParseRows($tableData);
@@ -261,20 +261,35 @@ class TableBuilderService
 
         $returnData = array();
         $entityProperties = array();
+        $prohibitedColumns = $this->getModuleOptions()->getProhibitedColumns();
+
         foreach($this->getEntityProperties() as $property) {
-            if($property['type'] === "association" && isset($property['targetEntity'])) {
-                $targetEntity = $property['targetEntity'];
-                if(!array_key_exists($targetEntity, $entityProperties)) {
-                    $entityProperties[$targetEntity] = $this->resolveEntityProperties($targetEntity);
-                }
-                $targetEntityProperties = $entityProperties[$targetEntity];
-                foreach($targetEntityProperties as $targetEntityProperty) {
-                    if($targetEntityProperty['type'] !== "association") {
-                        $returnData[] = $property['fieldName'].'.'.$targetEntityProperty['fieldName'];
-                    }
-                }
-            } else {
+            if(in_array($property['fieldName'], $prohibitedColumns)) {
+               continue;
+            }
+
+            if($property['type'] != "association") {
                 $returnData[] = $property['fieldName'];
+                continue;
+            }
+
+            if(!isset($property['targetEntity'])) {
+                throw new \Exception(
+                    sprintf('%s is configured as a association, but no target Entity found', $property['fieldName'])
+                );
+            }
+
+            $targetEntity = $property['targetEntity'];
+
+            if(!array_key_exists($targetEntity, $entityProperties)) {
+                $entityProperties[$targetEntity] = $this->resolveEntityProperties($targetEntity);
+            }
+
+            $targetEntityProperties = $entityProperties[$targetEntity];
+            foreach($targetEntityProperties as $targetEntityProperty) {
+                if($targetEntityProperty['type'] !== "association" && !array_search($targetEntityProperty, $prohibitedColumns)) {
+                    $returnData[] = $property['fieldName'].'.'.$targetEntityProperty['fieldName'];
+                }
             }
         }
         return $returnData;
