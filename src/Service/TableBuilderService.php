@@ -1,6 +1,7 @@
 <?php namespace Wms\Admin\DataGrid\Service;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query\Expr;
 use Wms\Admin\DataGrid\Options\ModuleOptions;
@@ -78,10 +79,14 @@ class TableBuilderService
     {
         $this->getQueryBuilder()->resetDQLPart('select');
         $this->getQueryBuilder()->resetDQLPart('join');
+
+        $entityMetaData = $this->entityMetadataHelper->getMetaData($this->getModuleOptions()->getEntityName());
+        if(!in_array($entityMetaData->getSingleIdentifierFieldName(), $columns)) {
+            $columns[] = $entityMetaData->getSingleIdentifierFieldName();
+        }
+
         $joinedProperties = array();
-        $entityMetaData = $this->entityMetadataHelper->parseMetaDataToFieldArray(
-            $this->entityMetadataHelper->getEntityMetadata($this->getModuleOptions()->getEntityName())
-        );
+        $entityMetaData = $this->entityMetadataHelper->parseMetaDataToFieldArray($entityMetaData);
 
         foreach ($columns as $selectColumn) {
             if (!in_array($selectColumn, $this->getAvailableTableColumns())) {
@@ -93,30 +98,25 @@ class TableBuilderService
             $columnMetadata = $entityMetaData[$selectColumn];
             $entityShortName = $this->getEntityShortName($this->getModuleOptions()->getEntityName());
 
-            // Make sure associations are joined by looking at the targetEntity and sourceToTargetKeyColumns fields
             if ($columnMetadata['type'] === 'association') {
-                if (!isset($columnMetadata['targetEntity']) || empty($columnMetadata['targetEntity'])) {
-                    throw new \Exception(sprintf('Can\'t create join query parameters for %s in Entity %s',
+                if(empty($columnMetadata['targetEntity'])) {
+                    throw new \Exception(sprintf('No target Entity found for %s in Entity %s',
                         $selectColumn['fieldName'], $entityShortName));
                 }
 
-                // @todo: OneToMany vanuit de huidige entity
-                // @todo: ManyToMany: Deze wordt even geskipped omdat er onenigheid is geconstanteerd in de implementaties hiervan
-
-                /*
-                 * Bij een OneToMany is de waarde van de property niet aanwezig (omdat dit zich in een koppeltabel of de andere entity bevint)
-                 * Dit zorgt er voor dat de volgende twee strategieën beschikbaar zijn om de data alsnog op te halen:
-                 * 1. een subquery in SQL gemaakt moet worden om de resultaten te tonen
-                 * 2. een tweede query achteraf afvuren om deze achteraf bij de results weer in te kunnen voeren
+                /**
+                 * Owning associations can be handled inline
+                 * others (OneToMany and ManyToMany) should result in a different query since querying
+                 * them will result in multiple duplicate rows in the database resultset
                  */
-                if ($selectColumn == "productReviews") {
-                    echo 'start debug oneToMany';
+                if(!$columnMetadata['isOwningSide']) {
+                    $this->addSubQuery($selectColumn, $columnMetadata['targetEntity'], end($selectColumnParts));
+                    continue;
                 }
 
-                // Deal with OneToMany and ManyToMany associated fields
-                if (!$columnMetadata['isOwningSide']) {
-
-                    continue;
+                if (!isset($columnMetadata['joinColumns']) || empty($columnMetadata['joinColumns'])) {
+                    throw new \Exception(sprintf('Can\'t create join query parameters for %s in Entity %s',
+                        $columnMetadata['fieldName'], $entityShortName));
                 }
 
                 if (!array_key_exists($selectColumn, $joinedProperties)) {
@@ -166,16 +166,29 @@ class TableBuilderService
     public function getTable()
     {
         // Retrieve data from Doctrine and the dataprovider
-        $tableData = $this->getQueryBuilder()->getQuery()->execute();
+        $primaryData = $this->getQueryBuilder()->getQuery()->execute();
+        $primaryKey = $this->entityMetadataHelper->getMetaData($this->getModuleOptions()->getEntityName())->getSingleIdentifierFieldName();
 
         echo '<pre>';
-        var_dump($tableData);
+        var_dump($primaryData);
         echo '</pre>';
-//        die('einde dump in getTable');
+        echo 'einde primary data';
+
+        foreach($this->subQueries as $query) {
+            $query->setParameter('resultIds', array_column($primaryData, $primaryKey));
+            $result = $query->getQuery()->execute();
+            echo '<pre>';
+            print_r($result);
+            echo '</pre>';
+            echo 'einde subquery result';
+        }
+
+//        die('einde plezier');
+
 
         $table = new Table();
         $table->setAvailableHeaders($this->getAvailableTableColumns());
-        $table->setAndParseRows($tableData);
+        $table->setAndParseRows($primaryData);
 
         return $table;
     }
@@ -271,7 +284,7 @@ class TableBuilderService
     protected function resolveAvailableTableColumns()
     {
         $entityProperties = $this->entityMetadataHelper->parseMetaDataToFieldArray(
-            $this->entityMetadataHelper->getEntityMetadata($this->getModuleOptions()->getEntityName())
+            $this->entityMetadataHelper->getMetaData($this->getModuleOptions()->getEntityName())
         );
 
         $returnData = array();
@@ -295,7 +308,7 @@ class TableBuilderService
 
             $targetEntity = $property['targetEntity'];
             $targetEntityProperties = $this->entityMetadataHelper->parseMetaDataToFieldArray(
-                $this->entityMetadataHelper->getEntityMetadata($targetEntity)
+                $this->entityMetadataHelper->getMetaData($targetEntity)
             );
 
             foreach ($targetEntityProperties as $targetEntityProperty) {
@@ -310,12 +323,44 @@ class TableBuilderService
         return $returnData;
     }
 
-    protected function AddsubQuery($enityName)
+    /**
+     * @param $sourceFieldName
+     * @param $targetEntityName
+     * @param $targetFieldName
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     * @throws \Exception
+     */
+    protected function addSubQuery($sourceFieldName, $targetEntityName, $targetFieldName)
     {
+        // Get additional information about the association property in the original entity
+        $sourceEntity = $this->getModuleOptions()->getEntityName();
+        $entityMetadata = $this->entityMetadataHelper->getMetaData($sourceEntity);
+        $fieldMetadata = $entityMetadata->getAssociationMapping($sourceFieldName);
 
-        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
-        $queryBuilder->from($enityName, $this->getEntityShortName($enityName));
+        // @todo: ManyToMany: Deze wordt uitgesteld omdat er onenigheid is geconstanteerd in de implementaties hiervan
+        if($fieldMetadata['type'] !== ClassMetadataInfo::ONE_TO_MANY) {
+            return;
+        }
 
-        $this->subQueries[$enityName] = $queryBuilder;
+        if(!isset($this->subQueries[$targetEntityName])) {
+            $query = $this->getEntityManager()->createQueryBuilder();
+
+            // Validate that we can "auto-join" the entity by letting doctrine do the work
+            $associationData = $this->entityMetadataHelper->getMetaData($targetEntityName)->getAssociationsByTargetClass($sourceEntity);
+            if(empty($associationData)) {
+                throw new \Exception(
+                    sprintf("No association data found to bind %s OneToMany with %s", $sourceEntity, $targetEntityName)
+                );
+            }
+
+            $query->from($targetEntityName, $this->getEntityShortName($targetEntityName));
+            $query->join($sourceEntity, $this->getEntityShortName($sourceEntity));
+            // @todo ondersteuning voor multi primary key columns
+            $query->where($this->getEntityShortName($sourceEntity).'.'.$entityMetadata->getSingleIdentifierFieldName().' IN (:resultIds)');
+            $this->subQueries[$targetEntityName] = $query;
+        }
+
+        $query = $this->subQueries[$targetEntityName];
+        $query->addSelect($this->getEntityShortName($targetEntityName).'.'.$targetFieldName);
     }
 }

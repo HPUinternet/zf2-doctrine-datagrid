@@ -20,16 +20,22 @@ class ModuleOptionsFactory implements FactoryInterface
                 'id', 'title', 'caption', 'originalFile.mimetype', 'originalFile.size', 'thumbnailFile.imagepath'
             ),
         );
+//        $dummyOptions = array(
+//            'entityName' => 'Wms\Admin\Shop\Entity\Product',
+//            'defaultColumns' => array(
+//                'id', 'productCode', 'name'
+//            ),
+//        );
 
-        $dummyOptions = array(
-            'entityName' => 'Wms\Admin\User\Entity\User',
-            'defaultColumns' => array(
-                'id',
-            ),
-            'prohibitedColumns' => array(
-                'password'
-            )
-        );
+//        $dummyOptions = array(
+//            'entityName' => 'Wms\Admin\User\Entity\User',
+//            'defaultColumns' => array(
+//                'id',
+//            ),
+//            'prohibitedColumns' => array(
+//                'password'
+//            )
+//        );
         return new ModuleOptions($dummyOptions);
     }
 }
