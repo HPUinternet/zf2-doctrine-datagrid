@@ -1,6 +1,5 @@
 <?php namespace Wms\Admin\DataGrid\Service;
 
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query\Expr;
@@ -21,9 +20,9 @@ class TableBuilderService
     protected $entityManager;
 
     /**
-     * @var Array
+     * @var EntityMetadataHelper
      */
-    protected $entityProperties;
+    private $entityMetadataHelper;
 
     /**
      * @var Array
@@ -40,6 +39,11 @@ class TableBuilderService
      */
     private $queryBuilder;
 
+    /**
+     * @var Array
+     */
+    private $subQueries;
+
     // --------------------------------------------------------------------
     //                         SERVICE INTERACTIONS
     // --------------------------------------------------------------------
@@ -55,9 +59,12 @@ class TableBuilderService
         $this->setEntityManager($entityManager);
         $this->setQueryBuilder($entityManager->getRepository($moduleOptions->getEntityName())->createQueryBuilder($this->getEntityShortName($moduleOptions->getEntityName())));
 
+        $this->entityMetadataHelper = new EntityMetadataHelper($entityManager);
+
         // Make sure data retrieval is default when not configured
         $this->setAvailableTableColumns($this->resolveAvailableTableColumns());
         $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
+        $this->subQueries = array();
     }
 
     /**
@@ -72,6 +79,9 @@ class TableBuilderService
         $this->getQueryBuilder()->resetDQLPart('select');
         $this->getQueryBuilder()->resetDQLPart('join');
         $joinedProperties = array();
+        $entityMetaData = $this->entityMetadataHelper->parseMetaDataToFieldArray(
+            $this->entityMetadataHelper->getEntityMetadata($this->getModuleOptions()->getEntityName())
+        );
 
         foreach ($columns as $selectColumn) {
             if (!in_array($selectColumn, $this->getAvailableTableColumns())) {
@@ -80,7 +90,7 @@ class TableBuilderService
 
             $selectColumnParts = explode(".", $selectColumn);
             $selectColumn = reset($selectColumnParts);
-            $columnMetadata = $this->getEntityProperties()[$selectColumn];
+            $columnMetadata = $entityMetaData[$selectColumn];
             $entityShortName = $this->getEntityShortName($this->getModuleOptions()->getEntityName());
 
             // Make sure associations are joined by looking at the targetEntity and sourceToTargetKeyColumns fields
@@ -91,13 +101,26 @@ class TableBuilderService
                 }
 
                 // @todo: OneToMany vanuit de huidige entity
-                // @todo: ManyToMany
-                if (!isset($columnMetadata['joinColumns']) || empty($columnMetadata['joinColumns'])) {
+                // @todo: ManyToMany: Deze wordt even geskipped omdat er onenigheid is geconstanteerd in de implementaties hiervan
+
+                /*
+                 * Bij een OneToMany is de waarde van de property niet aanwezig (omdat dit zich in een koppeltabel of de andere entity bevint)
+                 * Dit zorgt er voor dat de volgende twee strategieën beschikbaar zijn om de data alsnog op te halen:
+                 * 1. een subquery in SQL gemaakt moet worden om de resultaten te tonen
+                 * 2. een tweede query achteraf afvuren om deze achteraf bij de results weer in te kunnen voeren
+                 */
+                if ($selectColumn == "productReviews") {
+                    echo 'start debug oneToMany';
+                }
+
+                // Deal with OneToMany and ManyToMany associated fields
+                if (!$columnMetadata['isOwningSide']) {
+
                     continue;
                 }
 
                 if (!array_key_exists($selectColumn, $joinedProperties)) {
-                    $joinedEntityAlias = $this->getEntityShortName($columnMetadata['targetEntity']).count($joinedProperties);
+                    $joinedEntityAlias = $this->getEntityShortName($columnMetadata['targetEntity']) . count($joinedProperties);
                     $this->getQueryBuilder()->leftJoin(
                         $entityShortName . '.' . $selectColumn,
                         $joinedEntityAlias
@@ -115,6 +138,7 @@ class TableBuilderService
 
             $this->getQueryBuilder()->addSelect($entityShortName . '.' . $selectColumn);
         }
+
         return $this;
     }
 
@@ -130,6 +154,7 @@ class TableBuilderService
         $offset = ($pageNumber == 0) ? 0 : ($pageNumber - 1) * $itemsPerPage;
         $this->getQueryBuilder()->setMaxResults($itemsPerPage);
         $this->getQueryBuilder()->setFirstResult($offset);
+
         return $this;
     }
 
@@ -142,6 +167,11 @@ class TableBuilderService
     {
         // Retrieve data from Doctrine and the dataprovider
         $tableData = $this->getQueryBuilder()->getQuery()->execute();
+
+        echo '<pre>';
+        var_dump($tableData);
+        echo '</pre>';
+//        die('einde dump in getTable');
 
         $table = new Table();
         $table->setAvailableHeaders($this->getAvailableTableColumns());
@@ -202,22 +232,6 @@ class TableBuilderService
     }
 
     /**
-     * @return Array
-     */
-    public function getEntityProperties()
-    {
-        return $this->entityProperties;
-    }
-
-    /**
-     * @param Array $entityProperties
-     */
-    public function setEntityProperties($entityProperties)
-    {
-        $this->entityProperties = $entityProperties;
-    }
-
-    /**
      * @return string
      */
     public function getEntityShortName($entityName)
@@ -254,78 +268,54 @@ class TableBuilderService
      * @return array
      * @throws \Exception
      */
-    protected function resolveAvailableTableColumns() {
-        if(!$this->getEntityProperties()) {
-            $this->setEntityProperties($this->resolveEntityProperties());
-        }
+    protected function resolveAvailableTableColumns()
+    {
+        $entityProperties = $this->entityMetadataHelper->parseMetaDataToFieldArray(
+            $this->entityMetadataHelper->getEntityMetadata($this->getModuleOptions()->getEntityName())
+        );
 
         $returnData = array();
-        $entityProperties = array();
         $prohibitedColumns = $this->getModuleOptions()->getProhibitedColumns();
 
-        foreach($this->getEntityProperties() as $property) {
-            if(in_array($property['fieldName'], $prohibitedColumns)) {
-               continue;
+        foreach ($entityProperties as $property) {
+            if (in_array($property['fieldName'], $prohibitedColumns)) {
+                continue;
             }
 
-            if($property['type'] != "association") {
+            if ($property['type'] != "association") {
                 $returnData[] = $property['fieldName'];
                 continue;
             }
 
-            if(!isset($property['targetEntity'])) {
+            if (!isset($property['targetEntity'])) {
                 throw new \Exception(
                     sprintf('%s is configured as a association, but no target Entity found', $property['fieldName'])
                 );
             }
 
             $targetEntity = $property['targetEntity'];
+            $targetEntityProperties = $this->entityMetadataHelper->parseMetaDataToFieldArray(
+                $this->entityMetadataHelper->getEntityMetadata($targetEntity)
+            );
 
-            if(!array_key_exists($targetEntity, $entityProperties)) {
-                $entityProperties[$targetEntity] = $this->resolveEntityProperties($targetEntity);
-            }
-
-            $targetEntityProperties = $entityProperties[$targetEntity];
-            foreach($targetEntityProperties as $targetEntityProperty) {
-                if($targetEntityProperty['type'] !== "association" && !array_search($targetEntityProperty, $prohibitedColumns)) {
-                    $returnData[] = $property['fieldName'].'.'.$targetEntityProperty['fieldName'];
+            foreach ($targetEntityProperties as $targetEntityProperty) {
+                if ($targetEntityProperty['type'] !== "association" && !array_search($targetEntityProperty,
+                        $prohibitedColumns)
+                ) {
+                    $returnData[] = $property['fieldName'] . '.' . $targetEntityProperty['fieldName'];
                 }
             }
         }
+
         return $returnData;
     }
 
-    protected function resolveEntityProperties($entityClass = "")
+    protected function AddsubQuery($enityName)
     {
-        if($entityClass === "") {
-            $entityClass = $this->getModuleOptions()->getEntityName();
-        }
 
-        if (!$entityClass) {
-            throw new \Exception("No Entity configured for the dataGrid module");
-        }
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+        $queryBuilder->from($enityName, $this->getEntityShortName($enityName));
 
-        $metaData = $this->getEntityManager()->getClassMetadata($entityClass);
-
-        return $this->parseMetaDataToFieldArray($metaData);
-    }
-
-    protected function parseMetaDataToFieldArray(ClassMetadata $metaData)
-    {
-        $columns = array();
-        foreach ($metaData->reflFields as $fieldName => $reflectionData) {
-            if (array_key_exists($fieldName, $metaData->fieldMappings)) {
-                $fieldData = $metaData->getFieldMapping($fieldName);
-                $columns[$fieldName] = $fieldData;
-            } elseif (array_key_exists($fieldName, $metaData->associationMappings)) {
-                $fieldData = $metaData->getAssociationMapping($fieldName);
-                $fieldData['type'] = 'association';
-                $columns[$fieldName] = $fieldData;
-            } else {
-                throw new \Exception(sprintf('Can\'t map %s in the %s Entity', $fieldName, $metaData->name));
-            }
-        }
-
-        return $columns;
+        $this->subQueries[$enityName] = $queryBuilder;
     }
 }
