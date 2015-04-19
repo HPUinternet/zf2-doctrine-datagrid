@@ -81,7 +81,7 @@ class TableBuilderService
         $this->getQueryBuilder()->resetDQLPart('join');
 
         $entityMetaData = $this->entityMetadataHelper->getMetaData($this->getModuleOptions()->getEntityName());
-        if(!in_array($entityMetaData->getSingleIdentifierFieldName(), $columns)) {
+        if (!in_array($entityMetaData->getSingleIdentifierFieldName(), $columns)) {
             $columns[] = $entityMetaData->getSingleIdentifierFieldName();
         }
 
@@ -99,7 +99,7 @@ class TableBuilderService
             $entityShortName = $this->getEntityShortName($this->getModuleOptions()->getEntityName());
 
             if ($columnMetadata['type'] === 'association') {
-                if(empty($columnMetadata['targetEntity'])) {
+                if (empty($columnMetadata['targetEntity'])) {
                     throw new \Exception(sprintf('No target Entity found for %s in Entity %s',
                         $selectColumn['fieldName'], $entityShortName));
                 }
@@ -109,7 +109,7 @@ class TableBuilderService
                  * others (OneToMany and ManyToMany) should result in a different query since querying
                  * them will result in multiple duplicate rows in the database resultset
                  */
-                if(!$columnMetadata['isOwningSide']) {
+                if (!$columnMetadata['isOwningSide']) {
                     $this->selectInSubQuery($selectColumn, $columnMetadata['targetEntity'], end($selectColumnParts));
                     continue;
                 }
@@ -164,22 +164,23 @@ class TableBuilderService
      * @return array
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function getTableData() {
+    public function getTableData()
+    {
         $resultSet = array();
 
         // Retrieve data from the primary query and re-order the array keys so they can be accessed more easily
         $result = $this->getQueryBuilder()->getQuery()->execute();
         $primaryKey = $this->entityMetadataHelper->getMetaData($this->getModuleOptions()->getEntityName())->getSingleIdentifierFieldName();
-        foreach($result as $key => $data) {
+        foreach ($result as $key => $data) {
             $resultSet[$data[$primaryKey]] = $data;
         }
 
-        foreach($this->subQueries as $fieldName => $queryBuilder) {
+        foreach ($this->subQueries as $fieldName => $queryBuilder) {
             $queryBuilder->setParameter('resultIds', array_column($resultSet, $primaryKey));
             $results = $queryBuilder->getQuery()->execute();
-            foreach($results as $result) {
+            foreach ($results as $result) {
                 $resultSetKey = $result['association'];
-                if(!array_key_exists($fieldName, $resultSet[$resultSetKey])) {
+                if (!array_key_exists($fieldName, $resultSet[$resultSetKey])) {
                     $resultSet[$resultSetKey][$fieldName] = array();
                 }
                 unset($result['association']);
@@ -200,6 +201,7 @@ class TableBuilderService
         $table = new Table();
         $table->setAvailableHeaders($this->getAvailableTableColumns());
         $table->setAndParseRows($this->getTableData());
+
         return $table;
     }
 
@@ -348,15 +350,15 @@ class TableBuilderService
         $fieldMetadata = $entityMetadata->getAssociationMapping($sourceFieldName);
 
         // @todo: ManyToMany: Deze wordt uitgesteld omdat er onenigheid is geconstanteerd in de implementaties hiervan
-        if($fieldMetadata['type'] !== ClassMetadataInfo::ONE_TO_MANY) {
+        if ($fieldMetadata['type'] !== ClassMetadataInfo::ONE_TO_MANY) {
             return;
         }
 
-        if(!isset($this->subQueries[$sourceFieldName])) {
+        if (!isset($this->subQueries[$sourceFieldName])) {
             $targetEntityMetadata = $this->entityMetadataHelper->getMetaData($targetEntityName);
             // Validate that we can join the entity by letting doctrine do the work
             $associationData = $targetEntityMetadata->getAssociationsByTargetClass($sourceEntity);
-            if(empty($associationData)) {
+            if (empty($associationData)) {
                 throw new \Exception(
                     sprintf("No association data found to bind %s OneToMany with %s", $sourceEntity, $targetEntityName)
                 );
@@ -364,9 +366,9 @@ class TableBuilderService
 
             $query = $this->getEntityManager()->createQueryBuilder();
             $query->from($targetEntityName, $this->getEntityShortName($targetEntityName));
-            foreach($associationData as $associationName => $joinData) {
-                $columnName = $this->getEntityShortName($targetEntityName).'.'.$associationName;
-                $query->addSelect(sprintf("IDENTITY(%s) AS association",$columnName));
+            foreach ($associationData as $associationName => $joinData) {
+                $columnName = $this->getEntityShortName($targetEntityName) . '.' . $associationName;
+                $query->addSelect(sprintf("IDENTITY(%s) AS association", $columnName));
                 $query->where(sprintf('%s IN (:resultIds)', $columnName));
             }
             $this->subQueries[$sourceFieldName] = $query;
@@ -376,7 +378,7 @@ class TableBuilderService
         $query->addSelect(sprintf("%s.%s AS %s",
             $this->getEntityShortName($targetEntityName),
             $targetFieldName,
-            $sourceFieldName.$targetFieldName
+            $sourceFieldName . $targetFieldName
         ));
     }
 }

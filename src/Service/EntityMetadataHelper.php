@@ -22,7 +22,8 @@ class EntityMetadataHelper
      */
     private $entityManger;
 
-    public function __construct(EntityManager $entityManager) {
+    public function __construct(EntityManager $entityManager)
+    {
         $this->setEntityManger($entityManager);
         $this->metaData = array();
     }
@@ -35,13 +36,15 @@ class EntityMetadataHelper
      * @param $entityName
      * @return ClassMetadata|bool
      */
-    public function getMetaData($entityName, $addIfNotExistent = true) {
-        if(!array_key_exists($entityName, $this->metaData)) {
-            if(!$addIfNotExistent){
+    public function getMetaData($entityName, $addIfNotExistent = true)
+    {
+        if (!array_key_exists($entityName, $this->metaData)) {
+            if (!$addIfNotExistent) {
                 return false;
             }
             $this->addMetadata($entityName);
         }
+
         return $this->metaData[$entityName];
     }
 
@@ -52,12 +55,14 @@ class EntityMetadataHelper
      * @param null $mappingData
      * @return $this
      */
-    public function addMetadata($entityName, $mappingData = null) {
-        if(is_null($mappingData)) {
+    public function addMetadata($entityName, $mappingData = null)
+    {
+        if (is_null($mappingData)) {
             $mappingData = $this->getEntityManger()->getClassMetadata($entityName);
         }
 
         $this->metaData[$entityName] = $mappingData;
+
         return $this;
     }
 

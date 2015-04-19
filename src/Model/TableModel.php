@@ -54,10 +54,11 @@ class TableModel
      * @param array $row
      * @return array
      */
-    private function buildTableHeaderFromRow(array $row) {
+    private function buildTableHeaderFromRow(array $row)
+    {
         // To prevent nested foreach loops, first rebuild the available headers
         $availableHeaders = array();
-        foreach($this->availableHeaders as $availableHeader) {
+        foreach ($this->availableHeaders as $availableHeader) {
             $availableHeaders[] = str_replace(".", "", $availableHeader);
         }
 
@@ -65,17 +66,18 @@ class TableModel
         foreach ($row as $property => $value) {
             // Find index by searching for the Key in the available headers
             $indexKey = array_search($property, $availableHeaders);
-            if($indexKey !== false) {
+            if ($indexKey !== false) {
                 $tableHeaders[] = $this->availableHeaders[$indexKey];
                 continue;
             }
 
             // If the data is an array (when data is joined) validate the first array value
-            if(is_array($value) && array_search(key($value[0]), $availableHeaders)) {
+            if (is_array($value) && array_search(key($value[0]), $availableHeaders)) {
                 $tableHeaders[] = $property;
                 continue;
             }
         }
+
         return $tableHeaders;
     }
 
