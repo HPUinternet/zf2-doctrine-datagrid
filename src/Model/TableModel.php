@@ -37,7 +37,7 @@ class TableModel
      */
     public function setAndParseRows(array $rows)
     {
-        $this->setUsedHeaders($this->buildTableHeaderFromRow($rows[0]));
+        $this->setUsedHeaders($this->buildTableHeaderFromRow(reset($rows)));
         foreach ($rows as $row) {
             $newRow = array();
             foreach ($this->getUsedHeaders() as $columnName) {

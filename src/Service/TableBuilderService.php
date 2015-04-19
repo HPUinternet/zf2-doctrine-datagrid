@@ -110,7 +110,7 @@ class TableBuilderService
                  * them will result in multiple duplicate rows in the database resultset
                  */
                 if(!$columnMetadata['isOwningSide']) {
-                    $this->addSubQuery($selectColumn, $columnMetadata['targetEntity'], end($selectColumnParts));
+                    $this->selectInSubQuery($selectColumn, $columnMetadata['targetEntity'], end($selectColumnParts));
                     continue;
                 }
 
@@ -159,37 +159,47 @@ class TableBuilderService
     }
 
     /**
+     * Fires the configured queries to the datbase and migrates the results back to one resultsset.
+     *
+     * @return array
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function getTableData() {
+        $resultSet = array();
+
+        // Retrieve data from the primary query and re-order the array keys so they can be accessed more easily
+        $result = $this->getQueryBuilder()->getQuery()->execute();
+        $primaryKey = $this->entityMetadataHelper->getMetaData($this->getModuleOptions()->getEntityName())->getSingleIdentifierFieldName();
+        foreach($result as $key => $data) {
+            $resultSet[$data[$primaryKey]] = $data;
+        }
+
+        foreach($this->subQueries as $fieldName => $queryBuilder) {
+            $queryBuilder->setParameter('resultIds', array_column($resultSet, $primaryKey));
+            $results = $queryBuilder->getQuery()->execute();
+            foreach($results as $result) {
+                $resultSetKey = $result['association'];
+                if(!array_key_exists($fieldName, $resultSet[$resultSetKey])) {
+                    $resultSet[$resultSetKey][$fieldName] = array();
+                }
+                unset($result['association']);
+                $resultSet[$resultSetKey][$fieldName][] = $result;
+            }
+        }
+
+        return $resultSet;
+    }
+
+    /**
      * Retrieve an new TableModel
      * based on your data configuration in the object
      * @return Table
      */
     public function getTable()
     {
-        // Retrieve data from Doctrine and the dataprovider
-        $primaryData = $this->getQueryBuilder()->getQuery()->execute();
-        $primaryKey = $this->entityMetadataHelper->getMetaData($this->getModuleOptions()->getEntityName())->getSingleIdentifierFieldName();
-
-        echo '<pre>';
-        var_dump($primaryData);
-        echo '</pre>';
-        echo 'einde primary data';
-
-        foreach($this->subQueries as $query) {
-            $query->setParameter('resultIds', array_column($primaryData, $primaryKey));
-            $result = $query->getQuery()->execute();
-            echo '<pre>';
-            print_r($result);
-            echo '</pre>';
-            echo 'einde subquery result';
-        }
-
-//        die('einde plezier');
-
-
         $table = new Table();
         $table->setAvailableHeaders($this->getAvailableTableColumns());
-        $table->setAndParseRows($primaryData);
-
+        $table->setAndParseRows($this->getTableData());
         return $table;
     }
 
@@ -330,7 +340,7 @@ class TableBuilderService
      * @throws \Doctrine\ORM\Mapping\MappingException
      * @throws \Exception
      */
-    protected function addSubQuery($sourceFieldName, $targetEntityName, $targetFieldName)
+    protected function selectInSubQuery($sourceFieldName, $targetEntityName, $targetFieldName)
     {
         // Get additional information about the association property in the original entity
         $sourceEntity = $this->getModuleOptions()->getEntityName();
@@ -342,25 +352,31 @@ class TableBuilderService
             return;
         }
 
-        if(!isset($this->subQueries[$targetEntityName])) {
-            $query = $this->getEntityManager()->createQueryBuilder();
-
-            // Validate that we can "auto-join" the entity by letting doctrine do the work
-            $associationData = $this->entityMetadataHelper->getMetaData($targetEntityName)->getAssociationsByTargetClass($sourceEntity);
+        if(!isset($this->subQueries[$sourceFieldName])) {
+            $targetEntityMetadata = $this->entityMetadataHelper->getMetaData($targetEntityName);
+            // Validate that we can join the entity by letting doctrine do the work
+            $associationData = $targetEntityMetadata->getAssociationsByTargetClass($sourceEntity);
             if(empty($associationData)) {
                 throw new \Exception(
                     sprintf("No association data found to bind %s OneToMany with %s", $sourceEntity, $targetEntityName)
                 );
             }
 
+            $query = $this->getEntityManager()->createQueryBuilder();
             $query->from($targetEntityName, $this->getEntityShortName($targetEntityName));
-            $query->join($sourceEntity, $this->getEntityShortName($sourceEntity));
-            // @todo ondersteuning voor multi primary key columns
-            $query->where($this->getEntityShortName($sourceEntity).'.'.$entityMetadata->getSingleIdentifierFieldName().' IN (:resultIds)');
-            $this->subQueries[$targetEntityName] = $query;
+            foreach($associationData as $associationName => $joinData) {
+                $columnName = $this->getEntityShortName($targetEntityName).'.'.$associationName;
+                $query->addSelect(sprintf("IDENTITY(%s) AS association",$columnName));
+                $query->where(sprintf('%s IN (:resultIds)', $columnName));
+            }
+            $this->subQueries[$sourceFieldName] = $query;
         }
 
-        $query = $this->subQueries[$targetEntityName];
-        $query->addSelect($this->getEntityShortName($targetEntityName).'.'.$targetFieldName);
+        $query = $this->subQueries[$sourceFieldName];
+        $query->addSelect(sprintf("%s.%s AS %s",
+            $this->getEntityShortName($targetEntityName),
+            $targetFieldName,
+            $sourceFieldName.$targetFieldName
+        ));
     }
 }
