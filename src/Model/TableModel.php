@@ -63,9 +63,17 @@ class TableModel
 
         $tableHeaders = array();
         foreach ($row as $property => $value) {
+            // Find index by searching for the Key in the available headers
             $indexKey = array_search($property, $availableHeaders);
-            if($indexKey) {
+            if($indexKey !== false) {
                 $tableHeaders[] = $this->availableHeaders[$indexKey];
+                continue;
+            }
+
+            // If the data is an array (when data is joined) validate the first array value
+            if(is_array($value) && array_search(key($value[0]), $availableHeaders)) {
+                $tableHeaders[] = $property;
+                continue;
             }
         }
         return $tableHeaders;

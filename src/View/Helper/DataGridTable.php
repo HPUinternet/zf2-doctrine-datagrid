@@ -134,6 +134,16 @@ class DataGridTable extends AbstractHelper
                 echo "&nbsp;";
                 break;
             case is_array($cellValue) == true:
+                if(is_array(reset($cellValue))) {
+                    echo '<ol>';
+                    foreach($cellValue as $cellArray) {
+                        echo '<li>';
+                        echo implode(", ",$cellArray);
+                        echo '</li>';
+                    }
+                    echo '</ol>';
+                    break;
+                }
                 echo implode(", ", $cellValue);
                 break;
             case $cellValue instanceof DateTime:
