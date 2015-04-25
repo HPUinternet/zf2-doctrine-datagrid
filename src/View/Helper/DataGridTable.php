@@ -66,7 +66,7 @@ class DataGridTable extends AbstractHelper
         $columnSettingsForm = new Form();
         $columnSettingsForm->setAttribute('method', 'get');
         $valueOptions = array();
-        $displayedColumns = new MultiCheckbox('datagrid_columns');
+        $displayedColumns = new MultiCheckbox('columns');
         $displayedColumns->setLabel($this->view->translate('Show data'));
 
         foreach ($this->getTableModel()->getAvailableHeaders() as $columnName) {
