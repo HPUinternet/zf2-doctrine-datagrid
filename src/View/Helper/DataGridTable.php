@@ -47,14 +47,20 @@ class DataGridTable extends AbstractHelper
     {
         $this->setTableModel($tableModel);
 
+        echo '<div class="datagrid-before">';
         $this->printColumnSettingsForm();
+        echo '</div>';
 
+        echo '<div class="datagrid-table">';
         $this->printTableStart();
         $this->printTableHeadRow();
         $this->printTableContent();
         $this->printTableEnd();
+        echo '</div>';
 
+        echo '<div class="datagrid-after">';
         $this->printPagination();
+        echo '</div>';
     }
 
     public function printColumnSettingsForm()
