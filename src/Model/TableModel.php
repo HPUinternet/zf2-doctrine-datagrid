@@ -20,6 +20,16 @@ class TableModel
      */
     protected $availableHeaders;
 
+    /**
+     * @var int
+     */
+    protected $pageNumber;
+
+    /**
+     * @var int
+     */
+    protected $maxPageNumber;
+
     public function __construct()
     {
         $this->rows = array();
@@ -197,6 +207,38 @@ class TableModel
     public function setAvailableHeaders($availableHeaders)
     {
         $this->availableHeaders = $availableHeaders;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPageNumber()
+    {
+        return $this->pageNumber;
+    }
+
+    /**
+     * @param int $pageNumber
+     */
+    public function setPageNumber($pageNumber)
+    {
+        $this->pageNumber = $pageNumber;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaxPageNumber()
+    {
+        return $this->maxPageNumber;
+    }
+
+    /**
+     * @param int $maxPageNumber
+     */
+    public function setMaxPageNumber($maxPageNumber)
+    {
+        $this->maxPageNumber = $maxPageNumber;
     }
 
 }

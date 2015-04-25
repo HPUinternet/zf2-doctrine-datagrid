@@ -36,6 +36,11 @@ class TableBuilderService
     protected $selectedTableColumns;
 
     /**
+     * @var int
+     */
+    protected $pageNumber;
+
+    /**
      * @var QueryBuilder
      */
     private $queryBuilder;
@@ -64,7 +69,7 @@ class TableBuilderService
 
         // Make sure data retrieval is default when not configured
         $this->setAvailableTableColumns($this->resolveAvailableTableColumns());
-        $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
+        $this->selectColumns($this->getModuleOptions()->getDefaultColumns())->setPage(0);
         $this->subQueries = array();
     }
 
@@ -149,8 +154,10 @@ class TableBuilderService
      * @param int $itemsPerPage
      * @return $this
      */
-    public function setPage($pageNumber, $itemsPerPage = 30)
+    public function setPage($pageNumber)
     {
+        $this->pageNumber = $pageNumber;
+        $itemsPerPage = $this->getModuleOptions()->getItemsPerPage();
         $offset = ($pageNumber == 0) ? 0 : ($pageNumber - 1) * $itemsPerPage;
         $this->getQueryBuilder()->setMaxResults($itemsPerPage);
         $this->getQueryBuilder()->setFirstResult($offset);
@@ -191,6 +198,26 @@ class TableBuilderService
         return $resultSet;
     }
 
+    public function getMaxResultCount()
+    {
+        // Play nice with the filters and create a separate query to get the result count
+        $query = clone $this->getQueryBuilder();
+        $entityName = $this->getModuleOptions()->getEntityName();
+        $entityMetaData = $this->entityMetadataHelper->getMetaData($entityName);
+
+        $query->resetDQLParts(array('select', 'join'));
+        $query->setFirstResult(0);
+        $query->setMaxResults(null);
+        $query->select(sprintf(
+            'count(%s.%s)',
+            $this->getEntityShortName($entityName),
+            $entityMetaData->getSingleIdentifierFieldName()
+        ));
+        $count = $query->getQuery()->getSingleScalarResult();
+
+        return $count;
+    }
+
     /**
      * Retrieve an new TableModel
      * based on your data configuration in the object
@@ -201,6 +228,8 @@ class TableBuilderService
         $table = new Table();
         $table->setAvailableHeaders($this->getAvailableTableColumns());
         $table->setAndParseRows($this->getTableData());
+        $table->setPageNumber($this->pageNumber);
+        $table->setMaxPageNumber(ceil($this->getMaxResultCount() / $this->getModuleOptions()->getItemsPerPage()));
 
         return $table;
     }

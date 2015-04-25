@@ -53,6 +53,8 @@ class DataGridTable extends AbstractHelper
         $this->printTableHeadRow();
         $this->printTableContent();
         $this->printTableEnd();
+
+        $this->printPagination();
     }
 
     public function printColumnSettingsForm()
@@ -87,6 +89,28 @@ class DataGridTable extends AbstractHelper
         ));
 
         echo $this->view->form($columnSettingsForm);
+    }
+
+    public function printPagination()
+    {
+        $maxPages = $this->getTableModel()->getMaxPageNumber();
+        $currentPage = $this->getTableModel()->getPageNumber();
+        $currentUrl = strtok($this->view->ServerUrl(true), '?');
+
+        // Unset any previous page parameter
+        $queryParams = array();
+        parse_str(parse_url($this->view->ServerUrl(true), PHP_URL_QUERY), $queryParams);
+        unset($queryParams['page']);
+        $queryParams = http_build_query($queryParams);
+
+        echo '<nav><ul class="pagination">';
+        for ($i = 0; $i < $maxPages; $i++) {
+            $page = empty($queryParams) ? sprintf('page=%d', $i) : sprintf('&page=%d', $i);
+            echo $i == $currentPage ? '<li class="active">' : '<li>';
+            echo sprintf('<a href="%s?%s">%d</a></li>', $currentUrl, $queryParams . $page, $i);
+        }
+        echo '</ul></nav>';
+
     }
 
     protected function printTableHeadRow($classes = "tabelHeader")

@@ -23,6 +23,11 @@ class ModuleOptions extends AbstractOptions
     protected $prohibitedColumns = array();
 
     /**
+     * @var int
+     */
+    protected $itemsPerPage = 5;
+
+    /**
      * @param string $entityName
      */
     public function setEntityName($entityName)
@@ -68,6 +73,22 @@ class ModuleOptions extends AbstractOptions
     public function setProhibitedColumns($prohibitedColumns)
     {
         $this->prohibitedColumns = $prohibitedColumns;
+    }
+
+    /**
+     * @return int
+     */
+    public function getItemsPerPage()
+    {
+        return $this->itemsPerPage;
+    }
+
+    /**
+     * @param int $itemsPerPage
+     */
+    public function setItemsPerPage($itemsPerPage)
+    {
+        $this->itemsPerPage = $itemsPerPage;
     }
 
 }
