@@ -16,9 +16,14 @@ class DataGridController extends AbstractActionController {
     }
 
     public function indexAction() {
-        if($this->params()->fromPost('datagrid_columns')) {
-            $this->getTableBuilderService()->selectColumns($this->params()->fromPost('datagrid_columns'));
+        if($this->params()->fromQuery('datagrid_columns')) {
+            $this->getTableBuilderService()->selectColumns($this->params()->fromQuery('datagrid_columns'));
         }
+
+        if($this->params()->fromQuery('page')) {
+            $this->getTableBuilderService()->setPage($this->params()->fromQuery('page'));
+        }
+
         return new ViewModel(array('tableData' => $this->getTableBuilderService()->getTable()));
     }
 

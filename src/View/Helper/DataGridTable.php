@@ -64,6 +64,7 @@ class DataGridTable extends AbstractHelper
         }
 
         $columnSettingsForm = new Form();
+        $columnSettingsForm->setAttribute('method', 'get');
         $valueOptions = array();
         $displayedColumns = new MultiCheckbox('datagrid_columns');
         $displayedColumns->setLabel($this->view->translate('Show data'));
@@ -93,6 +94,10 @@ class DataGridTable extends AbstractHelper
 
     public function printPagination()
     {
+        if (!in_array('pagination', $this->displaySettings)) {
+            return;
+        }
+
         $maxPages = $this->getTableModel()->getMaxPageNumber();
         $currentPage = $this->getTableModel()->getPageNumber();
         $currentUrl = strtok($this->view->ServerUrl(true), '?');
