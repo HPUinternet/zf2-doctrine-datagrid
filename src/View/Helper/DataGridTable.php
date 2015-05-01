@@ -138,11 +138,25 @@ class DataGridTable extends AbstractHelper
         $queryParams = http_build_query($queryParams);
 
         echo '<nav><ul class="pagination">';
-        for ($i = 0; $i < $maxPages; $i++) {
+
+        $page = empty($queryParams) ? sprintf('page=%d', ($currentPage-1)) : sprintf('&page=%d', ($currentPage-1));
+        echo sprintf(
+            '<li class="%s"><a href="%s?%s" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>',
+            $currentPage == 0 ? 'disabled': '', $currentUrl, $queryParams . $page
+        );
+
+        for ($i = 0; $i <= $maxPages; $i++) {
             $page = empty($queryParams) ? sprintf('page=%d', $i) : sprintf('&page=%d', $i);
             echo $i == $currentPage ? '<li class="active">' : '<li>';
             echo sprintf('<a href="%s?%s">%d</a></li>', $currentUrl, $queryParams . $page, $i);
         }
+
+        $page = empty($queryParams) ? sprintf('page=%d', ($currentPage+1)) : sprintf('&page=%d', ($currentPage+1));
+        echo sprintf(
+            '<li class="%s"><a href="%s?%s" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>',
+            $currentPage == $maxPages ? 'disabled': '', $currentUrl, $queryParams . $page
+        );
+
         echo '</ul></nav>';
 
     }
