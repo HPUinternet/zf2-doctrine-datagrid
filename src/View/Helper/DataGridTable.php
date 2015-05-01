@@ -71,21 +71,44 @@ class DataGridTable extends AbstractHelper
 
         $columnSettingsForm = new Form();
         $columnSettingsForm->setAttribute('method', 'get');
-        $valueOptions = array();
-        $displayedColumns = new MultiCheckbox('columns');
-        $displayedColumns->setLabel($this->view->translate('Show data'));
+        $columns = $this->getTableModel()->getAvailableHeaders();
+        $checkboxName = 'columns';
 
-        foreach ($this->getTableModel()->getAvailableHeaders() as $columnName) {
-            $valueOption = array(
-                'value' => $columnName,
-                'label' => $this->view->translate($columnName),
-                'selected' => !$this->isHiddenColumn($columnName),
-            );
-            $valueOptions[] = $valueOption;
+        // Group checkboxes by property
+        $columnGroups = array();
+        foreach($columns as $column) {
+            $columnNameSegments = explode('.',$column);
+            if(!array_key_exists($columnNameSegments[0], $columnGroups)) {
+                $columnGroups[$columnNameSegments[0]] = array();
+            }
         }
 
-        $displayedColumns->setValueOptions($valueOptions);
-        $columnSettingsForm->add($displayedColumns);
+        // Create all values for each property
+        foreach ($columns as $column) {
+            $columnNameSegments = explode('.',$column);
+            $label = $column;
+            if(count($columnNameSegments) > 1) {
+                $segments = $columnNameSegments;
+                unset($segments[0]);
+                $label = implode('.', $segments);
+            }
+            $valueOption = array(
+                'value' => $column,
+                'label' => $this->view->translate($label),
+                'selected' => !$this->isHiddenColumn($column),
+            );
+            $columnGroups[$columnNameSegments[0]][] = $valueOption;
+        }
+
+        // Create the actuall form element per property
+        foreach($columnGroups as $property => $checkboxValues) {
+            $multiCheckbox =  new MultiCheckbox($checkboxName);
+//            $multiCheckbox->setOption('inline', false);
+            $multiCheckbox->setLabel($property);
+            $multiCheckbox->setValueOptions($checkboxValues);
+            $columnSettingsForm->add($multiCheckbox);
+        }
+
         $columnSettingsForm->add(array(
             'name' => 'submit',
             'type' => 'Submit',
