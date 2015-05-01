@@ -25,7 +25,7 @@ class ModuleOptions extends AbstractOptions
     /**
      * @var int
      */
-    protected $itemsPerPage = 5;
+    protected $itemsPerPage = 10;
 
     /**
      * @param string $entityName
