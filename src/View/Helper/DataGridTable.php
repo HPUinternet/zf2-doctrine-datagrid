@@ -197,6 +197,7 @@ class DataGridTable extends AbstractHelper
     protected function printTableContentCell($cellValue, $cellName = "", $tdClass = "kolom")
     {
         echo sprintf("<td class=\"%s\">", $tdClass . " " . $cellName);
+        // @todo implement strategy rendering pattern here
         switch (true) {
             case is_bool($cellValue) || (($cellValue === 1 || $cellValue === 0) && strpos($cellName, 'id') === false):
                 $cellValue = $cellValue == true ? "yes" : "no";
