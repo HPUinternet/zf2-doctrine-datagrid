@@ -24,13 +24,14 @@ return array(
     'view_helpers' => array(
         'invokables' => array(
             'DataGridTable' => 'Wms\Admin\DataGrid\View\Helper\DataGridTable',
+            'DataGridForm' => 'Wms\Admin\DataGrid\View\Helper\Form',
         ),
     ),
     'router' => array(
         'routes' => array(
             'zfcadmin' => array(
                 'child_routes' => array(
-                    'layoutbuilder' => array(
+                    'datagrid' => array(
                         'type'    => 'Segment',
                         'options' => array(
                             'route'    => '/datagrid',

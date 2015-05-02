@@ -69,7 +69,7 @@ class DataGridTable extends AbstractHelper
             return;
         }
 
-        $columnSettingsForm = new Form();
+        $columnSettingsForm = new Form('Display Settings');
         $columnSettingsForm->setAttribute('method', 'get');
         $columns = $this->getTableModel()->getAvailableHeaders();
         $checkboxName = 'columns';
@@ -103,8 +103,10 @@ class DataGridTable extends AbstractHelper
         // Create the actuall form element per property
         foreach($columnGroups as $property => $checkboxValues) {
             $multiCheckbox =  new MultiCheckbox($checkboxName);
-//            $multiCheckbox->setOption('inline', false);
-            $multiCheckbox->setLabel($property);
+            $multiCheckbox->setOption('inline', false);
+            if(count($checkboxValues) >= 2 ) {
+                $multiCheckbox->setLabel($property);
+            }
             $multiCheckbox->setValueOptions($checkboxValues);
             $columnSettingsForm->add($multiCheckbox);
         }
