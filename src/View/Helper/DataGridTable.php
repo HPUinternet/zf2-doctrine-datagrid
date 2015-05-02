@@ -94,7 +94,7 @@ class DataGridTable extends AbstractHelper
             }
             $valueOption = array(
                 'value' => $column,
-                'label' => $this->view->translate($label),
+                'label' => $this->getView()->translate($label),
                 'selected' => !$this->isHiddenColumn($column),
             );
             $columnGroups[$columnNameSegments[0]][] = $valueOption;
@@ -113,12 +113,12 @@ class DataGridTable extends AbstractHelper
             'name' => 'submit',
             'type' => 'Submit',
             'attributes' => array(
-                'value' => $this->view->translate('Apply'),
+                'value' => $this->getView()->translate('Apply'),
                 'class' => 'btn',
             ),
         ));
 
-        echo $this->view->form($columnSettingsForm);
+        echo $this->getView()->DataGridForm($columnSettingsForm);
     }
 
     public function printPagination()
@@ -129,11 +129,11 @@ class DataGridTable extends AbstractHelper
 
         $maxPages = $this->getTableModel()->getMaxPageNumber();
         $currentPage = $this->getTableModel()->getPageNumber();
-        $currentUrl = strtok($this->view->ServerUrl(true), '?');
+        $currentUrl = strtok($this->getView()->ServerUrl(true), '?');
 
         // Unset any previous page parameter
         $queryParams = array();
-        parse_str(parse_url($this->view->ServerUrl(true), PHP_URL_QUERY), $queryParams);
+        parse_str(parse_url($this->getView()->ServerUrl(true), PHP_URL_QUERY), $queryParams);
         unset($queryParams['page']);
         $queryParams = http_build_query($queryParams);
 
@@ -201,7 +201,7 @@ class DataGridTable extends AbstractHelper
         switch (true) {
             case is_bool($cellValue) || (($cellValue === 1 || $cellValue === 0) && strpos($cellName, 'id') === false):
                 $cellValue = $cellValue == true ? "yes" : "no";
-                echo $this->view->translate($cellValue);
+                echo $this->getView()->translate($cellValue);
                 break;
             case $cellValue === null || $cellValue === "":
                 echo "&nbsp;";
@@ -220,11 +220,11 @@ class DataGridTable extends AbstractHelper
                 echo implode(", ", $cellValue);
                 break;
             case $cellValue instanceof DateTime:
-                echo $this->view->dateFormat(
+                echo $this->getView()->dateFormat(
                     $cellValue,
                     IntlDateFormatter::MEDIUM,
                     IntlDateFormatter::NONE,
-                    $this->view->formLabel()->getTranslator()->getLocale()
+                    $this->getView()->formLabel()->getTranslator()->getLocale()
                 );
                 break;
             default:
