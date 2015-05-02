@@ -167,7 +167,7 @@ class DataGridTable extends AbstractHelper
     {
         echo sprintf('<thead>', $classes);
         echo '<tr>';
-        foreach ($this->getTableModel()->getUsedHeaders() as $column) {
+        foreach ($this->getTableModel()->getUsedHeaders() as $column => $accessor) {
             if ($this->isHiddenColumn($column)) {
                 continue;
             }
@@ -209,17 +209,11 @@ class DataGridTable extends AbstractHelper
                 echo "&nbsp;";
                 break;
             case is_array($cellValue) == true:
-                if (is_array(reset($cellValue))) {
-                    echo '<ol>';
-                    foreach ($cellValue as $cellArray) {
-                        echo '<li>';
-                        echo implode(", ", $cellArray);
-                        echo '</li>';
-                    }
-                    echo '</ol>';
-                    break;
+                echo '<ol>';
+                foreach ($cellValue as $arrayValue) {
+                    echo sprintf('<li>%s</li>', $arrayValue);
                 }
-                echo implode(", ", $cellValue);
+                echo '</ol>';
                 break;
             case $cellValue instanceof DateTime:
                 echo $this->getView()->dateFormat(
@@ -248,7 +242,7 @@ class DataGridTable extends AbstractHelper
 
     private function isHiddenColumn($columnName)
     {
-        if (in_array($columnName, $this->getTableModel()->getUsedHeaders())) {
+        if (array_key_exists($columnName, $this->getTableModel()->getUsedHeaders())) {
             return false;
         }
 

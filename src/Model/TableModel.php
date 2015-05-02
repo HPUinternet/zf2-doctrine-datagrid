@@ -47,15 +47,15 @@ class TableModel
      */
     public function setAndParseRows(array $rows)
     {
-        if(empty($rows)) {
+        if (empty($rows)) {
             return $this;
         }
 
         $this->setUsedHeaders($this->buildTableHeaderFromRow(reset($rows)));
         foreach ($rows as $row) {
             $newRow = array();
-            foreach ($this->getUsedHeaders() as $columnName) {
-                $cellValue = $this->extractProperty($row, str_replace(".", "", $columnName));
+            foreach ($this->getUsedHeaders() as $columnName => $accessor) {
+                $cellValue = $this->extractProperty($row, $columnName, $accessor);
                 $newRow[$columnName] = $this->preParseCellValue($cellValue);
             }
             $this->rows[] = $newRow;
@@ -65,15 +65,24 @@ class TableModel
     }
 
     /**
+     * Resolve the data accessors by parsing an resultrow
+     * This will return a array with the used table headings and accessors like the example with a person object below:
+     *
+     * array(
+     *  name => name (the property name of the result person array/object is accessible by calling it directly)
+     *  photo.name => photos (one person can have multiple photos. So the data for all the photos for the
+     * );                     result person array/object is accessible in the property "photos")
+     *
      * @param array $row
      * @return array
      */
-    private function buildTableHeaderFromRow(array $row)
+    private function buildTableHeaderFromRow(array $row, $availableHeaders = array(), $accessorProperty = false)
     {
         // To prevent nested foreach loops, first rebuild the available headers
-        $availableHeaders = array();
-        foreach ($this->availableHeaders as $availableHeader) {
-            $availableHeaders[] = str_replace(".", "", $availableHeader);
+        if (empty($availableHeaders)) {
+            foreach ($this->availableHeaders as $availableHeader) {
+                $availableHeaders[] = str_replace(".", "", $availableHeader);
+            }
         }
 
         $tableHeaders = array();
@@ -81,13 +90,17 @@ class TableModel
             // Find index by searching for the Key in the available headers
             $indexKey = array_search($property, $availableHeaders);
             if ($indexKey !== false) {
-                $tableHeaders[] = $this->availableHeaders[$indexKey];
+                $accessProperty = $accessorProperty ? $accessorProperty : $this->availableHeaders[$indexKey];
+                $tableHeaders[$this->availableHeaders[$indexKey]] = $accessProperty;
                 continue;
             }
 
             // If the data is an array (when data is joined) validate the first array value
             if (is_array($value) && array_search(key($value[0]), $availableHeaders)) {
-                $tableHeaders[] = $property;
+                $tableHeaders = array_merge(
+                    $tableHeaders,
+                    $this->buildTableHeaderFromRow(reset($value), $availableHeaders, $property)
+                );
                 continue;
             }
         }
@@ -96,49 +109,36 @@ class TableModel
     }
 
     /**
-     * Get property of object using several ways of extraction
+     * Extract property from a result array
      *
-     * @param $class
-     * @param $propertyName
-     * @return bool|mixed
+     * @param $data
+     * @param $property
+     * @param $accessor
+     * @return array
      * @throws \Exception
      */
-    private function extractProperty($class, $propertyName)
+    protected function extractProperty($data, $property, $accessor)
     {
-        if (is_array($class)) {
-            $propertyName = str_replace(".", "", $propertyName);
+        if (is_array($data)) {
+            $accessor = str_replace(".", "", $accessor);
+            $property = str_replace(".", "", $property);
 
-            return $class[$propertyName];
+            if ($accessor == $property) {
+                return $data[$property];
+            }
+
+            // See if we have nested data
+            if (is_array($data[$accessor])) {
+                $resultData = array();
+                foreach ($data[$accessor] as $accessorData) {
+                    $resultData[] = $accessorData[$property];
+                }
+
+                return $resultData;
+            }
         }
 
-        $propertyNameSegments = explode(".", $propertyName);
-        $propertyName = reset($propertyNameSegments);
-
-        if (!property_exists($class, $propertyName)) {
-            throw new \Exception (
-                sprintf("Expected %s to contain a property named: %s, but it didn't", get_class($class), $propertyName)
-            );
-        }
-
-        $getter = sprintf('get%s', ucfirst($propertyName));
-        $propertyValue = method_exists($class, $getter) ? $class->$getter() : false;
-        if ($propertyValue !== false) {
-            return $propertyValue;
-        }
-
-        // if the normal getter method fails (due to weird naming conventions or sub-classed protected properties)
-        // try to retrieve the property value through reflection
-        $reflectionClass = new \ReflectionClass($class);
-        $reflectionProperty = $reflectionClass->getProperty($propertyName);
-        if (!$reflectionProperty->isPrivate()) {
-            $reflectionProperty->setAccessible(true);
-
-            return $reflectionProperty->getValue($class);
-        }
-
-        throw new \Exception (
-            sprintf("Cant get %s property in class %s. Is the property private?", $propertyName, get_class($class))
-        );
+        throw new \Exception(sprintf('Failed extracting %s out of the result set', $property));
     }
 
     /**
