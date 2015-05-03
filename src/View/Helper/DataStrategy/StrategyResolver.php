@@ -21,6 +21,7 @@ class StrategyResolver
     public function __construct()
     {
         $this->setDi(new Di());
+        $this->addDependency($this, __CLASS__);
     }
 
     /**
