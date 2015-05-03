@@ -3,6 +3,7 @@
 use DateTime;
 use Wms\Admin\DataGrid\View\Helper\DataStrategy\DataStrategyInterface;
 use Zend\Di\Di;
+use Doctrine\ORM\Proxy\Proxy;
 
 class StrategyResolver
 {
@@ -66,6 +67,9 @@ class StrategyResolver
                 break;
             case $data instanceof DateTime:
                 return $strategyPrefix . 'DateTimeStrategy';
+                break;
+            case $data instanceof Proxy:
+                return $strategyPrefix . 'DoctrineProxyStrategy';
                 break;
             default:
                 return false;

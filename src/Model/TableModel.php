@@ -1,8 +1,5 @@
 <?php namespace Wms\Admin\DataGrid\Model;
 
-use Doctrine\ORM\PersistentCollection;
-use Doctrine\ORM\Proxy\Proxy;
-
 class TableModel
 {
     /**
@@ -56,7 +53,7 @@ class TableModel
             $newRow = array();
             foreach ($this->getUsedHeaders() as $columnName => $accessor) {
                 $cellValue = $this->extractProperty($row, $columnName, $accessor);
-                $newRow[$columnName] = $this->preParseCellValue($cellValue);
+                $newRow[$columnName] = $cellValue;
             }
             $this->rows[] = $newRow;
         }
@@ -140,27 +137,6 @@ class TableModel
 
         throw new \Exception(sprintf('Failed extracting %s out of the result set', $property));
     }
-
-    /**
-     * Prepare the data for parsing by the viewHelper
-     * Please note that, other parsing (like the datetime objects and arrays should be done in the viewHelper)
-     *
-     * @param $cellData
-     * @return array
-     */
-    protected function preParseCellValue($cellData)
-    {
-        if ($cellData instanceof PersistentCollection) {
-            return $cellData->getValues();
-        }
-
-        if ($cellData instanceof Proxy) {
-            return '@todo handle proxy classes';
-        }
-
-        return $cellData;
-    }
-
 
     /**
      * @param array $rows
