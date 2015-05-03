@@ -5,8 +5,7 @@ use Zend\Form\Element\MultiCheckbox;
 use Zend\Form\Form;
 use Zend\View\Helper\AbstractHelper;
 use Wms\Admin\DataGrid\Model\TableModel;
-use IntlDateFormatter;
-use DateTime;
+use Wms\Admin\DataGrid\View\Helper\DataStrategy\StrategyResolver;
 
 class DataGridTable extends AbstractHelper
 {
@@ -19,6 +18,11 @@ class DataGridTable extends AbstractHelper
      * @var TableModel;
      */
     private $tableModel;
+
+    /**
+     * @var StrategyResolver
+     */
+    private $dataStrategyResolver;
 
     /**
      * @return TableModel
@@ -46,6 +50,8 @@ class DataGridTable extends AbstractHelper
     public function __invoke(TableModel $tableModel)
     {
         $this->setTableModel($tableModel);
+        $this->dataStrategyResolver = new StrategyResolver();
+        $this->dataStrategyResolver->addDependency($this->getView(), 'Zend\View\Renderer\RendererInterface');
 
         echo '<div class="datagrid-before">';
         $this->printColumnSettingsForm();
@@ -199,34 +205,7 @@ class DataGridTable extends AbstractHelper
     protected function printTableContentCell($cellValue, $cellName = "", $tdClass = "kolom")
     {
         echo sprintf("<td class=\"%s\">", $tdClass . " " . $cellName);
-        // @todo implement strategy rendering pattern here
-        switch (true) {
-            case is_bool($cellValue) || (($cellValue === 1 || $cellValue === 0) && strpos($cellName, 'id') === false):
-                $cellValue = $cellValue == true ? "yes" : "no";
-                echo $this->getView()->translate($cellValue);
-                break;
-            case $cellValue === null || $cellValue === "":
-                echo "&nbsp;";
-                break;
-            case is_array($cellValue) == true:
-                echo '<ol>';
-                foreach ($cellValue as $arrayValue) {
-                    echo sprintf('<li>%s</li>', $arrayValue);
-                }
-                echo '</ol>';
-                break;
-            case $cellValue instanceof DateTime:
-                echo $this->getView()->dateFormat(
-                    $cellValue,
-                    IntlDateFormatter::MEDIUM,
-                    IntlDateFormatter::NONE,
-                    $this->getView()->formLabel()->getTranslator()->getLocale()
-                );
-                break;
-            default:
-                echo $cellValue;
-                break;
-        }
+        echo $this->dataStrategyResolver->resolveAndParse($cellValue, $cellName);
         echo '</td>';
     }
 
