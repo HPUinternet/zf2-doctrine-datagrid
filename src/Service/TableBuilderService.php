@@ -229,7 +229,7 @@ class TableBuilderService
         $table->setAvailableHeaders($this->getAvailableTableColumns());
         $table->setAndParseRows($this->getTableData());
         $table->setPageNumber($this->pageNumber);
-        $table->setMaxPageNumber(ceil($this->getMaxResultCount() / $this->getModuleOptions()->getItemsPerPage()));
+        $table->setMaxPageNumber($this->calculateMaxPages());
 
         return $table;
     }
@@ -409,5 +409,17 @@ class TableBuilderService
             $targetFieldName,
             $sourceFieldName . $targetFieldName
         ));
+    }
+
+    protected function calculateMaxPages(){
+        $maxResults = $this->getMaxResultCount();
+        $itemsPerPage = $this->getModuleOptions()->getItemsPerPage();
+
+        if($maxResults <= $itemsPerPage) {
+            return 0;
+        }
+
+        return ceil($maxResults / $itemsPerPage);
+
     }
 }
