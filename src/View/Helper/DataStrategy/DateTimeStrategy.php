@@ -18,11 +18,14 @@ class DateTimeStrategy implements DataStrategyInterface {
 
     public function parse($data)
     {
-        echo $this->view->dateFormat(
-            $data,
-            IntlDateFormatter::MEDIUM,
-            IntlDateFormatter::NONE,
-            $this->view->formLabel()->getTranslator()->getLocale()
+        echo sprintf('<time datetime="%s">%s</time>',
+            $data->format('Y-m-d'),
+            $this->view->dateFormat(
+                $data,
+                IntlDateFormatter::MEDIUM,
+                IntlDateFormatter::NONE,
+                $this->view->formLabel()->getTranslator()->getLocale()
+            )
         );
     }
 }
