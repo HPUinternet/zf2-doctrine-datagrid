@@ -1,7 +1,6 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper\DataStrategy;
 
 use DateTime;
-use Wms\Admin\DataGrid\View\Helper\DataStrategy\DataStrategyInterface;
 use Zend\Di\Di;
 use Doctrine\ORM\Proxy\Proxy;
 

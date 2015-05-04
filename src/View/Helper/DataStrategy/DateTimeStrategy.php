@@ -1,6 +1,5 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper\DataStrategy;
 
-use Wms\Admin\DataGrid\View\Helper\DataStrategy\DataStrategyInterface;
 use IntlDateFormatter;
 use Zend\View\Renderer\RendererInterface as View;
 

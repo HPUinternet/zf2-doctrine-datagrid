@@ -1,8 +1,5 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper\DataStrategy;
 
-use Wms\Admin\DataGrid\View\Helper\DataStrategy\DataStrategyInterface;
-use Wms\Admin\DataGrid\View\Helper\DataStrategy\StrategyResolver;
-
 class ArrayStrategy implements DataStrategyInterface {
 
     /**
