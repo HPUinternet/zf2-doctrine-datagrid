@@ -20,24 +20,23 @@ class Form extends BaseFormHelper
 
         $formContent = '';
         $elementCount = 0;
-        $elementsPerContainer = $this->extractProperty('elementsPerContainer', $form, 1);
-        $containerClass = $this->extractProperty('containerClass', $form, 'col-md-2');
+        $elementsPerContainer = $this->extractProperty('elementsPerContainer', $form, 6);
 
         foreach ($form as $element) {
             if($elementCount == 0) {
-                $formContent .= sprintf('<div class="%s">', $containerClass);
+                $formContent.= '<div class="row">';
             }
 
             if ($element instanceof FieldsetInterface) {
                 $formContent.= $this->getView()->formCollection($element);
             } else {
-                $formContent.= $this->getView()->formRow($element);
+                $formContent.= $this->getView()->DataGridFormRow($element);
             }
 
             $elementCount++;
             if($elementCount >= $elementsPerContainer) {
+                $formContent.= '</div>';
                 $elementCount = 0;
-                $formContent .= '</div>';
             }
         }
 

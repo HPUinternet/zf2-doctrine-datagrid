@@ -25,6 +25,7 @@ return array(
         'invokables' => array(
             'DataGridTable' => 'Wms\Admin\DataGrid\View\Helper\DataGridTable',
             'DataGridForm' => 'Wms\Admin\DataGrid\View\Helper\Form',
+            'DataGridFormRow' => 'Wms\Admin\DataGrid\View\Helper\FormRow',
         ),
     ),
     'router' => array(
