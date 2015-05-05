@@ -82,18 +82,18 @@ class DataGridTable extends AbstractHelper
 
         // Group checkboxes by property
         $columnGroups = array();
-        foreach($columns as $column) {
-            $columnNameSegments = explode('.',$column);
-            if(!array_key_exists($columnNameSegments[0], $columnGroups)) {
+        foreach ($columns as $column) {
+            $columnNameSegments = explode('.', $column);
+            if (!array_key_exists($columnNameSegments[0], $columnGroups)) {
                 $columnGroups[$columnNameSegments[0]] = array();
             }
         }
 
         // Create all values for each property
         foreach ($columns as $column) {
-            $columnNameSegments = explode('.',$column);
+            $columnNameSegments = explode('.', $column);
             $label = $column;
-            if(count($columnNameSegments) > 1) {
+            if (count($columnNameSegments) > 1) {
                 $segments = $columnNameSegments;
                 unset($segments[0]);
                 $label = implode('.', $segments);
@@ -107,14 +107,29 @@ class DataGridTable extends AbstractHelper
         }
 
         // Create the actuall form element per property
-        foreach($columnGroups as $property => $checkboxValues) {
-            $multiCheckbox =  new MultiCheckbox($checkboxName);
+        foreach ($columnGroups as $property => $checkboxValues) {
+            $multiCheckbox = new MultiCheckbox($checkboxName);
             $multiCheckbox->setOption('inline', false);
-            if(count($checkboxValues) >= 2 ) {
+            if (count($checkboxValues) >= 2) {
                 $multiCheckbox->setLabel($property);
             }
             $multiCheckbox->setValueOptions($checkboxValues);
             $columnSettingsForm->add($multiCheckbox);
+        }
+
+        // @todo: need to find a better way of implementing this ugly piece of code
+        if (in_array('pagination', $this->displaySettings)) {
+            $queryParams = array();
+            parse_str(parse_url($this->getView()->ServerUrl(true), PHP_URL_QUERY), $queryParams);
+            if (isset($queryParams['page']) && !is_null($queryParams['page']) && is_numeric($queryParams['page'])) {
+                $columnSettingsForm->add(array(
+                    'name' => 'page',
+                    'type' => 'hidden',
+                    'attributes' => array(
+                        'value' => $this->getView()->EscapeUrl($queryParams['page']),
+                    ),
+                ));
+            }
         }
 
         $columnSettingsForm->add(array(
@@ -147,10 +162,10 @@ class DataGridTable extends AbstractHelper
 
         echo '<nav><ul class="pagination">';
 
-        $page = empty($queryParams) ? sprintf('page=%d', ($currentPage-1)) : sprintf('&page=%d', ($currentPage-1));
+        $page = empty($queryParams) ? sprintf('page=%d', ($currentPage - 1)) : sprintf('&page=%d', ($currentPage - 1));
         echo sprintf(
             '<li class="%s"><a href="%s?%s" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>',
-            $currentPage == 0 ? 'disabled': '', $currentUrl, $queryParams . $page
+            $currentPage == 0 ? 'disabled' : '', $currentUrl, $queryParams . $page
         );
 
         for ($i = 0; $i <= $maxPages; $i++) {
@@ -159,10 +174,10 @@ class DataGridTable extends AbstractHelper
             echo sprintf('<a href="%s?%s">%d</a></li>', $currentUrl, $queryParams . $page, $i);
         }
 
-        $page = empty($queryParams) ? sprintf('page=%d', ($currentPage+1)) : sprintf('&page=%d', ($currentPage+1));
+        $page = empty($queryParams) ? sprintf('page=%d', ($currentPage + 1)) : sprintf('&page=%d', ($currentPage + 1));
         echo sprintf(
             '<li class="%s"><a href="%s?%s" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>',
-            $currentPage == $maxPages ? 'disabled': '', $currentUrl, $queryParams . $page
+            $currentPage == $maxPages ? 'disabled' : '', $currentUrl, $queryParams . $page
         );
 
         echo '</ul></nav>';
