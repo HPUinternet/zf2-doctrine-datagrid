@@ -104,17 +104,12 @@ class TableBuilderService
             $entityShortName = $this->getEntityShortName($this->getModuleOptions()->getEntityName());
 
             if ($columnMetadata['type'] === 'association') {
-                if (empty($columnMetadata['targetEntity'])) {
-                    throw new \Exception(sprintf('No target Entity found for %s in Entity %s',
-                        $selectColumn['fieldName'], $entityShortName));
-                }
-
                 /**
-                 * Owning associations can be handled inline
-                 * others (OneToMany and ManyToMany) should result in a different query since querying
-                 * them will result in multiple duplicate rows in the database resultset
+                 * Only owning One-to-One associations can be handled inline. others, like One-To-Many and Many-To-Many
+                 * should result in a different query since querying them will result in multiple duplicate rows
+                 * in the database result set.
                  */
-                if (!$columnMetadata['isOwningSide'] || isset($columnMetadata['joinTable'])) {
+                if ($columnMetadata['associationType'] !== ClassMetadataInfo::ONE_TO_ONE && $columnMetadata['associationType'] !== ClassMetadataInfo::MANY_TO_ONE) {
                     $this->selectInSubQuery($selectColumn, $columnMetadata['targetEntity'], end($selectColumnParts));
                     continue;
                 }
@@ -151,7 +146,6 @@ class TableBuilderService
      * Set the page for pagination
      *
      * @param $pageNumber
-     * @param int $itemsPerPage
      * @return $this
      */
     public function setPage($pageNumber)
@@ -365,6 +359,10 @@ class TableBuilderService
     }
 
     /**
+     * Whenever we need to retrieve additional data (like in a one-to-may or many-to-many) we need to work
+     * aside from the main query. This method lets you select anything form another entity that has associations
+     * with the configured entity of the main query.
+     *
      * @param $sourceFieldName
      * @param $targetEntityName
      * @param $targetFieldName
@@ -386,7 +384,10 @@ class TableBuilderService
     }
 
     /**
-     * Create a new query based on the source entity property and a targetEntity
+     * Since the configured association (one-to-many vs many-to-many) has a lot of
+     * influence on how the query will be build, its vital we identify the used
+     * association type first. The createSubQuery method will handle this delicately and return
+     * an usable queryobject for you to add your select statement in.
      *
      * @param $sourceFieldName
      * @param $targetEntityName
@@ -399,45 +400,44 @@ class TableBuilderService
         // Get additional information about the association
         $sourceEntityName = $this->getModuleOptions()->getEntityName();
         $sourceEntityMetadata = $this->entityMetadataHelper->getMetaData($sourceEntityName);
-        $targetEntityMetadata = $this->entityMetadataHelper->getMetaData($targetEntityName);
-
-        $query = $this->getEntityManager()->createQueryBuilder();
-        $query->from($targetEntityName, $this->getEntityShortName($targetEntityName));
-
-        $associationData = $targetEntityMetadata->getAssociationsByTargetClass($sourceEntityName);
-        if (empty($associationData)) {
-            throw new \Exception(
-                sprintf("No association data found to bind %s OneToMany with %s", $sourceEntityName,
-                    $targetEntityName)
-            );
-        }
-
         $associationMapping = $sourceEntityMetadata->getAssociationMapping($sourceFieldName);
         if (empty($associationMapping)) {
             throw new \Exception(
-                sprintf("Could not determine the association type for %s", $sourceFieldName)
+                sprintf("Could not determine the association for %s", $sourceFieldName)
             );
         }
 
+        $query = $this->getEntityManager()->createQueryBuilder();
+
         $associationType = $associationMapping['type'];
-        foreach ($associationData as $associationName => $joinData) {
-            if ($associationType === ClassMetadataInfo::ONE_TO_MANY) {
-                $identityColumn = $this->getEntityShortName($targetEntityName) . '.' . $associationName;
-                $query->addSelect(sprintf("IDENTITY(%s) AS association", $identityColumn));
-            } elseif ($associationType === ClassMetadataInfo::MANY_TO_MANY) {
-                $identityColumn = $this->getEntityShortName($sourceEntityName) . '.' . $sourceEntityMetadata->getSingleIdentifierFieldName();
-                $query->addSelect(sprintf("%s AS association", $identityColumn));
-                $query->innerJoin($this->getEntityShortName($targetEntityName) . '.' . $associationName,
-                    $this->getEntityShortName($sourceEntityName));
-            } else {
-                throw new \Exception(
-                    sprintf("Unsupported association type: %s", $associationType)
-                );
-            }
-            $query->where(sprintf('%s IN (:resultIds)', $identityColumn));
+
+        // One to Many associations should always start in the external entity, they contain data about the join
+        if ($associationType === ClassMetadataInfo::ONE_TO_MANY) {
+            $mappedColumn = $this->getEntityShortName($targetEntityName) . '.' . $associationMapping['mappedBy'];
+            $query->addSelect(sprintf("IDENTITY(%s) AS association", $mappedColumn));
+            $query->from($targetEntityName, $this->getEntityShortName($targetEntityName));
+            $query->where(sprintf('%s IN (:resultIds)', $mappedColumn));
+
+            return $query;
         }
 
-        return $query;
+        // When dealing with many-to-many we can make the assumption that our SourceEntity knows what to bind
+        if ($associationType === ClassMetadataInfo::MANY_TO_MANY) {
+            // @todo: the code below will break if you have a multi column primary key
+            $identityColumn = $this->getEntityShortName($sourceEntityName) . '.' . $sourceEntityMetadata->getSingleIdentifierFieldName();
+            $query->addSelect(sprintf("%s AS association", $identityColumn));
+            $query->from($sourceEntityName, $this->getEntityShortName($sourceEntityName));
+            $query->innerJoin($this->getEntityShortName($sourceEntityName) . '.' . $sourceFieldName,
+                $this->getEntityShortName($targetEntityName));
+            $query->where(sprintf('%s IN (:resultIds)', $identityColumn));
+
+            return $query;
+        }
+
+
+        throw new \Exception(
+            sprintf("Unsupported association type: %s", $associationType)
+        );
     }
 
 

@@ -101,7 +101,7 @@ class TableModel
                 continue;
             }
         }
-
+        
         return $tableHeaders;
     }
 

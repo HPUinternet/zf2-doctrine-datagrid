@@ -82,6 +82,7 @@ class EntityMetadataHelper
                 $columns[$fieldName] = $fieldData;
             } elseif (array_key_exists($fieldName, $metaData->associationMappings)) {
                 $fieldData = $metaData->getAssociationMapping($fieldName);
+                $fieldData['associationType'] = $fieldData['type'];
                 $fieldData['type'] = 'association';
                 $columns[$fieldName] = $fieldData;
             } else {
