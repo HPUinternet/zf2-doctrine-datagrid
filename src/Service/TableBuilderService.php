@@ -185,13 +185,6 @@ class TableBuilderService
         foreach ($this->subQueries as $fieldName => $queryBuilder) {
             $queryBuilder->setParameter('resultIds', array_column($resultSet, $primaryKey));
             $results = $queryBuilder->getQuery()->execute();
-
-
-            echo '<pre>';
-            print_r($results);
-            echo '</pre>';
-            die('aasdf');
-
             foreach ($results as $result) {
                 $resultSetKey = $result['association'];
                 if (!array_key_exists($fieldName, $resultSet[$resultSetKey])) {
@@ -392,85 +385,68 @@ class TableBuilderService
         ));
     }
 
-    protected function createSubQuery($sourceFieldName, $targetEntityName) {
-
+    /**
+     * Create a new query based on the source entity property and a targetEntity
+     *
+     * @param $sourceFieldName
+     * @param $targetEntityName
+     * @return QueryBuilder
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     * @throws \Exception
+     */
+    protected function createSubQuery($sourceFieldName, $targetEntityName)
+    {
         // Get additional information about the association
         $sourceEntityName = $this->getModuleOptions()->getEntityName();
         $sourceEntityMetadata = $this->entityMetadataHelper->getMetaData($sourceEntityName);
-        $associationMapping = $sourceEntityMetadata->getAssociationMapping($sourceFieldName);
+        $targetEntityMetadata = $this->entityMetadataHelper->getMetaData($targetEntityName);
 
         $query = $this->getEntityManager()->createQueryBuilder();
         $query->from($targetEntityName, $this->getEntityShortName($targetEntityName));
 
-
-        if ($associationMapping['type'] === ClassMetadataInfo::ONE_TO_MANY) {
-            // Since the sourceEntity is not the owning side, the targetEntity should have information for the join
-            $targetEntityMetadata = $this->entityMetadataHelper->getMetaData($targetEntityName);
-            $associationData = $targetEntityMetadata->getAssociationsByTargetClass($sourceEntityName);
-
-            if (empty($associationData)) {
-                throw new \Exception(
-                    sprintf("No association data found to bind %s OneToMany with %s", $sourceEntityName, $targetEntityName)
-                );
-            }
-
-            foreach ($associationData as $associationName => $joinData) {
-                $columnName = $this->getEntityShortName($targetEntityName) . '.' . $associationName;
-                $query->addSelect(sprintf("IDENTITY(%s) AS association", $columnName));
-                $query->where(sprintf('%s IN (:resultIds)', $columnName));
-            }
-        } elseif($associationMapping['type'] === ClassMetadataInfo::MANY_TO_MANY) {
-            $targetEntityMetadata = $this->entityMetadataHelper->getMetaData($targetEntityName);
-            $associationData = $targetEntityMetadata->getAssociationsByTargetClass($sourceEntityName);
-
-            foreach($associationData as $associationName => $joinData) {
-                $query->addSelect(sprintf("%s AS association", 'MEDIAITEM.id'));
-                $query->innerJoin($this->getEntityShortName($targetEntityName).'.'.$associationName, $this->getEntityShortName($sourceEntityName));
-                $query->where(sprintf('%s IN (:resultIds)', 'MEDIAITEM.id'));
-            }
-
-//            // No need to retrieve joining information in the targetEntity here, we can start joining using the 'joinTable' property
-//            $associationData = $sourceEntityMetadata->getAssociationMapping($sourceFieldName);
-//            if(!isset($associationData['joinTable']['name']) && empty($associationData['joinTable']['name'])) {
-//                throw new \Exception(
-//                    sprintf("No joinTable found in a Many to Many association between %s and %s", $sourceEntityName, $targetEntityName)
-//                );
-//            }
-//
-//            if(!isset($associationData['joinTable']['joinColumns']) && empty($associationData['joinTable']['joinColumns'])) {
-//                throw new \Exception(
-//                    sprintf("No joinTable found in a Many to Many association between %s and %s", $sourceEntityName, $targetEntityName)
-//                );
-//            }
-//
-//            $joinTableName = $associationData['joinTable']['name'];
-//
-//            foreach($associationData['joinTable']['joinColumns'] as $joinColumn) {
-////                'MEMBER OF '. $sourceEntityName
-//                $query->where(sprintf('%s IN (:resultIds)', $columnName));
-//            }
-
-            /**
-             * SELECT *
-                FROM  `mediacategory`
-                INNER JOIN mediaitem_mediacategory ON mediacategory.id = mediaitem_mediacategory.mediacategory_id
-                WHERE mediaitem_mediacategory.mediaitem_id
-                IN ( 162, 163 )
-             */
-
+        $associationData = $targetEntityMetadata->getAssociationsByTargetClass($sourceEntityName);
+        if (empty($associationData)) {
+            throw new \Exception(
+                sprintf("No association data found to bind %s OneToMany with %s", $sourceEntityName,
+                    $targetEntityName)
+            );
         }
 
+        $associationMapping = $sourceEntityMetadata->getAssociationMapping($sourceFieldName);
+        if (empty($associationMapping)) {
+            throw new \Exception(
+                sprintf("Could not determine the association type for %s", $sourceFieldName)
+            );
+        }
 
+        $associationType = $associationMapping['type'];
+        foreach ($associationData as $associationName => $joinData) {
+            if ($associationType === ClassMetadataInfo::ONE_TO_MANY) {
+                $identityColumn = $this->getEntityShortName($targetEntityName) . '.' . $associationName;
+                $query->addSelect(sprintf("IDENTITY(%s) AS association", $identityColumn));
+            } elseif ($associationType === ClassMetadataInfo::MANY_TO_MANY) {
+                $identityColumn = $this->getEntityShortName($sourceEntityName) . '.' . $sourceEntityMetadata->getSingleIdentifierFieldName();
+                $query->addSelect(sprintf("%s AS association", $identityColumn));
+                $query->innerJoin($this->getEntityShortName($targetEntityName) . '.' . $associationName,
+                    $this->getEntityShortName($sourceEntityName));
+            } else {
+                throw new \Exception(
+                    sprintf("Unsupported association type: %s", $associationType)
+                );
+            }
+            $query->where(sprintf('%s IN (:resultIds)', $identityColumn));
+        }
 
         return $query;
-
     }
 
-    protected function calculateMaxPages(){
+
+    protected function calculateMaxPages()
+    {
         $maxResults = $this->getMaxResultCount();
         $itemsPerPage = $this->getModuleOptions()->getItemsPerPage();
 
-        if($maxResults <= $itemsPerPage) {
+        if ($maxResults <= $itemsPerPage) {
             return 0;
         }
 
