@@ -125,7 +125,7 @@ class TableModel
             }
 
             // See if we have nested data
-            if (is_array($data[$accessor])) {
+            if (isset($data[$accessor]) && is_array($data[$accessor])) {
                 $resultData = array();
                 foreach ($data[$accessor] as $accessorData) {
                     $resultData[] = $accessorData[$property];
@@ -134,8 +134,6 @@ class TableModel
                 return $resultData;
             }
         }
-
-        throw new \Exception(sprintf('Failed extracting %s out of the result set', $property));
     }
 
     /**
