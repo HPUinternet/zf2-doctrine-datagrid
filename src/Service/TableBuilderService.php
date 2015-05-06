@@ -69,7 +69,7 @@ class TableBuilderService
 
         // Make sure data retrieval is default when not configured
         $this->setAvailableTableColumns($this->resolveAvailableTableColumns());
-        $this->selectColumns($this->getModuleOptions()->getDefaultColumns())->setPage(0);
+        $this->selectColumns($this->getModuleOptions()->getDefaultColumns())->setPage(1);
         $this->subQueries = array();
     }
 
@@ -152,7 +152,7 @@ class TableBuilderService
     {
         $this->pageNumber = $pageNumber;
         $itemsPerPage = $this->getModuleOptions()->getItemsPerPage();
-        $offset = ($pageNumber == 0) ? 0 : ($pageNumber - 1) * $itemsPerPage;
+        $offset = ($pageNumber <= 1) ? 0 : ($pageNumber - 1) * $itemsPerPage;
         $this->getQueryBuilder()->setMaxResults($itemsPerPage);
         $this->getQueryBuilder()->setFirstResult($offset);
 
@@ -447,7 +447,7 @@ class TableBuilderService
         $itemsPerPage = $this->getModuleOptions()->getItemsPerPage();
 
         if ($maxResults <= $itemsPerPage) {
-            return 0;
+            return 1;
         }
 
         return ceil($maxResults / $itemsPerPage);
