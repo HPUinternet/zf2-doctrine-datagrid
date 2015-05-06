@@ -196,7 +196,7 @@ class DataGridTable extends AbstractHelper
                 continue;
             }
             echo sprintf('<th class="%s">%s', $classes . " " . $column, $column);
-            if (in_array('ordering', $this->displaySettings)) {
+            if (in_array('ordering', $this->displaySettings) && $column == $accessor) {
                 $this->printOrderOption($column);
             }
             echo '</th>';

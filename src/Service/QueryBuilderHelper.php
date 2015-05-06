@@ -68,6 +68,7 @@ class QueryBuilderHelper
      */
     public function select(array $columns)
     {
+        $this->selectedTableColumns = array();
         $this->queryBuilder->resetDQLPart('select');
         $this->queryBuilder->resetDQLPart('join');
 
@@ -180,7 +181,16 @@ class QueryBuilderHelper
     }
 
     public function orderBy($column, $order) {
-        $this->queryBuilder->orderBy($this->getEntityShortName($this->sourceEntityName).'.'.$column, strtoupper($order));
+        $column = str_replace(".", "", $column);
+        $selects = $this->queryBuilder->getDQLPart('select');
+        foreach($selects as $select) {
+            $selectSegments = explode(" ", $select);
+            if($selectSegments[count($selectSegments)-1] == $column) {
+                $this->queryBuilder->orderBy($selectSegments[0], $order);
+            }
+        }
+
+        return $this;
     }
 
     public function getMaxResultCount()
@@ -189,7 +199,7 @@ class QueryBuilderHelper
         $query = clone $this->queryBuilder;
         $entityMetaData = $this->entityMetadataHelper->getMetaData($this->sourceEntityName);
 
-        $query->resetDQLParts(array('select', 'join'));
+        $query->resetDQLParts(array('select', 'join', 'orderBy'));
         $query->setFirstResult(0);
         $query->setMaxResults(null);
         $query->select(sprintf(
@@ -351,7 +361,7 @@ class QueryBuilderHelper
 
     private function addToSelectedTableColumns($name, $parent = false)
     {
-        $dummyValue = '';
+        $dummyValue = $name;
         if ($parent) {
             if (!isset($this->selectedTableColumns[$parent])) {
                 $this->selectedTableColumns[$parent] = array();
