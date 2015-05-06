@@ -26,14 +26,14 @@ class ModuleOptionsFactory implements FactoryInterface
 //                'id', 'productCode', 'name'
 //            ),
 //        );
-
+//
 //        $dummyOptions = array(
 //            'entityName' => 'Wms\Admin\User\Entity\User',
 //            'defaultColumns' => array(
-//                'id',
+//                'username',
 //            ),
 //            'prohibitedColumns' => array(
-//                'password'
+//                'password', 'creator_id.password', 'last_modifier_id.password'
 //            )
 //        );
         return new ModuleOptions($dummyOptions);

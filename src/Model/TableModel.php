@@ -126,7 +126,7 @@ class TableModel
             $property = str_replace(".", "", $property);
 
             if ($accessor == $property) {
-                return $data[$property];
+                return isset($data[$property]) ? $data[$property] : null;
             }
 
             // See if we have nested data
