@@ -1,3 +1,6 @@
 <?php $this->headLink()->prependStylesheet($this->basePath() . '/css/Admin/DataGrid/Dist/dataGrid.css'); ?>
-<?php echo $this->DataGridTable($tableData); ?>
+<?php if(isset($tableData)) {
+    echo $this->DataGridTable($tableData);
+}
+?>
 <?php $this->headScript()->appendScript($this->basePath() . '/js/Admin/DataGrid/Dist/dataGrid.js', 'text/javascript');

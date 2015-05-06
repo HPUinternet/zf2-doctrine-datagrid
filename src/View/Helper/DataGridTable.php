@@ -110,7 +110,7 @@ class DataGridTable extends AbstractHelper
         foreach ($columnGroups as $property => $checkboxValues) {
             $multiCheckbox = new MultiCheckbox($checkboxName);
             $multiCheckbox->setOption('inline', false);
-            if (count($checkboxValues) >= 2) {
+            if (count($checkboxValues) >= 2 || (count($checkboxValues) == 1 && (strpos($checkboxValues[0]['value'], ".") !== false))) {
                 $multiCheckbox->setLabel($property);
             }
             $multiCheckbox->setValueOptions($checkboxValues);
