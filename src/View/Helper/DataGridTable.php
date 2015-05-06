@@ -1,6 +1,7 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper;
 
 use Zend\Di\ServiceLocator;
+use Zend\Form\Element\Checkbox;
 use Zend\Form\Element\MultiCheckbox;
 use Zend\Form\Form;
 use Zend\View\Helper\AbstractHelper;
@@ -34,8 +35,9 @@ class DataGridTable extends AbstractHelper
 
     /**
      * @param TableModel $tableModel
+     * @param array $displaySettings
      */
-    public function setTableModel($tableModel, $displaySettings = array('hiddenColumns', 'pagination', 'searchFilters'))
+    public function setTableModel($tableModel, $displaySettings = array('columnsForm', 'pagination'))
     {
         $this->tableModel = $tableModel;
         $this->displaySettings = $displaySettings;
@@ -71,7 +73,7 @@ class DataGridTable extends AbstractHelper
 
     public function printColumnSettingsForm()
     {
-        if (!in_array('hiddenColumns', $this->displaySettings)) {
+        if (!in_array('columnsForm', $this->displaySettings)) {
             return;
         }
 
@@ -110,7 +112,9 @@ class DataGridTable extends AbstractHelper
         foreach ($columnGroups as $property => $checkboxValues) {
             $multiCheckbox = new MultiCheckbox($checkboxName);
             $multiCheckbox->setOption('inline', false);
-            if (count($checkboxValues) >= 2 || (count($checkboxValues) == 1 && (strpos($checkboxValues[0]['value'], ".") !== false))) {
+            if (count($checkboxValues) >= 2 || (count($checkboxValues) == 1 && (strpos($checkboxValues[0]['value'],
+                            ".") !== false))
+            ) {
                 $multiCheckbox->setLabel($property);
             }
             $multiCheckbox->setValueOptions($checkboxValues);
@@ -192,7 +196,7 @@ class DataGridTable extends AbstractHelper
             if ($this->isHiddenColumn($column)) {
                 continue;
             }
-            echo sprintf('<th class="%s ">%s</th>', $classes . " " . $column, $column);
+            echo sprintf('<th class="%s">%s</th>', $classes . " " . $column, $column);
         }
         echo '</tr>';
         echo '</thead>';
