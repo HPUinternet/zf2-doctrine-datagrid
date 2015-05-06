@@ -48,7 +48,10 @@ class TableModel
             return $this;
         }
 
-        $this->setUsedHeaders($this->buildTableHeaderFromRow(reset($rows)));
+        if (empty($this->usedHeaders)) {
+            $this->setUsedHeaders($this->buildTableHeaderFromRow(reset($rows)));
+        }
+
         foreach ($rows as $row) {
             $newRow = array();
             foreach ($this->getUsedHeaders() as $columnName => $accessor) {
@@ -73,7 +76,7 @@ class TableModel
      * @param array $row
      * @return array
      */
-    private function buildTableHeaderFromRow(array $row, $availableHeaders = array(), $accessorProperty = false)
+    public function buildTableHeaderFromRow(array $row, $availableHeaders = array(), $accessorProperty = false)
     {
         // To prevent nested foreach loops, first rebuild the available headers
         if (empty($availableHeaders)) {
@@ -101,7 +104,6 @@ class TableModel
                 continue;
             }
         }
-        
         return $tableHeaders;
     }
 

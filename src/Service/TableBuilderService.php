@@ -136,7 +136,7 @@ class TableBuilderService
                 continue;
             }
 
-            $this->getQueryBuilder()->addSelect($entityShortName . '.' . $selectColumn);
+            $this->getQueryBuilder()->addSelect($entityShortName . '.' . $selectColumn . ' AS '. $selectColumn);
         }
 
         return $this;
@@ -221,6 +221,7 @@ class TableBuilderService
     {
         $table = new Table();
         $table->setAvailableHeaders($this->getAvailableTableColumns());
+        $table->setUsedHeaders($table->buildTableHeaderFromRow($this->calculateResponseObject()));
         $table->setAndParseRows($this->getTableData());
         $table->setPageNumber($this->pageNumber);
         $table->setMaxPageNumber($this->calculateMaxPages());
@@ -438,6 +439,26 @@ class TableBuilderService
         throw new \Exception(
             sprintf("Unsupported association type: %s", $associationType)
         );
+    }
+
+    protected function calculateResponseObject() {
+        $usedColumns = array();
+        foreach($this->getQueryBuilder()->getDQLPart('select') as $select) {
+            $columnName = end(explode(" ",$select->getParts()[0]));
+            $usedColumns[$columnName] = "database data";
+        }
+
+        foreach($this->subQueries as $key => $queryBuilder) {
+            $usedColumns[$key] = array();
+            $usedColumns[$key][0] = array();
+            foreach($queryBuilder->getDQLPart('select') as $select) {
+                $columnName = end(explode(" ",$select->getParts()[0]));
+                if($columnName != "association") {
+                    $usedColumns[$key][0][$columnName] = "database data";
+                }
+            }
+        }
+        return $usedColumns;
     }
 
 
