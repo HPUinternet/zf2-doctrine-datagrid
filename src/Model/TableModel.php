@@ -48,8 +48,10 @@ class TableModel
             return $this;
         }
 
+        // You should avoid bulding a table without the heading's
+        // the first result element can contain invalid data, which will result in data being trimmed from all results
         if (empty($this->usedHeaders)) {
-            $this->setUsedHeaders($this->buildTableHeaderFromRow(reset($rows)));
+            $this->setUsedHeaders($this->calculateTableHeader(reset($rows)));
         }
 
         foreach ($rows as $row) {
@@ -76,7 +78,7 @@ class TableModel
      * @param array $row
      * @return array
      */
-    public function buildTableHeaderFromRow(array $row, $availableHeaders = array(), $accessorProperty = false)
+    public function calculateTableHeader(array $row, $availableHeaders = array(), $accessorProperty = false)
     {
         // To prevent nested foreach loops, first rebuild the available headers
         if (empty($availableHeaders)) {
@@ -87,7 +89,6 @@ class TableModel
 
         $tableHeaders = array();
         foreach ($row as $property => $value) {
-            // Find index by searching for the Key in the available headers
             $indexKey = array_search($property, $availableHeaders);
             if ($indexKey !== false) {
                 $accessProperty = $accessorProperty ? $accessorProperty : $this->availableHeaders[$indexKey];
@@ -95,11 +96,13 @@ class TableModel
                 continue;
             }
 
-            // If the data is an array (when data is joined) validate the first array value
-            if (is_array($value) && array_search(key($value[0]), $availableHeaders)) {
+            if (is_array($value)) {
+                if(isset($value[0]) && is_array($value[0])) {
+                    $value = $value[0];
+                }
                 $tableHeaders = array_merge(
                     $tableHeaders,
-                    $this->buildTableHeaderFromRow(reset($value), $availableHeaders, $property)
+                    $this->calculateTableHeader($value, $availableHeaders, $property)
                 );
                 continue;
             }

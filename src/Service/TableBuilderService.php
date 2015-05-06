@@ -1,7 +1,7 @@
 <?php namespace Wms\Admin\DataGrid\Service;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\ClassMetadataInfo as MetaData;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query\Expr;
 use Wms\Admin\DataGrid\Options\ModuleOptions;
@@ -33,7 +33,7 @@ class TableBuilderService
     /**
      * @var Array
      */
-    protected $selectedTableColumns;
+    private $selectedTableColumns;
 
     /**
      * @var int
@@ -109,7 +109,7 @@ class TableBuilderService
                  * should result in a different query since querying them will result in multiple duplicate rows
                  * in the database result set.
                  */
-                if ($columnMetadata['associationType'] !== ClassMetadataInfo::ONE_TO_ONE && $columnMetadata['associationType'] !== ClassMetadataInfo::MANY_TO_ONE) {
+                if (!in_array($columnMetadata['associationType'], array(MetaData::ONE_TO_ONE, MetaData::MANY_TO_ONE))) {
                     $this->selectInSubQuery($selectColumn, $columnMetadata['targetEntity'], end($selectColumnParts));
                     continue;
                 }
@@ -133,10 +133,12 @@ class TableBuilderService
                 $this->getQueryBuilder()->addSelect(
                     $joinedEntityAlias . '.' . end($selectColumnParts) . ' AS ' . implode($selectColumnParts)
                 );
+                $this->addToSelectedTableColumns(implode($selectColumnParts));
                 continue;
             }
 
-            $this->getQueryBuilder()->addSelect($entityShortName . '.' . $selectColumn . ' AS '. $selectColumn);
+            $this->getQueryBuilder()->addSelect($entityShortName . '.' . $selectColumn . ' AS ' . $selectColumn);
+            $this->addToSelectedTableColumns($selectColumn);
         }
 
         return $this;
@@ -171,7 +173,8 @@ class TableBuilderService
 
         // Retrieve data from the primary query and re-order the array keys so they can be accessed more easily
         $result = $this->getQueryBuilder()->getQuery()->execute();
-        $primaryKey = $this->entityMetadataHelper->getMetaData($this->getModuleOptions()->getEntityName())->getSingleIdentifierFieldName();
+        $entityName = $this->getModuleOptions()->getEntityName();
+        $primaryKey = $this->entityMetadataHelper->getMetaData($entityName)->getSingleIdentifierFieldName();
         foreach ($result as $key => $data) {
             $resultSet[$data[$primaryKey]] = $data;
         }
@@ -221,7 +224,7 @@ class TableBuilderService
     {
         $table = new Table();
         $table->setAvailableHeaders($this->getAvailableTableColumns());
-        $table->setUsedHeaders($table->buildTableHeaderFromRow($this->calculateResponseObject()));
+        $table->setUsedHeaders($table->calculateTableHeader($this->selectedTableColumns));
         $table->setAndParseRows($this->getTableData());
         $table->setPageNumber($this->pageNumber);
         $table->setMaxPageNumber($this->calculateMaxPages());
@@ -377,11 +380,11 @@ class TableBuilderService
         }
 
         $query = $this->subQueries[$sourceFieldName];
-        $query->addSelect(sprintf("%s.%s AS %s",
-            $this->getEntityShortName($targetEntityName),
-            $targetFieldName,
+        $query->addSelect(sprintf("%s AS %s",
+            $this->getEntityShortName($targetEntityName) . '.' . $targetFieldName,
             $sourceFieldName . $targetFieldName
         ));
+        $this->addToSelectedTableColumns($sourceFieldName . $targetFieldName, $sourceFieldName);
     }
 
     /**
@@ -413,7 +416,7 @@ class TableBuilderService
         $associationType = $associationMapping['type'];
 
         // One to Many associations should always start in the external entity, they contain data about the join
-        if ($associationType === ClassMetadataInfo::ONE_TO_MANY) {
+        if ($associationType === MetaData::ONE_TO_MANY) {
             $mappedColumn = $this->getEntityShortName($targetEntityName) . '.' . $associationMapping['mappedBy'];
             $query->addSelect(sprintf("IDENTITY(%s) AS association", $mappedColumn));
             $query->from($targetEntityName, $this->getEntityShortName($targetEntityName));
@@ -423,7 +426,7 @@ class TableBuilderService
         }
 
         // When dealing with many-to-many we can make the assumption that our SourceEntity knows what to bind
-        if ($associationType === ClassMetadataInfo::MANY_TO_MANY) {
+        if ($associationType === MetaData::MANY_TO_MANY) {
             // @todo: the code below will break if you have a multi column primary key
             $identityColumn = $this->getEntityShortName($sourceEntityName) . '.' . $sourceEntityMetadata->getSingleIdentifierFieldName();
             $query->addSelect(sprintf("%s AS association", $identityColumn));
@@ -441,26 +444,17 @@ class TableBuilderService
         );
     }
 
-    protected function calculateResponseObject() {
-        $usedColumns = array();
-        foreach($this->getQueryBuilder()->getDQLPart('select') as $select) {
-            $columnName = end(explode(" ",$select->getParts()[0]));
-            $usedColumns[$columnName] = "database data";
-        }
-
-        foreach($this->subQueries as $key => $queryBuilder) {
-            $usedColumns[$key] = array();
-            $usedColumns[$key][0] = array();
-            foreach($queryBuilder->getDQLPart('select') as $select) {
-                $columnName = end(explode(" ",$select->getParts()[0]));
-                if($columnName != "association") {
-                    $usedColumns[$key][0][$columnName] = "database data";
-                }
+    private function addToSelectedTableColumns($name, $parent = false) {
+        $dummyValue = '';
+        if($parent) {
+            if(!isset($this->selectedTableColumns[$parent])) {
+                $this->selectedTableColumns[$parent] = array();
             }
+            $this->selectedTableColumns[$parent][$name] = $dummyValue;
+            return;
         }
-        return $usedColumns;
+        $this->selectedTableColumns[$name] = $dummyValue;
     }
-
 
     protected function calculateMaxPages()
     {
