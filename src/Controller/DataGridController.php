@@ -27,6 +27,17 @@ class DataGridController extends AbstractActionController
             $this->tableBuilderService->setPage($this->params()->fromQuery('page'));
         }
 
+        if($this->params()->fromQuery('sort') && $this->params()->fromQuery('order')) {
+            $this->tableBuilderService->orderBy(
+                $this->params()->fromQuery('sort'),
+                $this->params()->fromQuery('order')
+            );
+        }
+
         return new ViewModel(array('tableData' => $this->tableBuilderService->getTable()));
+    }
+
+    public function deleteSelectedEntities() {
+
     }
 }

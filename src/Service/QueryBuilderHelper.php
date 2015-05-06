@@ -179,6 +179,10 @@ class QueryBuilderHelper
         return $resultSet;
     }
 
+    public function orderBy($column, $order) {
+        $this->queryBuilder->orderBy($this->getEntityShortName($this->sourceEntityName).'.'.$column, strtoupper($order));
+    }
+
     public function getMaxResultCount()
     {
         // Play nice with the filters and create a separate query to get the result count

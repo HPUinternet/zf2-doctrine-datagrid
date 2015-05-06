@@ -61,6 +61,13 @@ class TableBuilderService
         $this->queryBuilder->limit($pageNumber, $this->getModuleOptions()->getItemsPerPage());
     }
 
+    public function orderBy($column, $order) {
+        // @todo: input valdiation should be handled by zend form
+        if(in_array($column, $this->queryBuilder->getAvailableTableColumns()) && (strtolower($order) == 'asc' || strtolower($order) == 'desc')) {
+            $this->queryBuilder->orderBy($column, $order);
+        }
+    }
+
     protected function calculateMaxPages()
     {
         $maxResults = $this->queryBuilder->getMaxResultCount();

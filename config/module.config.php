@@ -26,6 +26,7 @@ return array(
     'view_helpers' => array(
         'invokables' => array(
             'DataGridTable' => 'Wms\Admin\DataGrid\View\Helper\DataGridTable',
+            'UrlWithQuery' => 'Wms\Admin\DataGrid\View\Helper\UrlWithQuery',
             'DataGridForm' => 'Wms\Admin\DataGrid\View\Helper\Form',
             'DataGridFormRow' => 'Wms\Admin\DataGrid\View\Helper\FormRow',
         ),

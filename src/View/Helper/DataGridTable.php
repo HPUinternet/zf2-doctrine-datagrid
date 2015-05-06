@@ -37,7 +37,7 @@ class DataGridTable extends AbstractHelper
      * @param TableModel $tableModel
      * @param array $displaySettings
      */
-    public function setTableModel($tableModel, $displaySettings = array('columnsForm', 'pagination'))
+    public function setTableModel($tableModel, $displaySettings = array('columnsForm', 'pagination', 'ordering'))
     {
         $this->tableModel = $tableModel;
         $this->displaySettings = $displaySettings;
@@ -156,36 +156,35 @@ class DataGridTable extends AbstractHelper
 
         $maxPages = $this->getTableModel()->getMaxPageNumber();
         $currentPage = $this->getTableModel()->getPageNumber();
-        $currentUrl = strtok($this->getView()->ServerUrl(true), '?');
-
-        // Unset any previous page parameter
-        $queryParams = array();
-        parse_str(parse_url($this->getView()->ServerUrl(true), PHP_URL_QUERY), $queryParams);
-        unset($queryParams['page']);
-        $queryParams = http_build_query($queryParams);
 
         echo '<nav><ul class="pagination">';
-
-        $page = empty($queryParams) ? sprintf('page=%d', ($currentPage - 1)) : sprintf('&page=%d', ($currentPage - 1));
-        echo sprintf(
-            '<li class="%s"><a href="%s?%s" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>',
-            $currentPage <= 1 ? 'disabled' : '', $currentUrl, $queryParams . $page
+        echo sprintf('<li class="%s"><a href="%s" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>',
+            $currentPage <= 1 ? 'disabled' : '',
+            $this->getView()->UrlWithQuery(array('page' => ($currentPage - 1)))
         );
 
         for ($i = 1; $i <= $maxPages; $i++) {
-            $page = empty($queryParams) ? sprintf('page=%d', $i) : sprintf('&page=%d', $i);
             echo $i == $currentPage ? '<li class="active">' : '<li>';
-            echo sprintf('<a href="%s?%s">%d</a></li>', $currentUrl, $queryParams . $page, $i);
+            echo sprintf('<a href="%s">%d</a></li>', $this->getView()->UrlWithQuery(array('page' => $i)), $i);
         }
 
-        $page = empty($queryParams) ? sprintf('page=%d', ($currentPage + 1)) : sprintf('&page=%d', ($currentPage + 1));
-        echo sprintf(
-            '<li class="%s"><a href="%s?%s" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>',
-            $currentPage >= $maxPages ? 'disabled' : '', $currentUrl, $queryParams . $page
+        echo sprintf('<li class="%s"><a href="%s" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>',
+            $currentPage >= $maxPages ? 'disabled' : '',
+            $this->getView()->UrlWithQuery(array('page' => ($currentPage + 1)))
         );
 
         echo '</ul></nav>';
 
+    }
+
+    protected function printOrderOption($columName)
+    {
+        $sortDownUrl = $this->getView()->UrlWithQuery(array('sort' => $columName, 'order' => 'desc'));
+        $sortUpUrl = $this->getView()->UrlWithQuery(array('sort' => $columName, 'order' => 'asc'));
+        echo '<span class="pull-right">';
+        echo "<a href=\"$sortDownUrl\" class=\"tabelHeadOpties\"><i class=\"glyphicon glyphicon-chevron-down\"></i></a>";
+        echo "<a href=\"$sortUpUrl\" class=\"tabelHeadOpties\"><i class=\"glyphicon glyphicon-chevron-up\"></i></a>";
+        echo '</span>';
     }
 
     protected function printTableHeadRow($classes = "tabelHeader")
@@ -196,7 +195,11 @@ class DataGridTable extends AbstractHelper
             if ($this->isHiddenColumn($column)) {
                 continue;
             }
-            echo sprintf('<th class="%s">%s</th>', $classes . " " . $column, $column);
+            echo sprintf('<th class="%s">%s', $classes . " " . $column, $column);
+            if (in_array('ordering', $this->displaySettings)) {
+                $this->printOrderOption($column);
+            }
+            echo '</th>';
         }
         echo '</tr>';
         echo '</thead>';
