@@ -141,6 +141,15 @@ class TableModel
         }
     }
 
+    public function isHiddenColumn($columnName)
+    {
+        if (array_key_exists($columnName, $this->getUsedHeaders())) {
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * @param array $rows
      * @return Table

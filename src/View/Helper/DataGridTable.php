@@ -1,11 +1,11 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper;
 
 use Zend\Di\ServiceLocator;
-use Zend\Form\Element\Checkbox;
-use Zend\Form\Element\MultiCheckbox;
 use Zend\Form\Form;
 use Zend\View\Helper\AbstractHelper;
 use Wms\Admin\DataGrid\Model\TableModel;
+use Wms\Admin\DataGrid\Fieldset\ColumnSettingsFieldset;
+use Wms\Admin\DataGrid\Fieldset\FilterSettingsFieldset;
 use Wms\Admin\DataGrid\View\Helper\DataStrategy\StrategyResolver;
 
 class DataGridTable extends AbstractHelper
@@ -24,6 +24,11 @@ class DataGridTable extends AbstractHelper
      * @var StrategyResolver
      */
     private $dataStrategyResolver;
+
+    /**
+     * @var Form
+     */
+    private $settingsForm;
 
     /**
      * @return TableModel
@@ -55,78 +60,39 @@ class DataGridTable extends AbstractHelper
         $this->dataStrategyResolver = new StrategyResolver();
         $this->dataStrategyResolver->addDependency($this->getView(), 'Zend\View\Renderer\RendererInterface');
 
-        echo '<div class="datagrid-before">';
-        $this->printColumnSettingsForm();
+        echo '<div class="datagrid-before col-md-12">';
+        $this->prepareForm();
+        $this->prepareColumnSettings();
+        $this->prepareFilterSettings();
+        $this->printForm();
         echo '</div>';
 
-        echo '<div class="datagrid-table">';
+        echo '<div class="datagrid-table col-md-12">';
         $this->printTableStart();
         $this->printTableHeadRow();
         $this->printTableContent();
         $this->printTableEnd();
         echo '</div>';
 
-        echo '<div class="datagrid-after">';
+        echo '<div class="datagrid-after col-md-12">';
         $this->printPagination();
         echo '</div>';
     }
 
-    public function printColumnSettingsForm()
+    public function prepareForm()
     {
-        if (!in_array('columnsForm', $this->displaySettings)) {
-            return;
-        }
+        $this->settingsForm = new Form($this->getView()->Translate('settings'));
+        $this->settingsForm->setAttribute('method', 'get');
+    }
 
-        $columnSettingsForm = new Form('Display Settings');
-        $columnSettingsForm->setAttribute('method', 'get');
-        $columns = $this->getTableModel()->getAvailableHeaders();
-        $checkboxName = 'columns';
-
-        // Group checkboxes by property
-        $columnGroups = array();
-        foreach ($columns as $column) {
-            $columnNameSegments = explode('.', $column);
-            if (!array_key_exists($columnNameSegments[0], $columnGroups)) {
-                $columnGroups[$columnNameSegments[0]] = array();
-            }
-        }
-
-        // Create all values for each property
-        foreach ($columns as $column) {
-            $columnNameSegments = explode('.', $column);
-            $label = $column;
-            if (count($columnNameSegments) > 1) {
-                $segments = $columnNameSegments;
-                unset($segments[0]);
-                $label = implode('.', $segments);
-            }
-            $valueOption = array(
-                'value' => $column,
-                'label' => $this->getView()->translate($label),
-                'selected' => !$this->isHiddenColumn($column),
-            );
-            $columnGroups[$columnNameSegments[0]][] = $valueOption;
-        }
-
-        // Create the actuall form element per property
-        foreach ($columnGroups as $property => $checkboxValues) {
-            $multiCheckbox = new MultiCheckbox($checkboxName);
-            $multiCheckbox->setOption('inline', false);
-            if (count($checkboxValues) >= 2 || (count($checkboxValues) == 1 && (strpos($checkboxValues[0]['value'],
-                            ".") !== false))
-            ) {
-                $multiCheckbox->setLabel($property);
-            }
-            $multiCheckbox->setValueOptions($checkboxValues);
-            $columnSettingsForm->add($multiCheckbox);
-        }
-
+    public function printForm()
+    {
         // @todo: need to find a better way of implementing this ugly piece of code
         if (in_array('pagination', $this->displaySettings)) {
             $queryParams = array();
             parse_str(parse_url($this->getView()->ServerUrl(true), PHP_URL_QUERY), $queryParams);
             if (isset($queryParams['page']) && !is_null($queryParams['page']) && is_numeric($queryParams['page'])) {
-                $columnSettingsForm->add(array(
+                $this->settingsForm->add(array(
                     'name' => 'page',
                     'type' => 'hidden',
                     'attributes' => array(
@@ -136,7 +102,7 @@ class DataGridTable extends AbstractHelper
             }
         }
 
-        $columnSettingsForm->add(array(
+        $this->settingsForm->add(array(
             'name' => 'submit',
             'type' => 'Submit',
             'attributes' => array(
@@ -144,8 +110,23 @@ class DataGridTable extends AbstractHelper
                 'class' => 'btn btn-primary',
             ),
         ));
+        echo $this->getView()->DataGridForm($this->settingsForm);
+    }
 
-        echo $this->getView()->DataGridForm($columnSettingsForm);
+    public function prepareColumnSettings()
+    {
+        if (!in_array('columnsForm', $this->displaySettings)) {
+            return;
+        }
+        $this->settingsForm->add(New ColumnSettingsFieldset($this->tableModel));
+    }
+
+    public function prepareFilterSettings()
+    {
+        if (!in_array('columnsForm', $this->displaySettings)) {
+            return;
+        }
+        $this->settingsForm->add(New FilterSettingsFieldset());
     }
 
     public function printPagination()
@@ -157,7 +138,7 @@ class DataGridTable extends AbstractHelper
         $maxPages = $this->getTableModel()->getMaxPageNumber();
         $currentPage = $this->getTableModel()->getPageNumber();
 
-        echo '<nav><ul class="pagination">';
+        echo '<nav class="text-center"><ul class="pagination">';
         echo sprintf('<li class="%s"><a href="%s" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>',
             $currentPage <= 1 ? 'disabled' : '',
             $this->getView()->UrlWithQuery(array('page' => ($currentPage - 1)))
@@ -192,7 +173,7 @@ class DataGridTable extends AbstractHelper
         echo sprintf('<thead>', $classes);
         echo '<tr>';
         foreach ($this->getTableModel()->getUsedHeaders() as $column => $accessor) {
-            if ($this->isHiddenColumn($column)) {
+            if ($this->tableModel->isHiddenColumn($column)) {
                 continue;
             }
             echo sprintf('<th class="%s">%s', $classes . " " . $column, $column);
@@ -216,7 +197,7 @@ class DataGridTable extends AbstractHelper
     {
         echo empty($trClass) ? "<tr>" : sprintf("<tr class=\"%s\"", $trClass);
         foreach ($rowData as $cellName => $cellValue) {
-            if ($this->isHiddenColumn($cellName)) {
+            if ($this->tableModel->isHiddenColumn($cellName)) {
                 continue;
             }
             $this->printTableContentCell($cellValue, $cellName);
@@ -239,14 +220,5 @@ class DataGridTable extends AbstractHelper
     protected function printTableEnd()
     {
         echo '</table>';
-    }
-
-    private function isHiddenColumn($columnName)
-    {
-        if (array_key_exists($columnName, $this->getTableModel()->getUsedHeaders())) {
-            return false;
-        }
-
-        return true;
     }
 }

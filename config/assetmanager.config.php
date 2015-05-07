@@ -4,9 +4,9 @@ return array(
         'resolver_configs' => array(
             'collections' => array(
                 'js/Admin/DataGrid/Dist/dataGrid.js' => array(
-                    'js/Admin/DataGrid/Dist/vendorLibraries.js',
-                    '/js/Admin/DataGrid/zf-table.js',
-                    '/js/Admin/DataGrid/DT_bootstrap_3.js',
+//                    'js/Admin/DataGrid/Dist/vendorLibraries.js',
+                    '/js/Admin/DataGrid/datagrid.js',
+//                    '/js/Admin/DataGrid/DT_bootstrap_3.js',
                 ),
                 'css/Admin/DataGrid/Dist/dataGrid.css' => array(
                     'css/Admin/DataGrid/Dist/vendorStyles.css',

@@ -29,6 +29,7 @@ return array(
             'UrlWithQuery' => 'Wms\Admin\DataGrid\View\Helper\UrlWithQuery',
             'DataGridForm' => 'Wms\Admin\DataGrid\View\Helper\Form',
             'DataGridFormRow' => 'Wms\Admin\DataGrid\View\Helper\FormRow',
+            'DataGridFormCollection' => 'Wms\Admin\DataGrid\View\Helper\FormCollection',
         ),
     ),
     'router' => array(
