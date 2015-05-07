@@ -141,7 +141,7 @@ class DataGridTable extends AbstractHelper
             'type' => 'Submit',
             'attributes' => array(
                 'value' => $this->getView()->translate('Apply'),
-                'class' => 'btn',
+                'class' => 'btn btn-primary',
             ),
         ));
 
