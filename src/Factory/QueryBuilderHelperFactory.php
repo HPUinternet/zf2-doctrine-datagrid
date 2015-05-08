@@ -9,7 +9,7 @@ class QueryBuilderHelperFactory implements FactoryInterface
     public function createService(ServiceLocatorInterface $serviceLocator) {
         return new QueryBuilderHelper(
             $serviceLocator->get('Wms\Admin\DataGrid\Options\ModuleOptions')->getEntityName(),
-            $serviceLocator->get('Doctrine\ORM\EntityManager'),
+            $serviceLocator->get('Wms\Admin\DataGrid\Service\QueryFilterHelper')->getFilteredEntityManager(),
             $serviceLocator->get('Wms\Admin\DataGrid\Service\EntityMetadataHelper')
         );
     }

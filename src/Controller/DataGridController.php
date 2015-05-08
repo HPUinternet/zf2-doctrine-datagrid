@@ -1,5 +1,6 @@
 <?php namespace Wms\Admin\DataGrid\Controller;
 
+use Zend\EventManager\EventManager;
 use Zend\Mvc\Controller\AbstractActionController;
 use Wms\Admin\DataGrid\Service\TableBuilderService;
 use Zend\View\Model\ViewModel;

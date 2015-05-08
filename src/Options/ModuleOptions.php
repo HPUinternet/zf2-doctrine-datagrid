@@ -28,6 +28,11 @@ class ModuleOptions extends AbstractOptions
     protected $itemsPerPage = 10;
 
     /**
+     * @var array
+     */
+    protected $filters = array();
+
+    /**
      * @param string $entityName
      */
     public function setEntityName($entityName)
@@ -91,4 +96,19 @@ class ModuleOptions extends AbstractOptions
         $this->itemsPerPage = $itemsPerPage;
     }
 
+    /**
+     * @return array
+     */
+    public function getFilters()
+    {
+        return $this->filters;
+    }
+
+    /**
+     * @param array $filters
+     */
+    public function setFilters($filters)
+    {
+        $this->filters = $filters;
+    }
 }

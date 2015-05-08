@@ -19,6 +19,9 @@ class ModuleOptionsFactory implements FactoryInterface
             'defaultColumns' => array(
                 'id', 'title', 'caption', 'originalFile.mimetype', 'originalFile.size', 'thumbnailFile.imagepath'
             ),
+            'filters' => array(
+                'Wms\Admin\User\Filter\OnlyOwnEntitiesFilter' => 'Wms\Admin\User\Filter\OnlyOwnEntitiesFilterParameterProvider'
+            )
         );
 //        $dummyOptions = array(
 //            'entityName' => 'Wms\Admin\Shop\Entity\Product',
@@ -34,6 +37,11 @@ class ModuleOptionsFactory implements FactoryInterface
 //            ),
 //            'prohibitedColumns' => array(
 //                'password', 'creator_id.password', 'last_modifier_id.password'
+//            ),
+//            'filters' => array(
+//                'Wms\Admin\User\Filter\OnlyOwnEntitiesFilter' => array(
+//                    'parameter' => 'value',
+//                )
 //            )
 //        );
         return new ModuleOptions($dummyOptions);
