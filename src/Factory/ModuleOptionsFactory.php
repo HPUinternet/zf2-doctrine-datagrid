@@ -20,8 +20,8 @@ class ModuleOptionsFactory implements FactoryInterface
                 'id', 'title', 'caption', 'originalFile.mimetype', 'originalFile.size', 'thumbnailFile.imagepath'
             ),
             'filters' => array(
-                'Wms\Admin\User\Filter\OnlyOwnEntitiesFilter' => 'Wms\Admin\User\Filter\OnlyOwnEntitiesFilterParameterProvider'
-            )
+                'Wms\Admin\User\Filter\PersonalEntitiesFilter' => 'Wms\Admin\User\Filter\PersonalEntitiesFilterParams'
+            ),
         );
 //        $dummyOptions = array(
 //            'entityName' => 'Wms\Admin\Shop\Entity\Product',
@@ -43,7 +43,7 @@ class ModuleOptionsFactory implements FactoryInterface
 //                    'parameter' => 'value',
 //                )
 //            )
-//        );
+////        );
         return new ModuleOptions($dummyOptions);
     }
 }
