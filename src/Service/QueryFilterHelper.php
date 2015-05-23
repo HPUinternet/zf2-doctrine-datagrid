@@ -28,11 +28,23 @@ class QueryFilterHelper {
         $this->loadFilters = $filters;
     }
 
+    /**
+     * Loads the filters using the loadFilters method and returns the filtered
+     * doctrine EntityManger
+     *
+     * @return EntityManager
+     */
     public function getFilteredEntityManager() {
         $this->loadFilters($this->loadFilters);
         return $this->entityManager;
     }
 
+    /**
+     * Let the filterhelper configure the doctrine filters and
+     * pass the appropriate parameters.
+     *
+     * @param $filters
+     */
     public function loadFilters($filters) {
         $config = $this->entityManager->getConfiguration();
         foreach($filters as $filterNamespace => $properties) {
@@ -57,6 +69,13 @@ class QueryFilterHelper {
         }
     }
 
+    /**
+     * Filters need a name, this is a simple way of generating a name
+     * that makes more sense than "filter1" or "filterB"
+     *
+     * @param $filterNamespace
+     * @return string
+     */
     private function generateFilterName($filterNamespace) {
         $nameSpaceSegments = explode('\\', $filterNamespace);
 

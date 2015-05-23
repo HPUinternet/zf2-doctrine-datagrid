@@ -55,8 +55,6 @@ class QueryBuilderHelper
     ) {
         $this->sourceEntityName = $sourceEntityName;
         $this->entityManager = $entityManager;
-//        $this->entityManager->getConfiguration()->addFilter('myFilter', '\Wms\Admin\DataGrid\Filter\MyLocaleFilter');
-//        $this->entityManager->getFilters()->enable('myFilter');
 
         $this->queryBuilder = $entityManager->getRepository($sourceEntityName)->createQueryBuilder($this->getEntityShortName($sourceEntityName));
         $this->entityMetadataHelper = $entityMetadataHelper;
