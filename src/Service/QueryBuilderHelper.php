@@ -181,12 +181,13 @@ class QueryBuilderHelper
         return $resultSet;
     }
 
-    public function orderBy($column, $order) {
+    public function orderBy($column, $order)
+    {
         $column = str_replace(".", "", $column);
         $selects = $this->queryBuilder->getDQLPart('select');
-        foreach($selects as $select) {
+        foreach ($selects as $select) {
             $selectSegments = explode(" ", $select);
-            if($selectSegments[count($selectSegments)-1] == $column) {
+            if ($selectSegments[count($selectSegments) - 1] == $column) {
                 $this->queryBuilder->orderBy($selectSegments[0], $order);
             }
         }
@@ -216,57 +217,13 @@ class QueryBuilderHelper
     public function refreshColumns($prohibitedColumns)
     {
         $this->prohibitedColumns = $prohibitedColumns;
-        $this->setAvailableTableColumns($this->resolveAvailableTableColumns());
+        $this->setAvailableTableColumns(
+            $this->entityMetadataHelper->resolveAvailableTableColumns($this->sourceEntityName, $this->prohibitedColumns)
+        );
 
         return $this;
     }
 
-    /**
-     * Resolve the available columns based on the configured entity.
-     * Will also resolve the available columns for the associated properties
-     *
-     * @return array
-     * @throws \Exception
-     */
-    protected function resolveAvailableTableColumns()
-    {
-        $entityProperties = $this->entityMetadataHelper->parseMetaDataToFieldArray(
-            $this->entityMetadataHelper->getMetaData($this->sourceEntityName)
-        );
-
-        $returnData = array();
-        foreach ($entityProperties as $property) {
-            if (in_array($property['fieldName'], $this->prohibitedColumns)) {
-                continue;
-            }
-
-            if ($property['type'] != "association") {
-                $returnData[] = $property['fieldName'];
-                continue;
-            }
-
-            if (!isset($property['targetEntity'])) {
-                throw new \Exception(
-                    sprintf('%s is configured as a association, but no target Entity found', $property['fieldName'])
-                );
-            }
-
-            $targetEntity = $property['targetEntity'];
-            $targetEntityProperties = $this->entityMetadataHelper->parseMetaDataToFieldArray(
-                $this->entityMetadataHelper->getMetaData($targetEntity)
-            );
-
-            foreach ($targetEntityProperties as $targetEntityProperty) {
-                if ($targetEntityProperty['type'] !== "association" && !array_search($targetEntityProperty,
-                        $this->prohibitedColumns)
-                ) {
-                    $returnData[] = $property['fieldName'] . '.' . $targetEntityProperty['fieldName'];
-                }
-            }
-        }
-
-        return $returnData;
-    }
 
     /**
      * @return string

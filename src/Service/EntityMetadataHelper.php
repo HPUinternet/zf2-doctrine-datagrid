@@ -92,6 +92,53 @@ class EntityMetadataHelper
 
         return $columns;
     }
+
+    /**
+     * Resolve the available columns based on the configured entity.
+     * Will also resolve the available columns for the associated properties
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function resolveAvailableTableColumns($entityName, $prohibitedColumns = array())
+    {
+        $entityProperties = $this->parseMetaDataToFieldArray(
+            $this->getMetaData($entityName)
+        );
+
+        $returnData = array();
+        foreach ($entityProperties as $property) {
+            if (in_array($property['fieldName'], $prohibitedColumns)) {
+                continue;
+            }
+
+            if ($property['type'] != "association") {
+                $returnData[] = $property['fieldName'];
+                continue;
+            }
+
+            if (!isset($property['targetEntity'])) {
+                throw new \Exception(
+                    sprintf('%s is configured as a association, but no target Entity found', $property['fieldName'])
+                );
+            }
+
+            $targetEntity = $property['targetEntity'];
+            $targetEntityProperties = $this->parseMetaDataToFieldArray(
+                $this->getMetaData($targetEntity)
+            );
+
+            foreach ($targetEntityProperties as $targetEntityProperty) {
+                if ($targetEntityProperty['type'] !== "association"
+                    && !array_search($targetEntityProperty, $prohibitedColumns)
+                ) {
+                    $returnData[] = $property['fieldName'] . '.' . $targetEntityProperty['fieldName'];
+                }
+            }
+        }
+
+        return $returnData;
+    }
     #endregion
 
     #region GETTERS & SETTERS
