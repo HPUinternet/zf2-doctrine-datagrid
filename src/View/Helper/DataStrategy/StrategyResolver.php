@@ -42,13 +42,7 @@ class StrategyResolver
             return $this->di->get($strategy);
         }
 
-        // 3. Resolving using an event, calling the ones who can parse and taking the first one
-        $strategy = $this->eventResolve($data, $propertyName);
-        if ($strategy) {
-            return $this->di->get($strategy);
-        }
-
-        // 4. Resolving using the string strategy:  no-one beats a plain old echo statement
+        // 3. Resolving using the string strategy:  no-one beats a plain old echo statement
         return $this->di->get('Wms\Admin\DataGrid\View\Helper\DataStrategy\StringStrategy');
     }
 
@@ -86,21 +80,6 @@ class StrategyResolver
     public function getConfiguredStrategy($propertyName)
     {
         // @todo: implement me, find the strategy using array_key_exists
-        return false;
-    }
-
-    /**
-     * Resolve a strategy by triggering an event in the application, calling all registered parsing strategies
-     *
-     * @param $data
-     * @param $propertyName
-     * @return bool
-     */
-    public function eventResolve($data, $propertyName)
-    {
-        /* @todo: implement me, find the strategy by calling all listeners for a method called canParse($value)
-         * The strategies shall return true if they are able to parse the data, the resolver will then use this strategy
-         */
         return false;
     }
 
