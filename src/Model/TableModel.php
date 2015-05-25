@@ -18,6 +18,11 @@ class TableModel
     protected $availableHeaders;
 
     /**
+     * @var Array
+     */
+    protected $dataTypes;
+
+    /**
      * @var int
      */
     protected $pageNumber;
@@ -231,6 +236,22 @@ class TableModel
     public function setMaxPageNumber($maxPageNumber)
     {
         $this->maxPageNumber = $maxPageNumber;
+    }
+
+    /**
+     * @return Array
+     */
+    public function getDataTypes()
+    {
+        return $this->dataTypes;
+    }
+
+    /**
+     * @param Array $dataTypes
+     */
+    public function setDataTypes($dataTypes)
+    {
+        $this->dataTypes = $dataTypes;
     }
 
 }

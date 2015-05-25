@@ -9,7 +9,6 @@
  */
 
 use Doctrine\ORM\EntityManager;
-use Zend\EventManager\EventManagerInterface;
 
 class QueryFilterHelper {
 

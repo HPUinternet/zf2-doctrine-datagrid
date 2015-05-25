@@ -28,9 +28,10 @@ return array(
         'invokables' => array(
             'DataGridTable' => 'Wms\Admin\DataGrid\View\Helper\DataGridTable',
             'UrlWithQuery' => 'Wms\Admin\DataGrid\View\Helper\UrlWithQuery',
-            'DataGridForm' => 'Wms\Admin\DataGrid\View\Helper\Form',
-            'DataGridFormRow' => 'Wms\Admin\DataGrid\View\Helper\FormRow',
-            'DataGridFormCollection' => 'Wms\Admin\DataGrid\View\Helper\FormCollection',
+            'DataGridForm' => 'Wms\Admin\DataGrid\View\Form\Form',
+            'DataGridFormRow' => 'Wms\Admin\DataGrid\View\Form\FormRow',
+            'DataGridFormCollection' => 'Wms\Admin\DataGrid\View\Form\FormCollection',
+            'DataGridNestedFormCollection' => 'Wms\Admin\DataGrid\View\Form\NestedFormCollection',
         ),
     ),
     'router' => array(

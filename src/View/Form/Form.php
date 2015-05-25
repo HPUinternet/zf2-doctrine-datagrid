@@ -1,4 +1,4 @@
-<?php namespace Wms\Admin\DataGrid\View\Helper;
+<?php namespace Wms\Admin\DataGrid\View\Form;
 
 use Zend\Form\Fieldset;
 use Zend\Form\FieldsetInterface;
@@ -28,8 +28,14 @@ class Form extends BaseFormHelper
         $tabHeading = '<ul class="nav nav-tabs">';
         foreach ($form as $element) {
             if ($element instanceof FieldsetInterface) {
-                $tabHeading .= sprintf('<li><a href="#%sTab" data-toggle="tab">%s</a></li>', $element->getName(),
-                    $element->getName());
+                $tabHeading .= sprintf('<li><a href="#%sTab" data-toggle="tab">%s</a></li>',
+                    $element->getName(),
+                    $element->getName()
+                );
+                if($element instanceof NestedFieldsetInterface) {
+                    $formContent .= $this->getView()->DataGridNestedFormCollection($element);
+                    continue;
+                }
                 $formContent .= $this->getView()->DataGridFormCollection($element);
             }
         }

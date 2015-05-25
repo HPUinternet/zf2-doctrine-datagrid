@@ -93,7 +93,6 @@ class StrategyResolver
     public function resolveAndParse($data, $propertyName = null)
     {
         $strategy = $this->resolve($data, $propertyName);
-
         return $strategy->parse($data);
     }
 

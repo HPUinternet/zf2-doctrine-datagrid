@@ -1,4 +1,4 @@
-<?php namespace Wms\Admin\DataGrid\View\Helper;
+<?php namespace Wms\Admin\DataGrid\View\Form;
 
 use Zend\Form\ElementInterface;
 use Zend\Form\View\Helper\FormCollection as BaseFormCollectionHelper;

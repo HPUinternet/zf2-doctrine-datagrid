@@ -15,7 +15,7 @@ class EntityMetadataHelper
     /**
      * @var Array
      */
-    private $metaData;
+    private $entityMetadata;
 
     /**
      * @var EntityManager
@@ -25,7 +25,7 @@ class EntityMetadataHelper
     public function __construct(EntityManager $entityManager)
     {
         $this->setEntityManger($entityManager);
-        $this->metaData = array();
+        $this->entityMetadata = array();
     }
 
     #region SERVICE INTERACTIONS
@@ -34,18 +34,19 @@ class EntityMetadataHelper
      * Get EntityMapping by entityName
      *
      * @param $entityName
-     * @return ClassMetadata|bool
+     * @param bool $addIfNotExistent
+     * @return bool|ClassMetadata
      */
-    public function getMetaData($entityName, $addIfNotExistent = true)
+    public function getEntityMetadata($entityName, $addIfNotExistent = true)
     {
-        if (!array_key_exists($entityName, $this->metaData)) {
+        if (!array_key_exists($entityName, $this->entityMetadata)) {
             if (!$addIfNotExistent) {
                 return false;
             }
-            $this->addMetadata($entityName);
+            $this->addEntityMetadata($entityName);
         }
 
-        return $this->metaData[$entityName];
+        return $this->entityMetadata[$entityName];
     }
 
     /**
@@ -55,19 +56,19 @@ class EntityMetadataHelper
      * @param null $mappingData
      * @return $this
      */
-    public function addMetadata($entityName, $mappingData = null)
+    public function addEntityMetadata($entityName, $mappingData = null)
     {
         if (is_null($mappingData)) {
             $mappingData = $this->getEntityManger()->getClassMetadata($entityName);
         }
 
-        $this->metaData[$entityName] = $mappingData;
+        $this->entityMetadata[$entityName] = $mappingData;
 
         return $this;
     }
 
     /**
-     * Transform a class metaData object to a more user-friendly array
+     * Transform a class entityMetadata object to a more user-friendly array
      *
      * @param ClassMetadata $metaData
      * @return array
@@ -97,23 +98,26 @@ class EntityMetadataHelper
      * Resolve the available columns based on the configured entity.
      * Will also resolve the available columns for the associated properties
      *
+     * @param $entityName
+     * @param array $prohibitedColumns
      * @return array
      * @throws \Exception
      */
     public function resolveAvailableTableColumns($entityName, $prohibitedColumns = array())
     {
         $entityProperties = $this->parseMetaDataToFieldArray(
-            $this->getMetaData($entityName)
+            $this->getEntityMetadata($entityName)
         );
 
         $returnData = array();
         foreach ($entityProperties as $property) {
-            if (in_array($property['fieldName'], $prohibitedColumns)) {
+            $fieldName = $property['fieldName'];
+            if (in_array($fieldName, $prohibitedColumns) || empty($fieldName)) {
                 continue;
             }
 
             if ($property['type'] != "association") {
-                $returnData[] = $property['fieldName'];
+                $returnData[$fieldName] = $property['type'];
                 continue;
             }
 
@@ -125,14 +129,14 @@ class EntityMetadataHelper
 
             $targetEntity = $property['targetEntity'];
             $targetEntityProperties = $this->parseMetaDataToFieldArray(
-                $this->getMetaData($targetEntity)
+                $this->getEntityMetadata($targetEntity)
             );
 
             foreach ($targetEntityProperties as $targetEntityProperty) {
                 if ($targetEntityProperty['type'] !== "association"
                     && !array_search($targetEntityProperty, $prohibitedColumns)
                 ) {
-                    $returnData[] = $property['fieldName'] . '.' . $targetEntityProperty['fieldName'];
+                    $returnData[$fieldName . '.' . $targetEntityProperty['fieldName']] = $targetEntityProperty['type'];
                 }
             }
         }

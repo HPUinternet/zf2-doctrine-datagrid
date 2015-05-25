@@ -73,7 +73,7 @@ class QueryBuilderHelper
         $this->queryBuilder->resetDQLPart('select');
         $this->queryBuilder->resetDQLPart('join');
 
-        $entityMetaData = $this->entityMetadataHelper->getMetaData($this->sourceEntityName);
+        $entityMetaData = $this->entityMetadataHelper->getEntityMetadata($this->sourceEntityName);
         if (!in_array($entityMetaData->getSingleIdentifierFieldName(), $columns)) {
             $columns[] = $entityMetaData->getSingleIdentifierFieldName();
         }
@@ -160,7 +160,7 @@ class QueryBuilderHelper
 
         // Retrieve data from the primary query and re-order the array keys so they can be accessed more easily
         $result = $this->queryBuilder->getQuery()->execute();
-        $primaryKey = $this->entityMetadataHelper->getMetaData($this->sourceEntityName)->getSingleIdentifierFieldName();
+        $primaryKey = $this->entityMetadataHelper->getEntityMetadata($this->sourceEntityName)->getSingleIdentifierFieldName();
         foreach ($result as $key => $data) {
             $resultSet[$data[$primaryKey]] = $data;
         }
@@ -199,7 +199,7 @@ class QueryBuilderHelper
     {
         // Play nice with the filters and create a separate query to get the result count
         $query = clone $this->queryBuilder;
-        $entityMetaData = $this->entityMetadataHelper->getMetaData($this->sourceEntityName);
+        $entityMetaData = $this->entityMetadataHelper->getEntityMetadata($this->sourceEntityName);
 
         $query->resetDQLParts(array('select', 'join', 'orderBy'));
         $query->setFirstResult(0);
@@ -217,9 +217,8 @@ class QueryBuilderHelper
     public function refreshColumns($prohibitedColumns)
     {
         $this->prohibitedColumns = $prohibitedColumns;
-        $this->setAvailableTableColumns(
-            $this->entityMetadataHelper->resolveAvailableTableColumns($this->sourceEntityName, $this->prohibitedColumns)
-        );
+        $this->availableTableColumns =
+        $this->entityMetadataHelper->resolveAvailableTableColumns($this->sourceEntityName, $this->prohibitedColumns);
 
         return $this;
     }
@@ -276,7 +275,7 @@ class QueryBuilderHelper
     {
         // Get additional information about the association
         $sourceEntityName = $this->sourceEntityName;
-        $sourceEntityMetadata = $this->entityMetadataHelper->getMetaData($sourceEntityName);
+        $sourceEntityMetadata = $this->entityMetadataHelper->getEntityMetadata($sourceEntityName);
         $associationMapping = $sourceEntityMetadata->getAssociationMapping($sourceFieldName);
         if (empty($associationMapping)) {
             throw new \Exception(
@@ -368,16 +367,13 @@ class QueryBuilderHelper
      */
     public function getAvailableTableColumns()
     {
-        return $this->availableTableColumns;
+        return array_keys($this->availableTableColumns);
     }
 
     /**
-     * @param Array $availableTableColumns
+     * @return Array
      */
-    public function setAvailableTableColumns($availableTableColumns)
-    {
-        $this->availableTableColumns = $availableTableColumns;
+    public function getTableColumnTypes() {
+        return $this->availableTableColumns;
     }
-
-
 }

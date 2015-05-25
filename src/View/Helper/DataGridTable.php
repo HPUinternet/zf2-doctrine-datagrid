@@ -126,7 +126,7 @@ class DataGridTable extends AbstractHelper
         if (!in_array('columnsForm', $this->displaySettings)) {
             return;
         }
-        $this->settingsForm->add(New FilterSettingsFieldset());
+        $this->settingsForm->add(New FilterSettingsFieldset($this->tableModel));
     }
 
     public function printPagination()

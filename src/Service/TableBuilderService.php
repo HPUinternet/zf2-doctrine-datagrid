@@ -45,6 +45,7 @@ class TableBuilderService
 
         $table->setAvailableHeaders($this->queryBuilder->getAvailableTableColumns());
         $table->setUsedHeaders($table->calculateTableHeader($this->queryBuilder->getSelectedTableColumns()));
+        $table->setDataTypes($this->queryBuilder->getTableColumnTypes());
         $table->setAndParseRows($this->queryBuilder->getResultSet());
         $table->setPageNumber($this->page);
         $table->setMaxPageNumber($this->calculateMaxPages());
