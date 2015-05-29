@@ -6,7 +6,8 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 
 class EntityMetadataHelperFactory implements FactoryInterface
 {
-    public function createService(ServiceLocatorInterface $serviceLocator) {
+    public function createService(ServiceLocatorInterface $serviceLocator)
+    {
         return new EntityMetadataHelper($serviceLocator->get('Doctrine\ORM\EntityManager'));
     }
 }

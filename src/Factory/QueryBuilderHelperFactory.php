@@ -6,7 +6,8 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 
 class QueryBuilderHelperFactory implements FactoryInterface
 {
-    public function createService(ServiceLocatorInterface $serviceLocator) {
+    public function createService(ServiceLocatorInterface $serviceLocator)
+    {
         return new QueryBuilderHelper(
             $serviceLocator->get('Wms\Admin\DataGrid\Options\ModuleOptions')->getEntityName(),
             $serviceLocator->get('Wms\Admin\DataGrid\Service\QueryFilterHelper')->getFilteredEntityManager(),

@@ -118,7 +118,7 @@ class StrategyResolver
             if ($strategy instanceof DataStrategyFilterInterface) {
                 return $strategy->showFilter($elementName);
             }
-        } catch(ClassNotFoundException $ex) {
+        } catch (ClassNotFoundException $ex) {
             return $this->defaultStrategy->showFilter($elementName);
         }
         return $this->defaultStrategy->showFilter($elementName);
@@ -153,5 +153,4 @@ class StrategyResolver
     {
         $this->di = $di;
     }
-
 }

@@ -152,7 +152,7 @@ class TableModel
 
     public function getDataTypeByHeader($headerName)
     {
-        if(array_key_exists($headerName, $this->dataTypes)) {
+        if (array_key_exists($headerName, $this->dataTypes)) {
             return $this->dataTypes[$headerName];
         }
 
@@ -266,5 +266,4 @@ class TableModel
     {
         $this->dataTypes = $dataTypes;
     }
-
 }

@@ -2,6 +2,6 @@
 
 use Zend\Form\FieldsetInterface;
 
-interface NestedFieldsetInterface extends FieldsetInterface {
-
+interface NestedFieldsetInterface extends FieldsetInterface
+{
 }

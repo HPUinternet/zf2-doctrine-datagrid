@@ -122,7 +122,7 @@ class DataGridTable extends AbstractHelper
         if (!in_array('columnsForm', $this->displaySettings)) {
             return;
         }
-        $this->settingsForm->add(New ColumnSettingsFieldset($this->tableModel));
+        $this->settingsForm->add(new ColumnSettingsFieldset($this->tableModel));
     }
 
     public function prepareFilterSettings()
@@ -130,7 +130,7 @@ class DataGridTable extends AbstractHelper
         if (!in_array('advancedSearch', $this->displaySettings)) {
             return;
         }
-        $this->settingsForm->add(New FilterSettingsFieldset($this->tableModel));
+        $this->settingsForm->add(new FilterSettingsFieldset($this->tableModel));
     }
 
     public function printTableFilterRow()
@@ -156,7 +156,6 @@ class DataGridTable extends AbstractHelper
 
             $element = $this->dataStrategyResolver->displayFilterForDataType($tableHeader, $dataType);
             if ($element instanceof Element) {
-
                 echo $this->getView()->formElement($element);
             } else {
                 echo $element;
@@ -165,7 +164,6 @@ class DataGridTable extends AbstractHelper
         }
         echo '</tr>';
         echo '</thead>';
-
     }
 
     public function printPagination()
@@ -194,7 +192,6 @@ class DataGridTable extends AbstractHelper
         );
 
         echo '</ul></nav>';
-
     }
 
     protected function printOrderOption($columName)

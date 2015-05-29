@@ -22,7 +22,7 @@ class FilterSettingsFieldset extends Fieldset implements NestedFieldsetInterface
         // @todo (re)add the used filters right here
         $this->add(new Fieldset('Active Criteria'));
 
-        if(!empty($dataTypes)) {
+        if (!empty($dataTypes)) {
             $this->addFilterableProperties($dataTypes);
         }
     }
@@ -38,9 +38,10 @@ class FilterSettingsFieldset extends Fieldset implements NestedFieldsetInterface
         return array();
     }
 
-    private function addFilterableProperties(array $tableHeadings) {
+    private function addFilterableProperties(array $tableHeadings)
+    {
         $fieldSet = new Fieldset('Available Criteria');
-        foreach($tableHeadings as $heading => $fieldType) {
+        foreach ($tableHeadings as $heading => $fieldType) {
             $button = new AddFilterButton($heading);
             $button->setLabelOption('additionalLabel', $heading);
             $fieldSet->add($button);

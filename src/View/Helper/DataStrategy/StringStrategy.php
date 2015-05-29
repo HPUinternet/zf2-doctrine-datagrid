@@ -3,13 +3,14 @@
 use Zend\Form\Element\Text;
 use Zend\Form\ElementInterface;
 
-class StringStrategy implements DataStrategyInterface, DataStrategyFilterInterface {
+class StringStrategy implements DataStrategyInterface, DataStrategyFilterInterface
+{
 
     protected $maxLength = 32;
 
     public function parse($data)
     {
-        if(strlen($data) > $this->maxLength) {
+        if (strlen($data) > $this->maxLength) {
             echo sprintf('%s...', mb_substr($data, 0, $this->maxLength));
             return;
         }

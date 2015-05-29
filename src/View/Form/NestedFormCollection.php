@@ -23,7 +23,7 @@ class NestedFormCollection extends BaseFormCollectionHelper
         $this->setWrapper('<div class="col-md-'.$columnSize.'" %4$s>%2$s%1$s%3$s</div>');
 
         $renderData = '';
-        foreach($element as $fieldset) {
+        foreach ($element as $fieldset) {
             $renderData .= $this->render($fieldset);
         }
 

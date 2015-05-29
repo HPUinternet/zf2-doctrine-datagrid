@@ -3,14 +3,16 @@
 use Zend\Form\Element\Select;
 use Zend\Form\ElementInterface;
 
-class ArrayStrategy implements DataStrategyInterface, DataStrategyFilterInterface {
+class ArrayStrategy implements DataStrategyInterface, DataStrategyFilterInterface
+{
 
     /**
      * @var StrategyResolver;
      */
     private $delegator;
 
-    public function __construct(StrategyResolver $delegator) {
+    public function __construct(StrategyResolver $delegator)
+    {
         $this->delegator = $delegator;
     }
 
@@ -33,6 +35,6 @@ class ArrayStrategy implements DataStrategyInterface, DataStrategyFilterInterfac
      */
     public function showFilter($elementName)
     {
-       return new Select($elementName);
+        return new Select($elementName);
     }
 }

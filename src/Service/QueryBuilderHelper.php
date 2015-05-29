@@ -373,7 +373,8 @@ class QueryBuilderHelper
     /**
      * @return Array
      */
-    public function getTableColumnTypes() {
+    public function getTableColumnTypes()
+    {
         return $this->availableTableColumns;
     }
 }

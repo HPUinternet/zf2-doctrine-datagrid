@@ -1,6 +1,7 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper\DataStrategy;
 
-class DoctrineProxyStrategy implements DataStrategyInterface {
+class DoctrineProxyStrategy implements DataStrategyInterface
+{
 
     public function parse($data)
     {

@@ -53,18 +53,21 @@ class TableBuilderService
         return $table;
     }
 
-    public function selectColumns(array $columns) {
+    public function selectColumns(array $columns)
+    {
         $this->queryBuilder->select($columns);
     }
 
-    public function setPage($pageNumber) {
+    public function setPage($pageNumber)
+    {
         $this->page = $pageNumber;
         $this->queryBuilder->limit($pageNumber, $this->getModuleOptions()->getItemsPerPage());
     }
 
-    public function orderBy($column, $order) {
+    public function orderBy($column, $order)
+    {
         // @todo: input valdiation should be handled by zend form
-        if(in_array($column, $this->queryBuilder->getAvailableTableColumns()) && (strtolower($order) == 'asc' || strtolower($order) == 'desc')) {
+        if (in_array($column, $this->queryBuilder->getAvailableTableColumns()) && (strtolower($order) == 'asc' || strtolower($order) == 'desc')) {
             $this->queryBuilder->orderBy($column, $order);
         }
     }
@@ -111,5 +114,4 @@ class TableBuilderService
     {
         $this->queryBuilder = $queryBuilder;
     }
-
 }

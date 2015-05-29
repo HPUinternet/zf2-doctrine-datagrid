@@ -3,8 +3,8 @@
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Wms\Admin\DataGrid\Options\ModuleOptions;
 
-interface FilterParameterProviderInterface {
+interface FilterParameterProviderInterface
+{
 
     public function resolveParameters(ServiceLocatorInterface $serviceLocator);
-
 }

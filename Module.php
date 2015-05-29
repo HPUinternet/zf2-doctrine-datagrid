@@ -1,6 +1,7 @@
 <?php namespace Wms\Admin\DataGrid;
 
-class Module {
+class Module
+{
     public function getAutoloaderConfig()
     {
         return array(

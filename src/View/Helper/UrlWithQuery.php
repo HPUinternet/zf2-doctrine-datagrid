@@ -20,7 +20,7 @@ class UrlWithQuery extends AbstractHelper
             $queryParams[$key] = $value;
         }
 
-        if(empty($queryParams)) {
+        if (empty($queryParams)) {
             return $currentUrl;
         }
 

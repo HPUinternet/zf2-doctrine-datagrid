@@ -4,5 +4,4 @@ class TextStrategy extends StringStrategy implements DataStrategyInterface, Data
 {
 
     protected $maxLength = 64;
-
 }

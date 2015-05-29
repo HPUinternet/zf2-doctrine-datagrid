@@ -1,5 +1,6 @@
 <?php
 namespace Wms\Admin\DataGrid;
+
 return array(
     'service_manager' => array(
         'factories' => array(

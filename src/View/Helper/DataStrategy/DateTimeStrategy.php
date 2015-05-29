@@ -3,7 +3,8 @@
 use IntlDateFormatter;
 use Zend\View\Renderer\RendererInterface as View;
 
-class DateTimeStrategy implements DataStrategyInterface {
+class DateTimeStrategy implements DataStrategyInterface
+{
 
 
     /**
@@ -11,7 +12,8 @@ class DateTimeStrategy implements DataStrategyInterface {
      */
     protected $view = null;
 
-    public function __construct(View $view) {
+    public function __construct(View $view)
+    {
         $this->view = $view;
     }
 

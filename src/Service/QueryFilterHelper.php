@@ -10,7 +10,8 @@
 
 use Doctrine\ORM\EntityManager;
 
-class QueryFilterHelper {
+class QueryFilterHelper
+{
 
     /**
      * @var Array
@@ -22,7 +23,8 @@ class QueryFilterHelper {
      */
     protected $entityManager;
 
-    public function __construct(EntityManager $entityManager, $filters = array()) {
+    public function __construct(EntityManager $entityManager, $filters = array())
+    {
         $this->entityManager = $entityManager;
         $this->loadFilters = $filters;
     }
@@ -33,7 +35,8 @@ class QueryFilterHelper {
      *
      * @return EntityManager
      */
-    public function getFilteredEntityManager() {
+    public function getFilteredEntityManager()
+    {
         $this->loadFilters($this->loadFilters);
         return $this->entityManager;
     }
@@ -44,24 +47,25 @@ class QueryFilterHelper {
      *
      * @param $filters
      */
-    public function loadFilters($filters) {
+    public function loadFilters($filters)
+    {
         $config = $this->entityManager->getConfiguration();
-        foreach($filters as $filterNamespace => $properties) {
-            if(!is_array($properties)) {
+        foreach ($filters as $filterNamespace => $properties) {
+            if (!is_array($properties)) {
                 $filterNamespace = $properties;
             }
 
             $filterAlias = $this->generateFilterName($filterNamespace);
 
-            if(in_array($filterNamespace, $this->entityManager->getFilters()->getEnabledFilters())) {
+            if (in_array($filterNamespace, $this->entityManager->getFilters()->getEnabledFilters())) {
                 continue;
             }
 
             $config->addFilter($filterAlias, $filterNamespace);
             $filter = $this->entityManager->getFilters()->enable($filterAlias);
 
-            if(is_array($properties)) {
-                foreach($properties as $key => $value) {
+            if (is_array($properties)) {
+                foreach ($properties as $key => $value) {
                     $filter->setParameter($key, $value);
                 }
             }
@@ -75,10 +79,10 @@ class QueryFilterHelper {
      * @param $filterNamespace
      * @return string
      */
-    private function generateFilterName($filterNamespace) {
+    private function generateFilterName($filterNamespace)
+    {
         $nameSpaceSegments = explode('\\', $filterNamespace);
 
         return strtoupper(end($nameSpaceSegments));
     }
-
 }

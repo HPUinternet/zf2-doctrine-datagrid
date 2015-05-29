@@ -20,15 +20,15 @@ class DataGridController extends AbstractActionController
 
     public function indexAction()
     {
-        if($this->params()->fromQuery('columns')) {
+        if ($this->params()->fromQuery('columns')) {
             $this->tableBuilderService->selectColumns($this->params()->fromQuery('columns'));
         }
 
-        if($this->params()->fromQuery('page')) {
+        if ($this->params()->fromQuery('page')) {
             $this->tableBuilderService->setPage($this->params()->fromQuery('page'));
         }
 
-        if($this->params()->fromQuery('sort') && $this->params()->fromQuery('order')) {
+        if ($this->params()->fromQuery('sort') && $this->params()->fromQuery('order')) {
             $this->tableBuilderService->orderBy(
                 $this->params()->fromQuery('sort'),
                 $this->params()->fromQuery('order')
@@ -38,7 +38,7 @@ class DataGridController extends AbstractActionController
         return new ViewModel(array('tableData' => $this->tableBuilderService->getTable()));
     }
 
-    public function deleteSelectedEntities() {
-
+    public function deleteSelectedEntities()
+    {
     }
 }

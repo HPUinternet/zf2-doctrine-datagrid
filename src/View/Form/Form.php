@@ -32,7 +32,7 @@ class Form extends BaseFormHelper
                     str_replace(" ", "_", $element->getName()),
                     $element->getName()
                 );
-                if($element instanceof NestedFieldsetInterface) {
+                if ($element instanceof NestedFieldsetInterface) {
                     $formContent .= $this->getView()->DataGridNestedFormCollection($element);
                     continue;
                 }
@@ -60,5 +60,4 @@ class Form extends BaseFormHelper
 
         return $defaultValue;
     }
-
 }
