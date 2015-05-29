@@ -17,8 +17,7 @@
         "email": "service@hpu.nl"
     },
     "require": {
-        "hpu/wms-admin-base": "~0",
-        "zf-commons/zfc-twig": "~1"
+        "hpu/wms-admin-base": "~0"
     },
     "repositories": [
         {

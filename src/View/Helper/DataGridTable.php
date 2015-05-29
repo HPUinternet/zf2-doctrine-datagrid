@@ -176,7 +176,8 @@ class DataGridTable extends AbstractHelper
         $currentPage = $this->getTableModel()->getPageNumber();
 
         echo '<nav class="text-center"><ul class="pagination">';
-        echo sprintf('<li class="%s"><a href="%s" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>',
+        echo sprintf(
+            '<li class="%s"><a href="%s" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>',
             $currentPage <= 1 ? 'disabled' : '',
             $this->getView()->UrlWithQuery(array('page' => ($currentPage - 1)))
         );
@@ -186,7 +187,8 @@ class DataGridTable extends AbstractHelper
             echo sprintf('<a href="%s">%d</a></li>', $this->getView()->UrlWithQuery(array('page' => $i)), $i);
         }
 
-        echo sprintf('<li class="%s"><a href="%s" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>',
+        echo sprintf(
+            '<li class="%s"><a href="%s" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>',
             $currentPage >= $maxPages ? 'disabled' : '',
             $this->getView()->UrlWithQuery(array('page' => ($currentPage + 1)))
         );
@@ -199,8 +201,8 @@ class DataGridTable extends AbstractHelper
         $sortDownUrl = $this->getView()->UrlWithQuery(array('sort' => $columName, 'order' => 'desc'));
         $sortUpUrl = $this->getView()->UrlWithQuery(array('sort' => $columName, 'order' => 'asc'));
         echo '<span class="pull-right">';
-        echo "<a href=\"$sortDownUrl\" class=\"tabelHeadOpties\"><i class=\"glyphicon glyphicon-chevron-down\"></i></a>";
-        echo "<a href=\"$sortUpUrl\" class=\"tabelHeadOpties\"><i class=\"glyphicon glyphicon-chevron-up\"></i></a>";
+        echo '<a href="'.$sortDownUrl.'" class="tabelHeadOpties"><i class="glyphicon glyphicon-chevron-down"></i></a>';
+        echo '<a href="'.$sortUpUrl.'" class="tabelHeadOpties"><i class="glyphicon glyphicon-chevron-up"></i></a>';
         echo '</span>';
     }
 

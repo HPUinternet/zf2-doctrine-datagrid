@@ -21,7 +21,9 @@ class FormRow extends BaseFormRowHelper
         }
 
         if ($element instanceof AddFilterButton && $element->hasLabelOption('additionalLabel')) {
-            $wrapper = '<div class="col-md-12"><label><span>' . $element->getLabelOption('additionalLabel') . '</span>%s</label></div>';
+            $wrapper = '<div class="col-md-12"><label><span>';
+            $wrapper .= $element->getLabelOption('additionalLabel');
+            $wrapper .= '</span>%s</label></div>';
         }
 
         return sprintf($wrapper, parent::render($element));

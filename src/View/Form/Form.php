@@ -28,14 +28,17 @@ class Form extends BaseFormHelper
         $tabHeading = '<ul class="nav nav-tabs">';
         foreach ($form as $element) {
             if ($element instanceof FieldsetInterface) {
-                $tabHeading .= sprintf('<li><a href="#%sTab" data-toggle="tab">%s</a></li>',
+                $tabHeading .= sprintf(
+                    '<li><a href="#%sTab" data-toggle="tab">%s</a></li>',
                     str_replace(" ", "_", $element->getName()),
                     $element->getName()
                 );
+
                 if ($element instanceof NestedFieldsetInterface) {
                     $formContent .= $this->getView()->DataGridNestedFormCollection($element);
                     continue;
                 }
+
                 $formContent .= $this->getView()->DataGridFormCollection($element);
             }
         }

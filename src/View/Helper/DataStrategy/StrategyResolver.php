@@ -114,7 +114,9 @@ class StrategyResolver
     public function displayFilterForDataType($elementName, $dataType)
     {
         try {
-            $strategy = $this->di->get('Wms\Admin\DataGrid\View\Helper\DataStrategy\\' . ucfirst($dataType) . 'Strategy');
+            $strategy = $this->di->get(
+                'Wms\Admin\DataGrid\View\Helper\DataStrategy\\' . ucfirst($dataType) . 'Strategy'
+            );
             if ($strategy instanceof DataStrategyFilterInterface) {
                 return $strategy->showFilter($elementName);
             }

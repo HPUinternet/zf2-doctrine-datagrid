@@ -56,7 +56,9 @@ class QueryBuilderHelper
         $this->sourceEntityName = $sourceEntityName;
         $this->entityManager = $entityManager;
 
-        $this->queryBuilder = $entityManager->getRepository($sourceEntityName)->createQueryBuilder($this->getEntityShortName($sourceEntityName));
+        $this->queryBuilder = $entityManager->getRepository($sourceEntityName)->createQueryBuilder(
+            $this->getEntityShortName($sourceEntityName)
+        );
         $this->entityMetadataHelper = $entityMetadataHelper;
     }
 
@@ -103,12 +105,15 @@ class QueryBuilderHelper
                 }
 
                 if (!isset($columnMetadata['joinColumns']) || empty($columnMetadata['joinColumns'])) {
-                    throw new \Exception(sprintf('Can\'t create join query parameters for %s in Entity %s',
-                        $columnMetadata['fieldName'], $entityShortName));
+                    throw new \Exception(sprintf(
+                        'Can\'t create join query parameters for %s in Entity %s',
+                        $columnMetadata['fieldName'], $entityShortName)
+                    );
                 }
 
                 if (!array_key_exists($selectColumn, $joinedProperties)) {
-                    $joinedEntityAlias = $this->getEntityShortName($columnMetadata['targetEntity']) . count($joinedProperties);
+                    $joinedEntityAlias =
+                        $this->getEntityShortName($columnMetadata['targetEntity']). count($joinedProperties);
                     $this->queryBuilder->leftJoin(
                         $entityShortName . '.' . $selectColumn,
                         $joinedEntityAlias
@@ -160,7 +165,8 @@ class QueryBuilderHelper
 
         // Retrieve data from the primary query and re-order the array keys so they can be accessed more easily
         $result = $this->queryBuilder->getQuery()->execute();
-        $primaryKey = $this->entityMetadataHelper->getEntityMetadata($this->sourceEntityName)->getSingleIdentifierFieldName();
+        $primaryKey = $this->entityMetadataHelper->getEntityMetadata($this->sourceEntityName)
+            ->getSingleIdentifierFieldName();
         foreach ($result as $key => $data) {
             $resultSet[$data[$primaryKey]] = $data;
         }
@@ -300,7 +306,8 @@ class QueryBuilderHelper
         // When dealing with many-to-many we can make the assumption that our SourceEntity knows what to bind
         if ($associationType === MetaData::MANY_TO_MANY) {
             // @todo: the code below will break if you have a multi column primary key
-            $identityColumn = $this->getEntityShortName($sourceEntityName) . '.' . $sourceEntityMetadata->getSingleIdentifierFieldName();
+            $identityColumn = $this->getEntityShortName($sourceEntityName)
+                . '.' . $sourceEntityMetadata->getSingleIdentifierFieldName();
             $query->addSelect(sprintf("%s AS association", $identityColumn));
             $query->from($sourceEntityName, $this->getEntityShortName($sourceEntityName));
             $query->innerJoin($this->getEntityShortName($sourceEntityName) . '.' . $sourceFieldName,

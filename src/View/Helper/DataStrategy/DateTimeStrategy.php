@@ -19,7 +19,8 @@ class DateTimeStrategy implements DataStrategyInterface
 
     public function parse($data)
     {
-        echo sprintf('<time datetime="%s">%s</time>',
+        echo sprintf(
+            '<time datetime="%s">%s</time>',
             $data->format('Y-m-d'),
             $this->view->dateFormat(
                 $data,
