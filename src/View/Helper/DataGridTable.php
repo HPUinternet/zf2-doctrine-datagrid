@@ -172,8 +172,8 @@ class DataGridTable extends AbstractHelper
 
             $element = $this->dataStrategyResolver->displayFilterForDataType($tableHeader, $dataType);
             if ($element instanceof Element) {
+                $element = $this->fillElementWithOptions($element, $tableHeader);
                 echo $this->getView()->formElement($element);
-
             } else {
                 echo $element;
             }
@@ -229,8 +229,8 @@ class DataGridTable extends AbstractHelper
         $sortDownUrl = $this->getView()->UrlWithQuery(array('sort' => $columName, 'order' => 'desc'));
         $sortUpUrl = $this->getView()->UrlWithQuery(array('sort' => $columName, 'order' => 'asc'));
         echo '<span class="pull-right">';
-        echo '<a href="'.$sortDownUrl.'" class="tabelHeadOpties"><i class="glyphicon glyphicon-chevron-down"></i></a>';
-        echo '<a href="'.$sortUpUrl.'" class="tabelHeadOpties"><i class="glyphicon glyphicon-chevron-up"></i></a>';
+        echo '<a href="' . $sortDownUrl . '" class="tabelHeadOpties"><i class="glyphicon glyphicon-chevron-down"></i></a>';
+        echo '<a href="' . $sortUpUrl . '" class="tabelHeadOpties"><i class="glyphicon glyphicon-chevron-up"></i></a>';
         echo '</span>';
     }
 
@@ -248,7 +248,7 @@ class DataGridTable extends AbstractHelper
                 continue;
             }
             echo sprintf('<th class="%s">%s', $classes . " " . $column, $column);
-            if($column == $accessor) {
+            if ($column == $accessor) {
                 $this->printOrderOption($column);
             }
             echo '</th>';
@@ -310,6 +310,20 @@ class DataGridTable extends AbstractHelper
             echo '<form method="GET" action="' . $this->getView()->UrlWithQuery(array('page' => 0)) . '">';
         }
         echo sprintf('<table class="%s">', $classes);
+    }
+
+    protected function fillElementWithOptions(Element $element, $fieldName)
+    {
+        return $element;
+
+        $fieldNameParts = explode(".", $fieldName);
+
+        if(isset($this->tableModel->getAvailableFilterValues()[$accessor]) && is_array($this->tableModel->getAvailableFilterValues()[$accessor])) {
+            foreach($this->tableModel->getAvailableFilterValues()[$accessor] as $filterData) {
+                $element->setValueOptions($filterData[$fieldname]);
+            }
+        }
+        return $element;
     }
 
     /**

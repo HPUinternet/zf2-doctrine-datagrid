@@ -20,6 +20,11 @@ class TableModel
     /**
      * @var Array
      */
+    protected $availableFilterValues;
+
+    /**
+     * @var Array
+     */
     protected $dataTypes;
 
     /**
@@ -281,4 +286,21 @@ class TableModel
     {
         $this->dataTypes = $dataTypes;
     }
+
+    /**
+     * @return Array
+     */
+    public function getAvailableFilterValues()
+    {
+        return $this->availableFilterValues;
+    }
+
+    /**
+     * @param Array $availableFilterValues
+     */
+    public function setAvailableFilterValues($availableFilterValues)
+    {
+        $this->availableFilterValues = $availableFilterValues;
+    }
+    
 }

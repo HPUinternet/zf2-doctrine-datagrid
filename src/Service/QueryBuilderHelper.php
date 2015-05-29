@@ -115,14 +115,14 @@ class QueryBuilderHelper
 
                 if (!isset($columnMetadata['joinColumns']) || empty($columnMetadata['joinColumns'])) {
                     throw new \Exception(sprintf(
-                        'Can\'t create join query parameters for %s in Entity %s',
-                        $columnMetadata['fieldName'], $entityShortName)
+                            'Can\'t create join query parameters for %s in Entity %s',
+                            $columnMetadata['fieldName'], $entityShortName)
                     );
                 }
 
                 if (!array_key_exists($selectColumn, $joinedProperties)) {
                     $joinedEntityAlias =
-                        $this->getEntityShortName($columnMetadata['targetEntity']). count($joinedProperties);
+                        $this->getEntityShortName($columnMetadata['targetEntity']) . count($joinedProperties);
                     $this->queryBuilder->leftJoin(
                         $entityShortName . '.' . $selectColumn,
                         $joinedEntityAlias
@@ -252,7 +252,8 @@ class QueryBuilderHelper
     {
         $this->prohibitedColumns = $prohibitedColumns;
         $this->availableTableColumns =
-        $this->entityMetadataHelper->resolveAvailableTableColumns($this->sourceEntityName, $this->prohibitedColumns);
+            $this->entityMetadataHelper->resolveAvailableTableColumns($this->sourceEntityName,
+                $this->prohibitedColumns);
 
         return $this;
     }
@@ -352,8 +353,35 @@ class QueryBuilderHelper
     }
 
     /**
-     * To keep track on the queried columns, this internal method is used to add them to a list
+     * When showing HTML select filters on association fields, all possible data
+     * should be preloaded into the filter fields. Since the QueryBuilderHelper
+     * keeps track on what is joined in a separate query, the QueryBuilderHelper is able to
+     * "eager load" this association data relatively easy.
      *
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function preLoadAllAssociationFields()
+    {
+        $returnData = array();
+        $entityMetadata = $this->entityMetadataHelper->getEntityMetadata($this->sourceEntityName);
+
+        foreach (array_keys($this->subQueries) as $associationField) {
+            $query = $this->entityManager->createQueryBuilder($associationField);
+            $fieldData = $entityMetadata->getAssociationMapping($associationField);
+            $query->from($fieldData['targetEntity'], $associationField);
+
+            foreach ($this->selectedTableColumns[$associationField] as $field) {
+                $query->addSelect(str_replace($associationField, $associationField . '.', $field));
+            }
+
+            $returnData[$associationField] = $query->getQuery()->getResult();
+
+        }
+        return $returnData;
+    }
+
+    /**
+     * To keep track on the queried columns, this internal method is used to add them to a list
      * @param $name
      * @param bool $parent
      */
