@@ -3,6 +3,7 @@
 use DateTime;
 use Zend\Di\Di;
 use Doctrine\ORM\Proxy\Proxy;
+use Zend\Di\Exception\ClassNotFoundException;
 
 class StrategyResolver
 {
@@ -17,10 +18,16 @@ class StrategyResolver
      */
     protected $di;
 
+    /**
+     * @var object
+     */
+    public $defaultStrategy;
+
     public function __construct()
     {
         $this->setDi(new Di());
         $this->addDependency($this, __CLASS__);
+        $this->defaultStrategy = $this->di->get('Wms\Admin\DataGrid\View\Helper\DataStrategy\StringStrategy');
     }
 
     /**
@@ -42,8 +49,8 @@ class StrategyResolver
             return $this->di->get($strategy);
         }
 
-        // 3. Resolving using the string strategy:  no-one beats a plain old echo statement
-        return $this->di->get('Wms\Admin\DataGrid\View\Helper\DataStrategy\StringStrategy');
+        // 3. Resolving using the default strategy;
+        return $this->defaultStrategy;
     }
 
     public function quickResolve($data, $propertyName)
@@ -93,7 +100,28 @@ class StrategyResolver
     public function resolveAndParse($data, $propertyName = null)
     {
         $strategy = $this->resolve($data, $propertyName);
+
         return $strategy->parse($data);
+    }
+
+    /**
+     * Find and resolve the appropriate filter strategy for a dataType
+     *
+     * @param $elementName
+     * @param $dataType
+     * @return string
+     */
+    public function displayFilterForDataType($elementName, $dataType)
+    {
+        try {
+            $strategy = $this->di->get('Wms\Admin\DataGrid\View\Helper\DataStrategy\\' . ucfirst($dataType) . 'Strategy');
+            if ($strategy instanceof DataStrategyFilterInterface) {
+                return $strategy->showFilter($elementName);
+            }
+        } catch(ClassNotFoundException $ex) {
+            return $this->defaultStrategy->showFilter($elementName);
+        }
+        return $this->defaultStrategy->showFilter($elementName);
     }
 
     /**

@@ -1,8 +1,11 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper\DataStrategy;
 
-class StringStrategy implements DataStrategyInterface {
+use Zend\Form\Element\Text;
+use Zend\Form\ElementInterface;
 
-    private $maxLength = 32;
+class StringStrategy implements DataStrategyInterface, DataStrategyFilterInterface {
+
+    protected $maxLength = 32;
 
     public function parse($data)
     {
@@ -11,5 +14,16 @@ class StringStrategy implements DataStrategyInterface {
             return;
         }
         echo $data;
+    }
+
+    /**
+     * returns a input element for the inline filter
+     *
+     * @param $elementName
+     * @return string|ElementInterface
+     */
+    public function showFilter($elementName)
+    {
+        return new Text($elementName);
     }
 }

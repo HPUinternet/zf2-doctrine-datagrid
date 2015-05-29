@@ -1,6 +1,9 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper\DataStrategy;
 
-class ArrayStrategy implements DataStrategyInterface {
+use Zend\Form\Element\Select;
+use Zend\Form\ElementInterface;
+
+class ArrayStrategy implements DataStrategyInterface, DataStrategyFilterInterface {
 
     /**
      * @var StrategyResolver;
@@ -20,5 +23,16 @@ class ArrayStrategy implements DataStrategyInterface {
             echo '</li>';
         }
         echo '</ol>';
+    }
+
+    /**
+     * returns a input element for the inline filter
+     *
+     * @param $elementName
+     * @return string|ElementInterface
+     */
+    public function showFilter($elementName)
+    {
+       return new Select($elementName);
     }
 }

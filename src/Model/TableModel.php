@@ -37,6 +37,9 @@ class TableModel
         $this->rows = array();
         $this->availableHeaders = array();
         $this->usedHeaders = array();
+        $this->dataTypes = array();
+        $this->pageNumber = 1;
+        $this->maxPageNumber = 1;
     }
 
     /**
@@ -102,7 +105,7 @@ class TableModel
             }
 
             if (is_array($value)) {
-                if(isset($value[0]) && is_array($value[0])) {
+                if (isset($value[0]) && is_array($value[0])) {
                     $value = $value[0];
                 }
                 $tableHeaders = array_merge(
@@ -112,6 +115,7 @@ class TableModel
                 continue;
             }
         }
+
         return $tableHeaders;
     }
 
@@ -144,6 +148,15 @@ class TableModel
                 return $resultData;
             }
         }
+    }
+
+    public function getDataTypeByHeader($headerName)
+    {
+        if(array_key_exists($headerName, $this->dataTypes)) {
+            return $this->dataTypes[$headerName];
+        }
+
+        return false;
     }
 
     public function isHiddenColumn($columnName)

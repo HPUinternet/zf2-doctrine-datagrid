@@ -1,6 +1,7 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper;
 
 use Zend\Di\ServiceLocator;
+use Zend\Form\Element;
 use Zend\Form\Form;
 use Zend\View\Helper\AbstractHelper;
 use Wms\Admin\DataGrid\Model\TableModel;
@@ -53,8 +54,10 @@ class DataGridTable extends AbstractHelper
      * @param array $displaySettings
      * @return null|string
      */
-    public function __invoke(TableModel $tableModel, $displaySettings = array('columnsForm', 'pagination', 'ordering', 'simpleSearch', 'advancedSearch'))
-    {
+    public function __invoke(
+        TableModel $tableModel,
+        $displaySettings = array('columnsForm', 'pagination', 'ordering', 'simpleSearch', 'advancedSearch')
+    ) {
         $this->setTableModel($tableModel);
         $this->displaySettings = $displaySettings;
         $this->dataStrategyResolver = new StrategyResolver();
@@ -70,6 +73,7 @@ class DataGridTable extends AbstractHelper
         echo '<div class="datagrid-table col-md-12">';
         $this->printTableStart();
         $this->printTableHeadRow();
+        $this->printTableFilterRow();
         $this->printTableContent();
         $this->printTableEnd();
         echo '</div>';
@@ -129,6 +133,41 @@ class DataGridTable extends AbstractHelper
         $this->settingsForm->add(New FilterSettingsFieldset($this->tableModel));
     }
 
+    public function printTableFilterRow()
+    {
+        if (!in_array('simpleSearch', $this->displaySettings)) {
+            echo '</thead>';
+
+            return;
+        }
+        echo '<tr class="simpleSearch">';
+
+        /**
+         * 1. kijk of er een speciale filter verklaard is voor dat veld, gebruik die
+         * 2. // TODO: kijk of het een doctrine extension is, gebruik die
+         * 3. kijk wat de datatype is, spuug een filter uit aan de hand van de type
+         */
+        foreach ($this->tableModel->getUsedHeaders() as $tableHeader => $accessor) {
+            echo '<td>';
+            $dataType = $this->tableModel->getDataTypeByHeader($tableHeader);
+            if ($tableHeader != $accessor) {
+                $dataType = "Array";
+            }
+
+            $element = $this->dataStrategyResolver->displayFilterForDataType($tableHeader, $dataType);
+            if ($element instanceof Element) {
+
+                echo $this->getView()->formElement($element);
+            } else {
+                echo $element;
+            }
+            echo '</td>';
+        }
+        echo '</tr>';
+        echo '</thead>';
+
+    }
+
     public function printPagination()
     {
         if (!in_array('pagination', $this->displaySettings)) {
@@ -183,7 +222,6 @@ class DataGridTable extends AbstractHelper
             echo '</th>';
         }
         echo '</tr>';
-        echo '</thead>';
     }
 
     protected function printTableContent($tdClass = "kolom")
@@ -214,11 +252,17 @@ class DataGridTable extends AbstractHelper
 
     protected function printTableStart($classes = "table tabelVerkenner table-striped table-hover table-condensed")
     {
+        if (in_array('simpleSearch', $this->displaySettings)) {
+            echo '<form method="GET" action="' . $this->getView()->UrlWithQuery(array('page' => 0)) . '">';
+        }
         echo sprintf('<table class="%s">', $classes);
     }
 
     protected function printTableEnd()
     {
         echo '</table>';
+        if (in_array('simpleSearch', $this->displaySettings)) {
+            echo '</form>';
+        }
     }
 }
