@@ -30,6 +30,10 @@
         }
     ],
     "autoload": {
+        "psr-4": {
+            "Wms\\Admin\\DataGrid\\": "src/",
+            "Wms\\Admin\\DataGrid\\Tests\\": "tests/"
+        },
         "classmap": [
             "./Module.php"
         ]
