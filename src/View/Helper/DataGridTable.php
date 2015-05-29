@@ -40,23 +40,23 @@ class DataGridTable extends AbstractHelper
 
     /**
      * @param TableModel $tableModel
-     * @param array $displaySettings
      */
-    public function setTableModel($tableModel, $displaySettings = array('columnsForm', 'pagination', 'ordering', 'simpleSearch', 'advancedSearch'))
+    public function setTableModel($tableModel)
     {
         $this->tableModel = $tableModel;
-        $this->displaySettings = $displaySettings;
     }
 
     /**
      * Execution of the view helper
      *
      * @param TableModel $tableModel
+     * @param array $displaySettings
      * @return null|string
      */
-    public function __invoke(TableModel $tableModel)
+    public function __invoke(TableModel $tableModel, $displaySettings = array('columnsForm', 'pagination', 'ordering', 'simpleSearch', 'advancedSearch'))
     {
         $this->setTableModel($tableModel);
+        $this->displaySettings = $displaySettings;
         $this->dataStrategyResolver = new StrategyResolver();
         $this->dataStrategyResolver->addDependency($this->getView(), 'Zend\View\Renderer\RendererInterface');
 
