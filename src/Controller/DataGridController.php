@@ -13,11 +13,19 @@ class DataGridController extends AbstractActionController
      */
     protected $tableBuilderService;
 
+    /**
+     * @param TableBuilderService $tableBuilderService
+     */
     public function __construct(TableBuilderService $tableBuilderService)
     {
         $this->tableBuilderService = $tableBuilderService;
     }
 
+    /**
+     * The index page
+     *
+     * @return ViewModel
+     */
     public function indexAction()
     {
         if ($this->params()->fromQuery('columns')) {
@@ -36,9 +44,5 @@ class DataGridController extends AbstractActionController
         }
 
         return new ViewModel(array('tableData' => $this->tableBuilderService->getTable()));
-    }
-
-    public function deleteSelectedEntities()
-    {
     }
 }

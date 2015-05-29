@@ -22,6 +22,9 @@ class EntityMetadataHelper
      */
     private $entityManger;
 
+    /**
+     * @param EntityManager $entityManager
+     */
     public function __construct(EntityManager $entityManager)
     {
         $this->setEntityManger($entityManager);

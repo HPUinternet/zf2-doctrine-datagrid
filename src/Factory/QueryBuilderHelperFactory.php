@@ -6,6 +6,12 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 
 class QueryBuilderHelperFactory implements FactoryInterface
 {
+    /**
+     * Create QueryBuilderHelper
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     * @return QueryBuilderHelper
+     */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
         return new QueryBuilderHelper(

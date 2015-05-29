@@ -12,7 +12,9 @@ class FilterSettingsFieldset extends Fieldset implements NestedFieldsetInterface
      */
     private $tableModel;
 
-
+    /**
+     * @param TableModel $tableModel
+     */
     public function __construct(TableModel $tableModel)
     {
         parent::__construct('Advanced Search');
@@ -38,6 +40,11 @@ class FilterSettingsFieldset extends Fieldset implements NestedFieldsetInterface
         return array();
     }
 
+    /**
+     * Adds available searchFilters as buttons
+     *
+     * @param array $tableHeadings
+     */
     private function addFilterableProperties(array $tableHeadings)
     {
         $fieldSet = new Fieldset('Available Criteria');

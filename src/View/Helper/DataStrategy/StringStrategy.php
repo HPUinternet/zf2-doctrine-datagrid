@@ -8,6 +8,12 @@ class StringStrategy implements DataStrategyInterface, DataStrategyFilterInterfa
 
     protected $maxLength = 32;
 
+    /**
+     * Parse the data to a html representation
+     *
+     * @param $data
+     * @return mixed
+     */
     public function parse($data)
     {
         if (strlen($data) > $this->maxLength) {

@@ -14,7 +14,9 @@ use Zend\Form\View\Helper\Form as BaseFormHelper;
  */
 class Form extends BaseFormHelper
 {
-
+    /**
+     * @inheritdoc
+     */
     public function render(FormInterface $form)
     {
         if (method_exists($form, 'prepare')) {
@@ -53,14 +55,5 @@ class Form extends BaseFormHelper
         }
 
         return $this->openTag($form) . $tabHeading . $formContent . $this->closeTag();
-    }
-
-    private function extractProperty($propertyName, $object, $defaultValue)
-    {
-        if (property_exists($object, $propertyName)) {
-            return $object->$propertyName;
-        }
-
-        return $defaultValue;
     }
 }

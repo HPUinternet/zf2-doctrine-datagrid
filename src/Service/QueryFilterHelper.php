@@ -23,6 +23,10 @@ class QueryFilterHelper
      */
     protected $entityManager;
 
+    /**
+     * @param EntityManager $entityManager
+     * @param array $filters
+     */
     public function __construct(EntityManager $entityManager, $filters = array())
     {
         $this->entityManager = $entityManager;

@@ -6,6 +6,12 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 
 class DataGridControllerFactory implements FactoryInterface
 {
+    /**
+     * Create DataGridController
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     * @return DataGridController
+     */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
         $sl = $serviceLocator->getServiceLocator();

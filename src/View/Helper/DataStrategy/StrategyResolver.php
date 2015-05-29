@@ -23,6 +23,9 @@ class StrategyResolver
      */
     public $defaultStrategy;
 
+    /**
+     * Configures the strategy resolver
+     */
     public function __construct()
     {
         $this->setDi(new Di());
@@ -53,6 +56,13 @@ class StrategyResolver
         return $this->defaultStrategy;
     }
 
+    /**
+     * Quick resolve a datatype by invoking a case - switch statement
+     *
+     * @param $data
+     * @param $propertyName
+     * @return bool|string
+     */
     public function quickResolve($data, $propertyName)
     {
         $strategyPrefix = 'Wms\Admin\DataGrid\View\Helper\DataStrategy\\';

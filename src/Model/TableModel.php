@@ -32,6 +32,9 @@ class TableModel
      */
     protected $maxPageNumber;
 
+    /**
+     * Create a new instance of the TableModel
+     */
     public function __construct()
     {
         $this->rows = array();
@@ -150,6 +153,12 @@ class TableModel
         }
     }
 
+    /**
+     * Resolve a datatype by a configured tableheader
+     *
+     * @param $headerName
+     * @return bool
+     */
     public function getDataTypeByHeader($headerName)
     {
         if (array_key_exists($headerName, $this->dataTypes)) {
@@ -159,6 +168,12 @@ class TableModel
         return false;
     }
 
+    /**
+     * Check if the columnName is configured to be hidden
+     *
+     * @param $columnName
+     * @return bool
+     */
     public function isHiddenColumn($columnName)
     {
         if (array_key_exists($columnName, $this->getUsedHeaders())) {

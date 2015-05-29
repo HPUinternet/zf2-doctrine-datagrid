@@ -6,6 +6,13 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 
 class ModuleOptionsFactory implements FactoryInterface
 {
+    /**
+     * Resolve the datagrid configuration by looking up the configuration
+     * inside a third party module
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     * @return mixed
+     */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
         /* Resolving options based on the route will be implemented later

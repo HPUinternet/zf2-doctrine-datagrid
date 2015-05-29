@@ -47,7 +47,16 @@ class QueryBuilderHelper
      */
     private $entityMetadataHelper;
 
-
+    /**
+     * Create a new instance of the QueryBuilder
+     *
+     * You can optionally retrieve the entityManager from the QueryFilterHelper to assure permanent filters are
+     * configured in the query builder.
+     *
+     * @param $sourceEntityName
+     * @param EntityManager $entityManager
+     * @param EntityMetadataHelper $entityMetadataHelper
+     */
     public function __construct(
         $sourceEntityName,
         EntityManager $entityManager,
@@ -187,6 +196,13 @@ class QueryBuilderHelper
         return $resultSet;
     }
 
+    /**
+     * Add a orderBy clause to the main query
+     *
+     * @param $column
+     * @param $order
+     * @return $this
+     */
     public function orderBy($column, $order)
     {
         $column = str_replace(".", "", $column);
@@ -201,6 +217,12 @@ class QueryBuilderHelper
         return $this;
     }
 
+    /**
+     * Resolve the maximum result count
+     *
+     * @return mixed
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
     public function getMaxResultCount()
     {
         // Play nice with the filters and create a separate query to get the result count
@@ -220,6 +242,12 @@ class QueryBuilderHelper
         return $count;
     }
 
+    /**
+     * Use this method to internally clean up the queryBuilder between each complete call
+     * @param $prohibitedColumns
+     * @return $this
+     * @throws \Exception
+     */
     public function refreshColumns($prohibitedColumns)
     {
         $this->prohibitedColumns = $prohibitedColumns;
@@ -323,6 +351,12 @@ class QueryBuilderHelper
         );
     }
 
+    /**
+     * To keep track on the queried columns, this internal method is used to add them to a list
+     *
+     * @param $name
+     * @param bool $parent
+     */
     private function addToSelectedTableColumns($name, $parent = false)
     {
         $dummyValue = $name;

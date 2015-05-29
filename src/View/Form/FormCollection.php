@@ -8,6 +8,9 @@ class FormCollection extends BaseFormCollectionHelper
 
     protected $defaultElementHelper = 'DataGridFormRow';
 
+    /**
+     * @inheritdoc
+     */
     public function __invoke(ElementInterface $element = null, $wrap = true)
     {
         if (!$element) {

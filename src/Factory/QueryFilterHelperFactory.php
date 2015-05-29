@@ -7,6 +7,13 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 
 class QueryFilterHelperFactory implements FactoryInterface
 {
+    /**
+     * Create QueryFilterHelper
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     * @return QueryFilterHelper
+     * @throws \Exception
+     */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
 

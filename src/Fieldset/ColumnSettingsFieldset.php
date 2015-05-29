@@ -14,6 +14,9 @@ class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInte
      */
     private $tableModel;
 
+    /**
+     * @param TableModel $table
+     */
     public function __construct(TableModel $table)
     {
         parent::__construct('Display');

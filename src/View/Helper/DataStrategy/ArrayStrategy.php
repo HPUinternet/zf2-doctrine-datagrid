@@ -11,11 +11,22 @@ class ArrayStrategy implements DataStrategyInterface, DataStrategyFilterInterfac
      */
     private $delegator;
 
+    /**
+     * Create a new instance of the ArrayStrategy
+     *
+     * @param StrategyResolver $delegator
+     */
     public function __construct(StrategyResolver $delegator)
     {
         $this->delegator = $delegator;
     }
 
+    /**
+     * Parse the data to a html representation
+     *
+     * @param $data
+     * @return mixed
+     */
     public function parse($data)
     {
         echo '<ol>';

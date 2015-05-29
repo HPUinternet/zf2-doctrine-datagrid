@@ -8,6 +8,9 @@ class FormRow extends BaseFormRowHelper
 {
     private $count = 1;
 
+    /**
+     * @inheritdoc
+     */
     public function render(ElementInterface $element)
     {
         $wrapper = '<div class="col-md-12">%s</div>';

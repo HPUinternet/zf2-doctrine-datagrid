@@ -6,6 +6,12 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 
 class TableBuilderServiceFactory implements FactoryInterface
 {
+    /**
+     * Create TableBuilderService
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     * @return TableBuilderService
+     */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
         return new TableBuilderService(

@@ -8,6 +8,15 @@ class NestedFormCollection extends BaseFormCollectionHelper
 
     protected $defaultElementHelper = 'DataGridFormRow';
 
+    /**
+     * Invoke helper as function
+     *
+     * Proxies to {@link render()}.
+     *
+     * @param  ElementInterface|null $element
+     * @param  bool                  $wrap
+     * @return string|FormCollection
+     */
     public function __invoke(ElementInterface $element = null, $wrap = true)
     {
         if (!$element) {
