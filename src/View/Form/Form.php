@@ -29,7 +29,7 @@ class Form extends BaseFormHelper
         foreach ($form as $element) {
             if ($element instanceof FieldsetInterface) {
                 $tabHeading .= sprintf('<li><a href="#%sTab" data-toggle="tab">%s</a></li>',
-                    $element->getName(),
+                    str_replace(" ", "_", $element->getName()),
                     $element->getName()
                 );
                 if($element instanceof NestedFieldsetInterface) {

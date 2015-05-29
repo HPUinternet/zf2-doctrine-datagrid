@@ -15,15 +15,15 @@ class FilterSettingsFieldset extends Fieldset implements NestedFieldsetInterface
 
     public function __construct(TableModel $tableModel)
     {
-        parent::__construct('Filters');
+        parent::__construct('Advanced Search');
         $this->tableModel = $tableModel;
         $dataTypes = $this->tableModel->getDataTypes();
 
         // @todo (re)add the used filters right here
-        $this->add(new Fieldset('Used filters'));
+        $this->add(new Fieldset('Active Criteria'));
 
         if(!empty($dataTypes)) {
-            $this->addFilterableCheckboxes($dataTypes);
+            $this->addFilterableProperties($dataTypes);
         }
     }
 
@@ -38,8 +38,8 @@ class FilterSettingsFieldset extends Fieldset implements NestedFieldsetInterface
         return array();
     }
 
-    private function addFilterableCheckboxes(array $tableHeadings) {
-        $fieldSet = new Fieldset('Available Filters');
+    private function addFilterableProperties(array $tableHeadings) {
+        $fieldSet = new Fieldset('Available Criteria');
         foreach($tableHeadings as $heading => $fieldType) {
             $button = new AddFilterButton($heading);
             $button->setLabelOption('additionalLabel', $heading);

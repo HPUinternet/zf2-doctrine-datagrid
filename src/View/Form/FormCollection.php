@@ -16,7 +16,7 @@ class FormCollection extends BaseFormCollectionHelper
 
         $this->setShouldWrap($wrap);
 
-        $this->setWrapper('<div class="tab-pane" id="' . $element->getName() . 'Tab" %4$s>%2$s%1$s%3$s</div>');
+        $this->setWrapper('<div class="tab-pane" id="' . str_replace(" ", "_", $element->getName()) . 'Tab" %4$s>%2$s%1$s%3$s</div>');
 
         return $this->render($element);
     }

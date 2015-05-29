@@ -42,7 +42,7 @@ class DataGridTable extends AbstractHelper
      * @param TableModel $tableModel
      * @param array $displaySettings
      */
-    public function setTableModel($tableModel, $displaySettings = array('columnsForm', 'pagination', 'ordering'))
+    public function setTableModel($tableModel, $displaySettings = array('columnsForm', 'pagination', 'ordering', 'simpleSearch', 'advancedSearch'))
     {
         $this->tableModel = $tableModel;
         $this->displaySettings = $displaySettings;
@@ -123,7 +123,7 @@ class DataGridTable extends AbstractHelper
 
     public function prepareFilterSettings()
     {
-        if (!in_array('columnsForm', $this->displaySettings)) {
+        if (!in_array('advancedSearch', $this->displaySettings)) {
             return;
         }
         $this->settingsForm->add(New FilterSettingsFieldset($this->tableModel));

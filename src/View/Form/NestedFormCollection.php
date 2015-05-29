@@ -16,7 +16,7 @@ class NestedFormCollection extends BaseFormCollectionHelper
 
         $this->setShouldWrap($wrap);
 
-        $parentWrapStart = '<div class="tab-pane" id="' . $element->getName() . 'Tab">';
+        $parentWrapStart = '<div class="tab-pane" id="' . str_replace(" ", "_", $element->getName()) . 'Tab">';
         $parentWrapEnd = '</div>';
 
         $columnSize = floor(12/count($element));
