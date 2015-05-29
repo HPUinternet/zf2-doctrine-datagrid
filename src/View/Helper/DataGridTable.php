@@ -312,6 +312,12 @@ class DataGridTable extends AbstractHelper
         echo sprintf('<table class="%s">', $classes);
     }
 
+    /**
+     * wip here
+     * @param Element $element
+     * @param $fieldName
+     * @return Element
+     */
     protected function fillElementWithOptions(Element $element, $fieldName)
     {
         return $element;

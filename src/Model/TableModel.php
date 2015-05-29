@@ -302,5 +302,4 @@ class TableModel
     {
         $this->availableFilterValues = $availableFilterValues;
     }
-    
 }
