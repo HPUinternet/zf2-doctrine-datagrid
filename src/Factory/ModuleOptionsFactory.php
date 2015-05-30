@@ -19,7 +19,8 @@ class ModuleOptionsFactory implements FactoryInterface
         $config = $serviceLocator->get('Config');
         $route = $serviceLocator->get('Application')->getMvcEvent()->getRouteMatch()->getMatchedRouteName();
         $module = explode('/', $route)[1];
-        return new ModuleOptions(isset($config['wms-category'][$module]) ? $config['wms-category'][$module] : array()); */
+        return new ModuleOptions(isset($config['wms-category'][$module]) ? $config['wms-category'][$module] : array());
+        */
 
 
         $dummyOptions = array(
