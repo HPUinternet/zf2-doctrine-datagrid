@@ -115,9 +115,10 @@ class QueryBuilderHelper
 
                 if (!isset($columnMetadata['joinColumns']) || empty($columnMetadata['joinColumns'])) {
                     throw new \Exception(sprintf(
-                            'Can\'t create join query parameters for %s in Entity %s',
-                            $columnMetadata['fieldName'], $entityShortName)
-                    );
+                        'Can\'t create join query parameters for %s in Entity %s',
+                        $columnMetadata['fieldName'],
+                        $entityShortName
+                    ));
                 }
 
                 if (!array_key_exists($selectColumn, $joinedProperties)) {
@@ -251,9 +252,10 @@ class QueryBuilderHelper
     public function refreshColumns($prohibitedColumns)
     {
         $this->prohibitedColumns = $prohibitedColumns;
-        $this->availableTableColumns =
-            $this->entityMetadataHelper->resolveAvailableTableColumns($this->sourceEntityName,
-                $this->prohibitedColumns);
+        $this->availableTableColumns = $this->entityMetadataHelper->resolveAvailableTableColumns(
+            $this->sourceEntityName,
+            $this->prohibitedColumns
+        );
 
         return $this;
     }
@@ -287,7 +289,8 @@ class QueryBuilderHelper
         }
 
         $query = $this->subQueries[$sourceFieldName];
-        $query->addSelect(sprintf("%s AS %s",
+        $query->addSelect(sprintf(
+            "%s AS %s",
             $this->getEntityShortName($targetEntityName) . '.' . $targetFieldName,
             $sourceFieldName . $targetFieldName
         ));
@@ -339,8 +342,10 @@ class QueryBuilderHelper
                 . '.' . $sourceEntityMetadata->getSingleIdentifierFieldName();
             $query->addSelect(sprintf("%s AS association", $identityColumn));
             $query->from($sourceEntityName, $this->getEntityShortName($sourceEntityName));
-            $query->innerJoin($this->getEntityShortName($sourceEntityName) . '.' . $sourceFieldName,
-                $this->getEntityShortName($targetEntityName));
+            $query->innerJoin(
+                $this->getEntityShortName($sourceEntityName) . '.' . $sourceFieldName,
+                $this->getEntityShortName($targetEntityName)
+            );
             $query->where(sprintf('%s IN (:resultIds)', $identityColumn));
 
             return $query;
@@ -377,6 +382,7 @@ class QueryBuilderHelper
             $returnData[$associationField] = $query->getQuery()->getResult();
 
         }
+
         return $returnData;
     }
 

@@ -226,11 +226,11 @@ class DataGridTable extends AbstractHelper
             return;
         }
 
-        $sortDownUrl = $this->getView()->UrlWithQuery(array('sort' => $columName, 'order' => 'desc'));
-        $sortUpUrl = $this->getView()->UrlWithQuery(array('sort' => $columName, 'order' => 'asc'));
+        $downUrl = $this->getView()->UrlWithQuery(array('sort' => $columName, 'order' => 'desc'));
+        $upUrl = $this->getView()->UrlWithQuery(array('sort' => $columName, 'order' => 'asc'));
         echo '<span class="pull-right">';
-        echo '<a href="' . $sortDownUrl . '" class="tabelHeadOpties"><i class="glyphicon glyphicon-chevron-down"></i></a>';
-        echo '<a href="' . $sortUpUrl . '" class="tabelHeadOpties"><i class="glyphicon glyphicon-chevron-up"></i></a>';
+        echo '<a href="' . $downUrl . '" class="tabelHeadOpties"><i class="glyphicon glyphicon-chevron-down"></i></a>';
+        echo '<a href="' . $upUrl . '" class="tabelHeadOpties"><i class="glyphicon glyphicon-chevron-up"></i></a>';
         echo '</span>';
     }
 
@@ -324,11 +324,12 @@ class DataGridTable extends AbstractHelper
 
         $fieldNameParts = explode(".", $fieldName);
 
-        if(isset($this->tableModel->getAvailableFilterValues()[$accessor]) && is_array($this->tableModel->getAvailableFilterValues()[$accessor])) {
-            foreach($this->tableModel->getAvailableFilterValues()[$accessor] as $filterData) {
+        if (is_array($this->tableModel->getAvailableFilterValues()[$accessor])) {
+            foreach ($this->tableModel->getAvailableFilterValues()[$accessor] as $filterData) {
                 $element->setValueOptions($filterData[$fieldname]);
             }
         }
+
         return $element;
     }
 

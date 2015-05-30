@@ -4,6 +4,7 @@ build_settings:
   ignore:
     - vendor
     - tests
+    - config
     - autoload_classmap.php
   verbose: false
 setup:

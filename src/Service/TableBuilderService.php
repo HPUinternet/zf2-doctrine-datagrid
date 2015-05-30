@@ -59,7 +59,7 @@ class TableBuilderService
         $table->setDataTypes($this->queryBuilder->getTableColumnTypes());
         $table->setPageNumber($this->page);
         $table->setMaxPageNumber($this->calculateMaxPages());
-        if($this->resolveAssociationColumns) {
+        if ($this->resolveAssociationColumns) {
             $table->setAvailableFilterValues($this->queryBuilder->preLoadAllAssociationFields());
         }
 
@@ -91,7 +91,9 @@ class TableBuilderService
     public function orderBy($column, $order)
     {
         // @todo: input valdiation should be handled by zend form
-        if (in_array($column, $this->queryBuilder->getAvailableTableColumns()) && (strtolower($order) == 'asc' || strtolower($order) == 'desc')) {
+        if (in_array($column, $this->queryBuilder->getAvailableTableColumns())
+            && (strtolower($order) == 'asc' || strtolower($order) == 'desc')
+        ) {
             $this->queryBuilder->orderBy($column, $order);
         }
     }
