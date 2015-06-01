@@ -128,28 +128,6 @@ class TableModel
     }
 
     /**
-     * @param array $queryResults
-     * @return array
-     */
-    public function parseFilterValues(array $queryResults) {
-        $returnData = array();
-        foreach($queryResults as $associationField => $queryResult) {
-            // Create the new structure arrays, so we wont have to deal with an if-statement on every conversion
-            $keys = array_keys($queryResult[0]);
-            foreach($keys as $key) {
-                $returnData[$associationField.'.'.$key] = array();
-            }
-
-            foreach($queryResult as $fieldName => $value) {
-                    // fak.
-                $returnData[$associationField.'.'.$fieldName][] = $value;
-            }
-        }
-
-        return $returnData;
-    }
-
-    /**
      * Extract property from a result array
      *
      * @param $data
@@ -318,11 +296,6 @@ class TableModel
     }
 
     /**
-     * Should be an associative array as the one below:
-     *  array(
-     *      'fieldname.fieldname'  => array( 'value1', 'value2')
-     *      'fieldname.fieldname2' => array ( 'value1, 'value2', etc...)
-     * )
      * @param Array $availableFilterValues
      */
     public function setAvailableFilterValues($availableFilterValues)

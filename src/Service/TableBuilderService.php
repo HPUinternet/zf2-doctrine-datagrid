@@ -60,9 +60,7 @@ class TableBuilderService
         $table->setPageNumber($this->page);
         $table->setMaxPageNumber($this->calculateMaxPages());
         if ($this->resolveAssociationColumns) {
-            $table->setAvailableFilterValues(
-                $table->parseFilterValues($this->queryBuilder->preLoadAllAssociationFields())
-            );
+            $table->setAvailableFilterValues($this->queryBuilder->preLoadAllAssociationFields());
         }
 
         return $table;

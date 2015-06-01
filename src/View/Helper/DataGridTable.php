@@ -313,16 +313,37 @@ class DataGridTable extends AbstractHelper
     }
 
     /**
+     * Fill the filter data
+     *
      * @param Element $element
      * @param $fieldName
      * @return Element
      */
     protected function fillElementWithOptions(Element $element, $fieldName)
     {
-        echo '<pre>';
-        print_r($this->tableModel->getAvailableFilterValues());
-        echo '</pre>';
-        // hier was ik
+        // If the fieldname is not nested, there is no way the joined query returns data for you.
+        $fieldNameSegments = explode(".", $fieldName);
+        if (count($fieldNameSegments) <= 1) {
+            return $element;
+        }
+
+        if (isset($this->tableModel->getAvailableFilterValues()[$fieldNameSegments[0]])) {
+            $valueOptions = array();
+            foreach ($this->tableModel->getAvailableFilterValues()[$fieldNameSegments[0]] as $filterValues) {
+                $key = $fieldNameSegments[1];
+                if (isset($filterValues[$key]) && !in_array($filterValues[$key], $valueOptions)) {
+                    $valueOptions[$filterValues[$fieldNameSegments[1]]] = $filterValues[$fieldNameSegments[1]];
+                }
+            }
+
+            if (method_exists($element, 'setValueOptions') && method_exists($element, 'setEmptyOption')) {
+                $element->setEmptyOption(
+                    $this->getView()->Translate('Select').' '.$this->getView()->Translate($fieldName)
+                );
+                $element->setValueOptions($valueOptions);
+            }
+        }
+
         return $element;
     }
 
