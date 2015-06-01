@@ -313,23 +313,16 @@ class DataGridTable extends AbstractHelper
     }
 
     /**
-     * wip here
      * @param Element $element
      * @param $fieldName
      * @return Element
      */
     protected function fillElementWithOptions(Element $element, $fieldName)
     {
-        return $element;
-
-        $fieldNameParts = explode(".", $fieldName);
-
-        if (is_array($this->tableModel->getAvailableFilterValues()[$accessor])) {
-            foreach ($this->tableModel->getAvailableFilterValues()[$accessor] as $filterData) {
-                $element->setValueOptions($filterData[$fieldname]);
-            }
-        }
-
+        echo '<pre>';
+        print_r($this->tableModel->getAvailableFilterValues());
+        echo '</pre>';
+        // hier was ik
         return $element;
     }
 
