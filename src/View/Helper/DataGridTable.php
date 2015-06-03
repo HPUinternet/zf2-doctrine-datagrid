@@ -8,6 +8,7 @@ use Wms\Admin\DataGrid\Model\TableModel;
 use Wms\Admin\DataGrid\Fieldset\ColumnSettingsFieldset;
 use Wms\Admin\DataGrid\Fieldset\FilterSettingsFieldset;
 use Wms\Admin\DataGrid\View\Helper\DataStrategy\StrategyResolver;
+use Zend\Escaper\Escaper;
 
 class DataGridTable extends AbstractHelper
 {
@@ -30,6 +31,8 @@ class DataGridTable extends AbstractHelper
      * @var Form
      */
     private $settingsForm;
+
+    private $escaper;
 
     /**
      * @return TableModel
@@ -58,19 +61,21 @@ class DataGridTable extends AbstractHelper
         TableModel $tableModel,
         $displaySettings = array('columnsForm', 'pagination', 'ordering', 'simpleSearch', 'advancedSearch')
     ) {
+        $this->escaper = new Escaper('utf-8');
+
         $this->setTableModel($tableModel);
         $this->displaySettings = $displaySettings;
         $this->dataStrategyResolver = new StrategyResolver();
         $this->dataStrategyResolver->addDependency($this->getView(), 'Zend\View\Renderer\RendererInterface');
 
-        echo '<div class="datagrid-before col-md-12">';
+        echo '<div class="datagrid before col-md-12">';
         $this->prepareForm();
         $this->prepareColumnSettings();
         $this->prepareFilterSettings();
         $this->printForm();
         echo '</div>';
 
-        echo '<div class="datagrid-table col-md-12">';
+        echo '<div class="datagrid table col-md-12">';
         $this->printTableStart();
         $this->printTableHeadRow();
         $this->printTableFilterRow();
@@ -78,7 +83,7 @@ class DataGridTable extends AbstractHelper
         $this->printTableEnd();
         echo '</div>';
 
-        echo '<div class="datagrid-after col-md-12">';
+        echo '<div class="datagrid after col-md-12">';
         $this->printPagination();
         echo '</div>';
     }
@@ -179,6 +184,13 @@ class DataGridTable extends AbstractHelper
             }
             echo '</td>';
         }
+        if (in_array('simpleSearch', $this->displaySettings)) {
+            echo '<td>
+                <button type="submit" class="btn btn-primary max-width">
+                    <span class="glyphicon glyphicon-search"></span> Search
+                </button>
+                </td>';
+        }
         echo '</tr>';
         echo '</thead>';
     }
@@ -253,6 +265,9 @@ class DataGridTable extends AbstractHelper
             }
             echo '</th>';
         }
+        if (in_array('simpleSearch', $this->displaySettings)) {
+            echo '<th class="rowOptions">Options</th>';
+        }
         echo '</tr>';
     }
 
@@ -283,6 +298,9 @@ class DataGridTable extends AbstractHelper
             }
             $this->printTableContentCell($cellValue, $cellName);
         }
+        if (in_array('simpleSearch', $this->displaySettings)) {
+            echo '<td></td>';
+        }
         echo "</tr>";
     }
 
@@ -307,13 +325,13 @@ class DataGridTable extends AbstractHelper
     protected function printTableStart($classes = "table tabelVerkenner table-striped table-hover table-condensed")
     {
         if (in_array('simpleSearch', $this->displaySettings)) {
-            echo '<form method="GET" action="' . $this->getView()->UrlWithQuery(array('page' => 0)) . '">';
+            echo '<form method="GET">';
         }
         echo sprintf('<table class="%s">', $classes);
     }
 
     /**
-     * Fill the filter data
+     * If the TableModel contains FilterData this method can provide the input element with the right optional values
      *
      * @param Element $element
      * @param $fieldName
@@ -338,7 +356,7 @@ class DataGridTable extends AbstractHelper
 
             if (method_exists($element, 'setValueOptions') && method_exists($element, 'setEmptyOption')) {
                 $element->setEmptyOption(
-                    $this->getView()->Translate('Select').' '.$this->getView()->Translate($fieldName)
+                    $this->getView()->Translate('Select') . ' ' . $this->getView()->Translate($fieldName)
                 );
                 $element->setValueOptions($valueOptions);
             }
@@ -353,7 +371,18 @@ class DataGridTable extends AbstractHelper
     protected function printTableEnd()
     {
         echo '</table>';
+        // Any current column settings? pass them in the form
         if (in_array('simpleSearch', $this->displaySettings)) {
+            if(isset($_GET['columns'])) {
+                echo sprintf(
+                    "<input type='hidden' name='columns' value='%s'/>",
+                    $this->escaper->escapeHtmlAttr($_GET['columns'])
+                );
+            }
+            if(isset($_GET['sort']) && isset($_GET['order'])) {
+                echo "<input type='hidden' name='sort' value='".$this->escaper->escapeHtmlAttr($_GET['sort'])."' />";
+                echo "<input type='hidden' name='order' value='".$this->escaper->escapeHtmlAttr($_GET['order'])."' />";
+            }
             echo '</form>';
         }
     }
