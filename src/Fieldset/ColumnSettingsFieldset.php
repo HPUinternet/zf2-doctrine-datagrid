@@ -1,6 +1,7 @@
 <?php namespace Wms\Admin\DataGrid\Fieldset;
 
 use Wms\Admin\DataGrid\Model\TableModel;
+use Zend\Form\Element\MultiCheckbox;
 use Zend\Form\Fieldset;
 use Zend\InputFilter\InputFilterProviderInterface;
 
@@ -51,19 +52,17 @@ class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInte
 
         // Create the actual form element per property
         foreach ($columnGroups as $property => $checkboxValues) {
-            $multiCheckbox = array(
-                'type' => 'Zend\Form\Element\MultiCheckbox',
-                'name' => $this->checkboxName,
-                'options' => array(
-                    'inline' => false,
-                    'value_options' => $checkboxValues
-                )
-            );
-            if (count($checkboxValues) >= 2 ||
-                (count($checkboxValues) == 1 && (strpos($checkboxValues[0]['value'], ".") !== false))) {
-                $multiCheckbox['options']['label'] = $property;
+            $multiCheckbox = new MultiCheckbox($this->checkboxName);
+            $multiCheckbox->setOptions(array('inline' => false, 'value_options' => $checkboxValues));
+            if
+            (
+                (count($checkboxValues) == 1 && (strpos($checkboxValues[0]['value'], ".") !== false))
+                || count($checkboxValues) >= 2
+            ) {
+                $multiCheckbox->setOption('label', $property);
             }
-            $this->add($multiCheckbox);
+            // Dirty hack, because this->add() does not detect element or fieldset naming conflicts
+            $this->iterator->insert($multiCheckbox, 0);
         }
     }
 
