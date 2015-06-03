@@ -54,13 +54,12 @@ class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInte
         foreach ($columnGroups as $property => $checkboxValues) {
             $multiCheckbox = new MultiCheckbox($this->checkboxName);
             $multiCheckbox->setOptions(array('inline' => false, 'value_options' => $checkboxValues));
-            if
-            (
-                (count($checkboxValues) == 1 && (strpos($checkboxValues[0]['value'], ".") !== false))
-                || count($checkboxValues) >= 2
-            ) {
-                $multiCheckbox->setOption('label', $property);
+
+            $isParentField = (strpos($checkboxValues[0]['value'], ".") !== false);
+            if (count($checkboxValues) >= 2 || (count($checkboxValues) == 1 && $isParentField)) {
+                $multiCheckbox->setLabel($property);
             }
+
             // Dirty hack, because this->add() does not detect element or fieldset naming conflicts
             $this->iterator->insert($multiCheckbox, 0);
         }
