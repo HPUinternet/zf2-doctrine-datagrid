@@ -48,6 +48,11 @@ class DataGridController extends AbstractActionController
             );
         }
 
+        if ($this->params()->fromQuery('search')) {
+            $search =  $this->params()->fromQuery('search');
+            $this->tableBuilderService->search($this->isJson($search) ? json_decode($search): $search);
+        }
+
         return new ViewModel(array('tableData' => $this->tableBuilderService->getTable()));
     }
 

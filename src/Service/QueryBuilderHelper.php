@@ -23,6 +23,11 @@ class QueryBuilderHelper
     protected $prohibitedColumns;
 
     /**
+     * @var Boolean
+     */
+    protected $prioritizeSubQueries = false;
+
+    /**
      * @var QueryBuilder
      */
     private $queryBuilder;
@@ -269,6 +274,27 @@ class QueryBuilderHelper
         $nameSpaceSegments = explode('\\', $entityName);
 
         return strtoupper(end($nameSpaceSegments));
+    }
+
+    /**
+     * Add a where clause to the query.
+     * note that: when you are putting a where clause on a column that belongs to a sub query
+     * the property prioritizeSubQueries will be set to true to ensure the where clause is respected
+     *
+     * @see prioritizeSubQueries
+     * @param $fieldName
+     * @param $clause
+     * @return bool|this
+     */
+    public function where($fieldName, $clause, $operator = "LIKE") {
+        if(!array_key_exists($fieldName, $this->availableTableColumns)) {
+            return false;
+        }
+
+        echo '<pre>';
+        print_r($this->selectedTableColumns);
+        echo '</pre>';
+//        die(' heueheu');
     }
 
     /**

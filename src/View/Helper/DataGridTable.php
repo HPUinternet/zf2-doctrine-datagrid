@@ -175,7 +175,7 @@ class DataGridTable extends AbstractHelper
                 $dataType = "Array";
             }
 
-            $element = $this->dataStrategyResolver->displayFilterForDataType($tableHeader, $dataType);
+            $element = $this->dataStrategyResolver->displayFilterForDataType('search['.$tableHeader.']', $dataType);
             if ($element instanceof Element) {
                 $element = $this->fillElementWithOptions($element, $tableHeader);
                 echo $this->getView()->formElement($element);
@@ -374,15 +374,27 @@ class DataGridTable extends AbstractHelper
         // Any current column settings? pass them in the form
         if (in_array('simpleSearch', $this->displaySettings)) {
             if(isset($_GET['columns'])) {
+                $value = $_GET['columns'];
+
+                if(is_array($_GET['columns'])) {
+                    $value = '[';
+                    foreach($_GET['columns'] as $column) {
+                        $value .= '"'.$column.'",';
+                    }
+                    $value = rtrim($value, ",").']';
+                }
+
                 echo sprintf(
                     "<input type='hidden' name='columns' value='%s'/>",
-                    $this->escaper->escapeHtmlAttr($_GET['columns'])
+                    $this->escaper->escapeHtmlAttr($value)
                 );
             }
+
             if(isset($_GET['sort']) && isset($_GET['order'])) {
                 echo "<input type='hidden' name='sort' value='".$this->escaper->escapeHtmlAttr($_GET['sort'])."' />";
                 echo "<input type='hidden' name='order' value='".$this->escaper->escapeHtmlAttr($_GET['order'])."' />";
             }
+
             echo '</form>';
         }
     }

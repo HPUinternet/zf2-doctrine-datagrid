@@ -1,6 +1,5 @@
 <?php namespace Wms\Admin\DataGrid\View\Form;
 
-use Wms\Admin\DataGrid\View\Form\Element\AddFilterButton;
 use Zend\Form\View\Helper\FormRow as BaseFormRowHelper;
 use Zend\Form\ElementInterface;
 
@@ -21,12 +20,6 @@ class FormRow extends BaseFormRowHelper
                 $this->count = 0;
             }
             $this->count = $this->count + 1;
-        }
-
-        if ($element instanceof AddFilterButton && $element->hasLabelOption('additionalLabel')) {
-            $wrapper = '<div class="col-md-12"><label><span>';
-            $wrapper .= $element->getLabelOption('additionalLabel');
-            $wrapper .= '</span>%s</label></div>';
         }
 
         return sprintf($wrapper, parent::render($element));
