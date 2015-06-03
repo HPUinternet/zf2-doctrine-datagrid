@@ -391,8 +391,10 @@ class DataGridTable extends AbstractHelper
             }
 
             if (isset($_GET['sort']) && isset($_GET['order'])) {
-                echo "<input type='hidden' name='sort' value='" . $this->escaper->escapeHtmlAttr($_GET['sort']) . "' />";
-                echo "<input type='hidden' name='order' value='" . $this->escaper->escapeHtmlAttr($_GET['order']) . "' />";
+                echo "<input type='hidden' name='sort' value='"
+                    . $this->escaper->escapeHtmlAttr($_GET['sort']) . "' />";
+                echo "<input type='hidden' name='order' value='"
+                    . $this->escaper->escapeHtmlAttr($_GET['order']) . "' />";
             }
 
             echo '</form>';
