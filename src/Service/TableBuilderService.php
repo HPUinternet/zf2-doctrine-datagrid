@@ -104,9 +104,10 @@ class TableBuilderService
      *
      * @param array $searchParams
      */
-    public function search(array $searchParams) {
-        foreach($searchParams as $fieldName => $searchParam) {
-            if(!empty($searchParam)) {
+    public function search(array $searchParams)
+    {
+        foreach ($searchParams as $fieldName => $searchParam) {
+            if (!empty($searchParam)) {
                 $this->queryBuilder->where($fieldName, $searchParam);
             }
         }

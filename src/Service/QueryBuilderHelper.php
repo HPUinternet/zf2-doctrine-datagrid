@@ -286,8 +286,9 @@ class QueryBuilderHelper
      * @param $clause
      * @return bool|this
      */
-    public function where($fieldName, $clause, $operator = "LIKE") {
-        if(!array_key_exists($fieldName, $this->availableTableColumns)) {
+    public function where($fieldName, $clause, $operator = "LIKE")
+    {
+        if (!array_key_exists($fieldName, $this->availableTableColumns)) {
             return false;
         }
 

@@ -175,7 +175,7 @@ class DataGridTable extends AbstractHelper
                 $dataType = "Array";
             }
 
-            $element = $this->dataStrategyResolver->displayFilterForDataType('search['.$tableHeader.']', $dataType);
+            $element = $this->dataStrategyResolver->displayFilterForDataType('search[' . $tableHeader . ']', $dataType);
             if ($element instanceof Element) {
                 $element = $this->fillElementWithOptions($element, $tableHeader);
                 echo $this->getView()->formElement($element);
@@ -373,15 +373,15 @@ class DataGridTable extends AbstractHelper
         echo '</table>';
         // Any current column settings? pass them in the form
         if (in_array('simpleSearch', $this->displaySettings)) {
-            if(isset($_GET['columns'])) {
+            if (isset($_GET['columns'])) {
                 $value = $_GET['columns'];
 
-                if(is_array($_GET['columns'])) {
+                if (is_array($_GET['columns'])) {
                     $value = '[';
-                    foreach($_GET['columns'] as $column) {
-                        $value .= '"'.$column.'",';
+                    foreach ($_GET['columns'] as $column) {
+                        $value .= '"' . $column . '",';
                     }
-                    $value = rtrim($value, ",").']';
+                    $value = rtrim($value, ",") . ']';
                 }
 
                 echo sprintf(
@@ -390,9 +390,9 @@ class DataGridTable extends AbstractHelper
                 );
             }
 
-            if(isset($_GET['sort']) && isset($_GET['order'])) {
-                echo "<input type='hidden' name='sort' value='".$this->escaper->escapeHtmlAttr($_GET['sort'])."' />";
-                echo "<input type='hidden' name='order' value='".$this->escaper->escapeHtmlAttr($_GET['order'])."' />";
+            if (isset($_GET['sort']) && isset($_GET['order'])) {
+                echo "<input type='hidden' name='sort' value='" . $this->escaper->escapeHtmlAttr($_GET['sort']) . "' />";
+                echo "<input type='hidden' name='order' value='" . $this->escaper->escapeHtmlAttr($_GET['order']) . "' />";
             }
 
             echo '</form>';
