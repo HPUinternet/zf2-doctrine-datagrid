@@ -3,8 +3,13 @@
 use Wms\Admin\DataGrid\Model\TableModel;
 use Wms\Admin\DataGrid\View\Form\NestedFieldsetInterface;
 use Zend\Form\Fieldset;
-use Wms\Admin\DataGrid\View\Form\Element\AddFilterButton;
 
+/**
+ * Advanced Filers, currently work in progress.
+ *
+ * Class FilterSettingsFieldset
+ * @package Wms\Admin\DataGrid\Fieldset
+ */
 class FilterSettingsFieldset extends Fieldset implements NestedFieldsetInterface
 {
     /**
