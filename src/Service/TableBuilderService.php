@@ -108,7 +108,7 @@ class TableBuilderService
     {
         foreach ($searchParams as $fieldName => $searchParam) {
             if (!empty($searchParam)) {
-                $this->queryBuilder->where($fieldName, $searchParam);
+                $this->queryBuilder->where($fieldName, "%".$searchParam."%");
             }
         }
     }

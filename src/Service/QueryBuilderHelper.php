@@ -177,18 +177,48 @@ class QueryBuilderHelper
     public function getResultSet()
     {
         $resultSet = array();
+        $subQueryResultSet = array();
+
+        $sourceEntityMetaData = $this->entityMetadataHelper->getEntityMetadata($this->sourceEntityName);
+        $primaryKey = $sourceEntityMetaData->getSingleIdentifierFieldName();
+
+        // if we have any prioritized Sub Queries, fire them before our many query.
+        if(!empty($this->prioritizedSubQueries)) {
+            foreach($this->prioritizedSubQueries as $fieldName => $queryBuilder) {
+                $results = $queryBuilder->getQuery()->execute();
+                $subQueryResultSet[$fieldName] = $results;
+                $whereClause = array();
+                foreach ($results as $result) {
+                    $whereClause[] = $result['association'];
+                }
+
+                $this->queryBuilder->where($primaryKey.' IN (:'.$fieldName.'s)');
+                $this->queryBuilder->setParameter($fieldName.'s', $whereClause);
+            }
+        }
 
         // Retrieve data from the primary query and re-order the array keys so they can be accessed more easily
         $result = $this->queryBuilder->getQuery()->execute();
-        $primaryKey = $this->entityMetadataHelper->getEntityMetadata($this->sourceEntityName)
-            ->getSingleIdentifierFieldName();
         foreach ($result as $key => $data) {
             $resultSet[$data[$primaryKey]] = $data;
         }
 
+        // Retrieve data from the subQueries
         foreach ($this->subQueries as $fieldName => $queryBuilder) {
             $queryBuilder->setParameter('resultIds', array_column($resultSet, $primaryKey));
             $results = $queryBuilder->getQuery()->execute();
+            foreach ($results as $result) {
+                $resultSetKey = $result['association'];
+                if (!array_key_exists($fieldName, $resultSet[$resultSetKey])) {
+                    $resultSet[$resultSetKey][$fieldName] = array();
+                }
+                unset($result['association']);
+                $resultSet[$resultSetKey][$fieldName][] = $result;
+            }
+        }
+
+        // At last, merge the prioritized Sub Query results if applicable
+        foreach($subQueryResultSet as $fieldName => $results) {
             foreach ($results as $result) {
                 $resultSetKey = $result['association'];
                 if (!array_key_exists($fieldName, $resultSet[$resultSetKey])) {
@@ -235,7 +265,7 @@ class QueryBuilderHelper
         $query = clone $this->queryBuilder;
         $entityMetaData = $this->entityMetadataHelper->getEntityMetadata($this->sourceEntityName);
 
-        $query->resetDQLParts(array('select', 'join', 'orderBy'));
+        $query->resetDQLParts(array('select', 'orderBy'));
         $query->setFirstResult(0);
         $query->setMaxResults(null);
         $query->select(sprintf(
@@ -267,6 +297,9 @@ class QueryBuilderHelper
 
 
     /**
+     * Generate a queryAlias for doctrine based on the fully qualified entity namespace
+     *
+     * @param $entityName
      * @return string
      */
     public function getEntityShortName($entityName)
@@ -283,13 +316,14 @@ class QueryBuilderHelper
      * to ensure the data is filtered properly
      *
      * @see prioritizeSubQueries
-     * @param $fieldName
-     * @param $clause
+     *
+     * @param string $fieldName
+     * @param string $clause
      * @param string $operator
      * @return bool|this
      * @throws \Exception
      */
-    public function where($fieldName, $clXause, $operator = "LIKE")
+    public function where($fieldName, $clause, $operator = "LIKE")
     {
         if (!array_key_exists($fieldName, $this->availableTableColumns)) {
             return false;
@@ -303,10 +337,9 @@ class QueryBuilderHelper
         }
 
         // When the column is in the selectedcolumns, we won't need to re-retrieve fieldset data
-        $isSubquery = (is_array($this->selectedTableColumns[$fieldName]));
+        $isSubQuery = (isset($this->selectedTableColumns[$fieldName]) && is_array($this->selectedTableColumns[$fieldName]));
         $query = $this->queryBuilder;
-
-        if ($isSubquery) {
+        if ($isSubQuery) {
             if (!array_key_exists($fieldName, $this->prioritizedSubQueries)) {
                 $query = $this->prioritizeSubQuery($fieldName);
             } else {
@@ -314,8 +347,19 @@ class QueryBuilderHelper
             }
         }
 
-        // @TODO: ADD TO WHERE CLAUSE, AND INJECT THE CLAUSE AS A VARIABLE
-        $query->where(sprintf('%s %s %s', implode(".", $fieldNameSegments), $operator, $clause));
+        $entityAlias = $query->getDQLPart('from')[0]->getAlias();
+        if (count($fieldNameSegments) >= 2 && !$isSubQuery) {
+            $joins = $query->getDQLPart('join');
+            foreach ($joins[$entityAlias] as $join) {
+                if ($join->getJoin() == $entityAlias . '.' . $fieldName) {
+                    $entityAlias = $join->getAlias();
+                }
+            }
+            $fieldName = end($fieldNameSegments);
+        }
+
+        $query->where(sprintf('%s %s :clause', $entityAlias . '.' . $fieldName, $operator));
+        $query->setParameter('clause', $clause);
 
         return $this;
     }
