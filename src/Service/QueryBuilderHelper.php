@@ -25,7 +25,7 @@ class QueryBuilderHelper
     /**
      * @var Boolean
      */
-    protected $prioritizeSubQueries = false;
+    protected $prioritizedSubQueries = array();
 
     /**
      * @var QueryBuilder
@@ -279,23 +279,80 @@ class QueryBuilderHelper
     /**
      * Add a where clause to the query.
      * note that: when you are putting a where clause on a column that belongs to a sub query
-     * the property prioritizeSubQueries will be set to true to ensure the where clause is respected
+     * the property prioritizedSubQueries will be the new container for that QueryBuilder instance
+     * to ensure the data is filtered properly
      *
      * @see prioritizeSubQueries
      * @param $fieldName
      * @param $clause
+     * @param string $operator
      * @return bool|this
+     * @throws \Exception
      */
-    public function where($fieldName, $clause, $operator = "LIKE")
+    public function where($fieldName, $clXause, $operator = "LIKE")
     {
         if (!array_key_exists($fieldName, $this->availableTableColumns)) {
             return false;
         }
 
-        echo '<pre>';
-        print_r($this->selectedTableColumns);
-        echo '</pre>';
-//        die(' heueheu');
+        $fieldNameSegments = explode(".", $fieldName);
+        $fieldName = $fieldNameSegments[0];
+
+        if (empty($this->selectedTableColumns)) {
+            throw new \Exception("Adding where clauses to non selected columns is not yet supported");
+        }
+
+        // When the column is in the selectedcolumns, we won't need to re-retrieve fieldset data
+        $isSubquery = (is_array($this->selectedTableColumns[$fieldName]));
+        $query = $this->queryBuilder;
+
+        if ($isSubquery) {
+            if (!array_key_exists($fieldName, $this->prioritizedSubQueries)) {
+                $query = $this->prioritizeSubQuery($fieldName);
+            } else {
+                $query = $this->prioritizedSubQueries[$fieldName];
+            }
+        }
+
+        // @TODO: ADD TO WHERE CLAUSE, AND INJECT THE CLAUSE AS A VARIABLE
+        $query->where(sprintf('%s %s %s', implode(".", $fieldNameSegments), $operator, $clause));
+
+        return $this;
+    }
+
+    /**
+     * Simple wrapper around if statements to retrieve the correct subQuery
+     * Because a subQuery might be contained by the subQueries property or the prioritizedSubQueries.
+     *
+     * @param $key
+     * @return bool
+     */
+    protected function getSubQuery($key)
+    {
+        if (array_key_exists($key, $this->subQueries)) {
+            return $this->subQueries[$key];
+        } elseif (array_key_exists($key, $this->prioritizedSubQueries)) {
+            return $this->prioritizedSubQueries[$key];
+        }
+
+        return false;
+    }
+
+    /**
+     * Moves a subQuery to the prioritizedSubQueries
+     * and removes the "where in" clause that links it back to the main query
+     *
+     * @param $key
+     * @return QueryBuilder
+     */
+    protected function prioritizeSubQuery($key)
+    {
+        $query = $this->subQueries[$key];
+        unset($this->subQueries[$key]);
+        $query->resetDQLPart('where');
+        $this->prioritizedSubQueries[$key] = $query;
+
+        return $query;
     }
 
     /**
@@ -311,11 +368,11 @@ class QueryBuilderHelper
      */
     protected function selectInSubQuery($sourceFieldName, $targetEntityName, $targetFieldName)
     {
-        if (!isset($this->subQueries[$sourceFieldName])) {
+        if (!($query = $this->getSubQuery($sourceFieldName))) {
             $this->subQueries[$sourceFieldName] = $this->createSubQuery($sourceFieldName, $targetEntityName);
+            $query = $this->subQueries[$sourceFieldName];
         }
 
-        $query = $this->subQueries[$sourceFieldName];
         $query->addSelect(sprintf(
             "%s AS %s",
             $this->getEntityShortName($targetEntityName) . '.' . $targetFieldName,
