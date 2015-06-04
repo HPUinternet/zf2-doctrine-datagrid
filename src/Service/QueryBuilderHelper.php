@@ -183,8 +183,8 @@ class QueryBuilderHelper
         $primaryKey = $sourceEntityMetaData->getSingleIdentifierFieldName();
 
         // if we have any prioritized Sub Queries, fire them before our many query.
-        if(!empty($this->prioritizedSubQueries)) {
-            foreach($this->prioritizedSubQueries as $fieldName => $queryBuilder) {
+        if (!empty($this->prioritizedSubQueries)) {
+            foreach ($this->prioritizedSubQueries as $fieldName => $queryBuilder) {
                 $results = $queryBuilder->getQuery()->execute();
                 $subQueryResultSet[$fieldName] = $results;
                 $whereClause = array();
@@ -192,8 +192,8 @@ class QueryBuilderHelper
                     $whereClause[] = $result['association'];
                 }
 
-                $this->queryBuilder->where($primaryKey.' IN (:'.$fieldName.'s)');
-                $this->queryBuilder->setParameter($fieldName.'s', $whereClause);
+                $this->queryBuilder->where($primaryKey . ' IN (:' . $fieldName . 's)');
+                $this->queryBuilder->setParameter($fieldName . 's', $whereClause);
             }
         }
 
@@ -218,7 +218,7 @@ class QueryBuilderHelper
         }
 
         // At last, merge the prioritized Sub Query results if applicable
-        foreach($subQueryResultSet as $fieldName => $results) {
+        foreach ($subQueryResultSet as $fieldName => $results) {
             foreach ($results as $result) {
                 $resultSetKey = $result['association'];
                 if (!array_key_exists($fieldName, $resultSet[$resultSetKey])) {
@@ -337,7 +337,9 @@ class QueryBuilderHelper
         }
 
         // When the column is in the selectedcolumns, we won't need to re-retrieve fieldset data
-        $isSubQuery = (isset($this->selectedTableColumns[$fieldName]) && is_array($this->selectedTableColumns[$fieldName]));
+        $isSubQuery = (
+            isset($this->selectedTableColumns[$fieldName]) && is_array($this->selectedTableColumns[$fieldName])
+        );
         $query = $this->queryBuilder;
         if ($isSubQuery) {
             if (!array_key_exists($fieldName, $this->prioritizedSubQueries)) {
