@@ -370,6 +370,13 @@ class DataGridTable extends AbstractHelper
         return $element;
     }
 
+    /**
+     * If the TableModel holds information about filters that where applied, we pass them into the form element
+     *
+     * @param Element $element
+     * @param $fieldName
+     * @return Element
+     */
     protected function setElementCurrentValue(Element $element, $fieldName)
     {
         if (!array_key_exists($fieldName, $this->tableModel->getUsedFilterValues())) {

@@ -193,7 +193,7 @@ class QueryBuilderHelper
                 }
 
                 $primaryKeyField = $this->getEntityShortName($this->sourceEntityName) . '.' . $primaryKey;
-                $this->queryBuilder->where($primaryKeyField . ' IN (:' . $fieldName . 's)');
+                $this->queryBuilder->andWhere($primaryKeyField . ' IN (:' . $fieldName . 's)');
                 $this->queryBuilder->setParameter($fieldName . 's', $whereClause);
             }
         }
@@ -222,9 +222,14 @@ class QueryBuilderHelper
         foreach ($subQueryResultSet as $fieldName => $results) {
             foreach ($results as $result) {
                 $resultSetKey = $result['association'];
+                if (!isset($resultSet[$resultSetKey])) {
+                    continue;
+                }
+
                 if (!array_key_exists($fieldName, $resultSet[$resultSetKey])) {
                     $resultSet[$resultSetKey][$fieldName] = array();
                 }
+
                 unset($result['association']);
                 $resultSet[$resultSetKey][$fieldName][] = $result;
             }
@@ -370,8 +375,8 @@ class QueryBuilderHelper
             }
         }
 
-        $query->where(sprintf('%s %s :clause', $entityAlias . '.' . $fieldName, $operator));
-        $query->setParameter('clause', $clause);
+        $query->andWhere(sprintf('%s %s :' . $fieldName . '1', $entityAlias . '.' . $fieldName, $operator));
+        $query->setParameter($fieldName . '1', $clause);
 
         return $this;
     }
