@@ -24,13 +24,28 @@ class StrategyResolver
     public $defaultStrategy;
 
     /**
-     * Configures the strategy resolver
+     * @var Array
      */
-    public function __construct()
+    private $configuredStrategies;
+
+    /**
+     * Configures the strategy resolver
+     *
+     * You can pass an optional array of fieldNames and renderStrategies in the constructor of this class
+     * to ensure your field from a specific rendering strategy. This array can look like the example below:
+     * array(
+     *      'fieldName' => 'string'
+     *      'category.name' => '\MyApplication\DataStrategy\CustomCategoryNameStrategy'
+     * );
+     *
+     * @param array $configuredStrategies
+     */
+    public function __construct($configuredStrategies = array())
     {
         $this->setDi(new Di());
         $this->addDependency($this, __CLASS__);
-        $this->defaultStrategy = $this->di->get('Wms\Admin\DataGrid\View\Helper\DataStrategy\StringStrategy');
+        $this->configuredStrategies = $configuredStrategies;
+        $this->defaultStrategy = $this->di->get(__NAMESPACE__ . '\StringStrategy');
     }
 
     /**
@@ -43,7 +58,7 @@ class StrategyResolver
 
         // 1. Resolving based on configured values
         if (!is_null($propertyName) && ($configuredStrategy = $this->getConfiguredStrategy($propertyName))) {
-            return $configuredStrategy;
+            return $this->di->get($configuredStrategy);
         }
 
         // 2. Resolving based using if statements
@@ -65,22 +80,21 @@ class StrategyResolver
      */
     public function quickResolve($data, $propertyName)
     {
-        $strategyPrefix = 'Wms\Admin\DataGrid\View\Helper\DataStrategy\\';
         switch (true) {
             case is_bool($data) || (($data === 1 || $data === 0) && strpos($propertyName, 'id') === false):
-                return $strategyPrefix . 'BooleanStrategy';
+                return __NAMESPACE__ . '\BooleanStrategy';
                 break;
             case is_array($data) == true:
-                return $strategyPrefix . 'ArrayStrategy';
+                return __NAMESPACE__ . '\ArrayStrategy';
                 break;
             case is_integer($data):
-                return $strategyPrefix . 'IntegerStrategy';
+                return __NAMESPACE__ . '\IntegerStrategy';
                 break;
             case $data instanceof DateTime:
-                return $strategyPrefix . 'DateTimeStrategy';
+                return __NAMESPACE__ . '\DateTimeStrategy';
                 break;
             case $data instanceof Proxy:
-                return $strategyPrefix . 'DoctrineProxyStrategy';
+                return __NAMESPACE__ . '\DoctrineProxyStrategy';
                 break;
             default:
                 return false;
@@ -96,7 +110,13 @@ class StrategyResolver
      */
     public function getConfiguredStrategy($propertyName)
     {
-        // @todo: implement me, find the strategy using array_key_exists
+        if (array_key_exists($propertyName, $this->configuredStrategies)) {
+            $strategy = $this->configuredStrategies[$propertyName];
+
+            return strpos($strategy,
+                '\\') !== false ? $strategy : __NAMESPACE__ . '\\' . ucfirst($strategy) . 'Strategy';
+        }
+
         return false;
     }
 
@@ -125,7 +145,7 @@ class StrategyResolver
     {
         try {
             $strategy = $this->di->get(
-                'Wms\Admin\DataGrid\View\Helper\DataStrategy\\' . ucfirst($dataType) . 'Strategy'
+                __NAMESPACE__ . '\\' . ucfirst($dataType) . 'Strategy'
             );
             if ($strategy instanceof DataStrategyFilterInterface) {
                 return $strategy->showFilter($elementName);
@@ -133,6 +153,7 @@ class StrategyResolver
         } catch (ClassNotFoundException $ex) {
             return $this->defaultStrategy->showFilter($elementName);
         }
+
         return $this->defaultStrategy->showFilter($elementName);
     }
 

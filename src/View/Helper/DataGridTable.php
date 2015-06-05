@@ -65,7 +65,7 @@ class DataGridTable extends AbstractHelper
 
         $this->setTableModel($tableModel);
         $this->displaySettings = $displaySettings;
-        $this->dataStrategyResolver = new StrategyResolver();
+        $this->dataStrategyResolver = new StrategyResolver($tableModel->getDataTypes());
         $this->dataStrategyResolver->addDependency($this->getView(), 'Zend\View\Renderer\RendererInterface');
 
         echo '<div class="datagrid before col-md-12">';

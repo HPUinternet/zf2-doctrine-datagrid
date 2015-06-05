@@ -31,6 +31,9 @@ class ModuleOptionsFactory implements FactoryInterface
             'filters' => array(
                 'Wms\Admin\User\Filter\PersonalEntitiesFilter' => 'Wms\Admin\User\Filter\PersonalEntitiesFilterParams'
             ),
+            'renders' => array(
+                'thumbnailFile.imagepath' => 'image'
+            )
         );
 //        $dummyOptions = array(
 //            'entityName' => 'Wms\Admin\Shop\Entity\Product',

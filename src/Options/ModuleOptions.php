@@ -33,6 +33,11 @@ class ModuleOptions extends AbstractOptions
     protected $filters = array();
 
     /**
+     * @var array
+     */
+    protected $renders = array();
+
+    /**
      * @param string $entityName
      */
     public function setEntityName($entityName)
@@ -110,5 +115,21 @@ class ModuleOptions extends AbstractOptions
     public function setFilters($filters)
     {
         $this->filters = $filters;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRenders()
+    {
+        return $this->renders;
+    }
+
+    /**
+     * @param array $renders
+     */
+    public function setRenders($renders)
+    {
+        $this->renders = $renders;
     }
 }

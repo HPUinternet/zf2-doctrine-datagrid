@@ -60,8 +60,12 @@ class TableBuilderService
         $table->setUsedHeaders($table->calculateTableHeader($this->queryBuilder->getSelectedTableColumns()));
         $table->setAndParseRows($this->queryBuilder->getResultSet());
 
-        // configure "optional" data in the TableModel
-        $table->setDataTypes($this->queryBuilder->getTableColumnTypes());
+        // configure TableModel extensions and additions
+        $table->setDataTypes(array_merge(
+                $this->queryBuilder->getTableColumnTypes(),
+                $this->moduleOptions->getRenders()
+            )
+        );
         $table->setPageNumber($this->page);
         $table->setMaxPageNumber($this->calculateMaxPages());
         $table->setUsedFilterValues($this->usedFilters);
