@@ -72,7 +72,7 @@ class EntityMetadataHelper
      *
      * @param $entityName
      * @param $fieldName
-     * @return bool
+     * @return bool|string
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
     public function getAssociationType($entityName, $fieldName)
