@@ -153,10 +153,14 @@ class EntityMetadataHelper
             );
 
             foreach ($targetEntityProperties as $targetEntityProperty) {
-                if ($targetEntityProperty['type'] !== "association"
-                    && !array_search($targetEntityProperty, $prohibitedColumns)
-                ) {
-                    $returnData[$fieldName . '.' . $targetEntityProperty['fieldName']] = $targetEntityProperty['type'];
+                $targetFieldName = $targetEntityProperty['fieldName'];
+                $prohibited = (
+                    array_search($targetFieldName, $prohibitedColumns) ||
+                    array_search($fieldName . '.' . $targetFieldName, $prohibitedColumns)
+                );
+
+                if ($targetEntityProperty['type'] !== "association" && !$prohibited) {
+                    $returnData[$fieldName . '.' . $targetFieldName] = $targetEntityProperty['type'];
                 }
             }
         }
