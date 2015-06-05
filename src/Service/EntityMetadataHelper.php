@@ -37,15 +37,11 @@ class EntityMetadataHelper
      * Get EntityMapping by entityName
      *
      * @param $entityName
-     * @param bool $addIfNotExistent
      * @return bool|ClassMetadata
      */
-    public function getEntityMetadata($entityName, $addIfNotExistent = true)
+    public function getEntityMetadata($entityName)
     {
         if (!array_key_exists($entityName, $this->entityMetadata)) {
-            if (!$addIfNotExistent) {
-                return false;
-            }
             $this->addEntityMetadata($entityName);
         }
 
