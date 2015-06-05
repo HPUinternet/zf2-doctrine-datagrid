@@ -12,6 +12,11 @@ class TableBuilderService
     protected $page = 1;
 
     /**
+     * @var array
+     */
+    protected $usedFilters = array();
+
+    /**
      * @var ModuleOptions
      */
     private $moduleOptions;
@@ -59,6 +64,7 @@ class TableBuilderService
         $table->setDataTypes($this->queryBuilder->getTableColumnTypes());
         $table->setPageNumber($this->page);
         $table->setMaxPageNumber($this->calculateMaxPages());
+        $table->setUsedFilterValues($this->usedFilters);
         if ($this->resolveAssociationColumns) {
             $table->setAvailableFilterValues($this->queryBuilder->preLoadAllAssociationFields());
         }
@@ -109,6 +115,7 @@ class TableBuilderService
         foreach ($searchParams as $fieldName => $searchParam) {
             if (!empty($searchParam)) {
                 $this->queryBuilder->where($fieldName, "%".$searchParam."%");
+                $this->usedFilters[$fieldName] = $searchParam;
             }
         }
     }

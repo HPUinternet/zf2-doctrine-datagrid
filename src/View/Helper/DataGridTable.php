@@ -177,7 +177,8 @@ class DataGridTable extends AbstractHelper
 
             $element = $this->dataStrategyResolver->displayFilterForDataType('search[' . $tableHeader . ']', $dataType);
             if ($element instanceof Element) {
-                $element = $this->fillElementWithOptions($element, $tableHeader);
+                $element = $this->setElementValues($element, $tableHeader);
+                $element = $this->setElementCurrentValue($element, $tableHeader);
                 echo $this->getView()->formElement($element);
             } else {
                 echo $element;
@@ -337,7 +338,7 @@ class DataGridTable extends AbstractHelper
      * @param $fieldName
      * @return Element
      */
-    protected function fillElementWithOptions(Element $element, $fieldName)
+    protected function setElementValues(Element $element, $fieldName)
     {
         // If the fieldname is not nested, there is no way the joined query returns data for you.
         $fieldNameSegments = explode(".", $fieldName);
@@ -345,22 +346,37 @@ class DataGridTable extends AbstractHelper
             return $element;
         }
 
-        if (isset($this->tableModel->getAvailableFilterValues()[$fieldNameSegments[0]])) {
-            $valueOptions = array();
-            foreach ($this->tableModel->getAvailableFilterValues()[$fieldNameSegments[0]] as $filterValues) {
-                $key = $fieldNameSegments[1];
-                if (isset($filterValues[$key]) && !in_array($filterValues[$key], $valueOptions)) {
-                    $valueOptions[$filterValues[$fieldNameSegments[1]]] = $filterValues[$fieldNameSegments[1]];
-                }
-            }
+        $parentField = $fieldNameSegments[0];
+        $childField = $fieldNameSegments[1];
 
-            if (method_exists($element, 'setValueOptions') && method_exists($element, 'setEmptyOption')) {
-                $element->setEmptyOption(
-                    $this->getView()->Translate('Select') . ' ' . $this->getView()->Translate($fieldName)
-                );
-                $element->setValueOptions($valueOptions);
+
+        if (!isset($this->tableModel->getAvailableFilterValues()[$parentField])) {
+            return $element;
+        }
+
+        $valueOptions = array();
+        foreach ($this->tableModel->getAvailableFilterValues()[$parentField] as $filterValues) {
+            if (isset($filterValues[$childField]) && !in_array($filterValues[$childField], $valueOptions)) {
+                $valueOptions[$filterValues[$childField]] = $filterValues[$childField];
             }
         }
+
+        if (method_exists($element, 'setValueOptions') && method_exists($element, 'setEmptyOption')) {
+            $emptyLabel = $this->getView()->Translate('Select') . ' ' . $this->getView()->Translate($fieldName);
+            $element->setEmptyOption($emptyLabel);
+            $element->setValueOptions($valueOptions);
+        }
+
+        return $element;
+    }
+
+    protected function setElementCurrentValue(Element $element, $fieldName)
+    {
+        if (!array_key_exists($fieldName, $this->tableModel->getUsedFilterValues())) {
+            return $element;
+        }
+
+        $element->setValue($this->tableModel->getUsedFilterValues()[$fieldName]);
 
         return $element;
     }

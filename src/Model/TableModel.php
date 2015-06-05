@@ -25,6 +25,11 @@ class TableModel
     /**
      * @var Array
      */
+    protected $usedFilterValues;
+
+    /**
+     * @var Array
+     */
     protected $dataTypes;
 
     /**
@@ -301,5 +306,21 @@ class TableModel
     public function setAvailableFilterValues($availableFilterValues)
     {
         $this->availableFilterValues = $availableFilterValues;
+    }
+
+    /**
+     * @return Array
+     */
+    public function getUsedFilterValues()
+    {
+        return $this->usedFilterValues;
+    }
+
+    /**
+     * @param Array $usedFilterValues
+     */
+    public function setUsedFilterValues($usedFilterValues)
+    {
+        $this->usedFilterValues = $usedFilterValues;
     }
 }
