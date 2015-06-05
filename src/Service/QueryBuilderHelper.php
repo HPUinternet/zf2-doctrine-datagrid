@@ -192,7 +192,8 @@ class QueryBuilderHelper
                     $whereClause[] = $result['association'];
                 }
 
-                $this->queryBuilder->where($primaryKey . ' IN (:' . $fieldName . 's)');
+                $primaryKeyField = $this->getEntityShortName($this->sourceEntityName) . '.' . $primaryKey;
+                $this->queryBuilder->where($primaryKeyField . ' IN (:' . $fieldName . 's)');
                 $this->queryBuilder->setParameter($fieldName . 's', $whereClause);
             }
         }
@@ -350,14 +351,23 @@ class QueryBuilderHelper
         }
 
         $entityAlias = $query->getDQLPart('from')[0]->getAlias();
-        if (count($fieldNameSegments) >= 2 && !$isSubQuery) {
-            $joins = $query->getDQLPart('join');
-            foreach ($joins[$entityAlias] as $join) {
-                if ($join->getJoin() == $entityAlias . '.' . $fieldName) {
-                    $entityAlias = $join->getAlias();
-                }
+
+        // When dealing with one-to-one or many-to-many associations, the entityAlias is the joined alias
+        if (count($fieldNameSegments) >= 2 && !$isSubQuery || $isSubQuery) {
+            $associationType = $this->entityMetadataHelper->getAssociationType($this->sourceEntityName, $fieldName);
+            if (!$associationType) {
+                throw new \Exception("Could not determine the association type when building a where clause");
             }
-            $fieldName = end($fieldNameSegments);
+
+            if ($associationType === MetaData::ONE_TO_ONE || $associationType === MetaData::MANY_TO_MANY) {
+                $joins = $query->getDQLPart('join');
+                foreach ($joins[$entityAlias] as $join) {
+                    if ($join->getJoin() == $entityAlias . '.' . $fieldName) {
+                        $entityAlias = $join->getAlias();
+                    }
+                }
+                $fieldName = end($fieldNameSegments);
+            }
         }
 
         $query->where(sprintf('%s %s :clause', $entityAlias . '.' . $fieldName, $operator));

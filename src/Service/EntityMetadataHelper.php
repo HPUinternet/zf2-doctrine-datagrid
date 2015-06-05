@@ -71,6 +71,27 @@ class EntityMetadataHelper
     }
 
     /**
+     * On several occasions it was hard for us to grab the association type of an entity
+     * so this wrapper will do that for you.
+     *
+     * @param $entityName
+     * @param $fieldName
+     * @return bool
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function getAssociationType($entityName, $fieldName)
+    {
+        $entityMapping = $this->getEntityMetadata($entityName);
+        $associationMapping = $entityMapping->getAssociationMapping($fieldName);
+
+        if (!$associationMapping || !isset($associationMapping['type'])) {
+            return false;
+        }
+
+        return $associationMapping['type'];
+    }
+
+    /**
      * Transform a class entityMetadata object to a more user-friendly array
      *
      * @param ClassMetadata $metaData
