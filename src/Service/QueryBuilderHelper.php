@@ -23,7 +23,7 @@ class QueryBuilderHelper
     protected $prohibitedColumns;
 
     /**
-     * @var Boolean
+     * @var Array
      */
     protected $prioritizedSubQueries = array();
 
@@ -510,7 +510,8 @@ class QueryBuilderHelper
         $returnData = array();
         $entityMetadata = $this->entityMetadataHelper->getEntityMetadata($this->sourceEntityName);
 
-        foreach (array_keys($this->subQueries) as $associationField) {
+        $fieldNames = array_merge(array_keys($this->subQueries), array_keys($this->prioritizedSubQueries));
+        foreach ($fieldNames as $associationField) {
             $query = $this->entityManager->createQueryBuilder($associationField);
             $fieldData = $entityMetadata->getAssociationMapping($associationField);
             $query->from($fieldData['targetEntity'], $associationField);
