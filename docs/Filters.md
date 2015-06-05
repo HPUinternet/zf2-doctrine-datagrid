@@ -5,7 +5,7 @@ The filters are divided into two different formats:
 1. Filter
 2. Search Filter
 
-Whilist the searchfilter is an manageble filter that can be altered by a user of the DataGrid module (for example an input field to search for a specific name), the normal Filter
+Whilst the searchfilter is an manageable filter that can be altered by a user of the DataGrid module (for example an input field to search for a specific name), the Filter in this context
 represents a [doctrine Filter](https://doctrine-orm.readthedocs.org/en/latest/reference/filters.html) that will be active in every query the datagrid module fires.
 
 ## Configuring a filter
@@ -135,4 +135,4 @@ The filter parameter provider class:
         }
     }
     
-Please note that these parameters are resolved on crating the DataGrid module in his factories, so you will still have a hard time overwriting these filter parameters in a controller. If you still need to overwrite something on a request basis, consider implementing a search filter (documented below).
+Please note that these parameters are resolved on crating the DataGrid module in his factories, so you will still have a hard time overwriting these filter parameters in a controller. If you still need to overwrite something on a request basis, consider implementing a search filter.
