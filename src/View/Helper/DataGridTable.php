@@ -116,15 +116,6 @@ class DataGridTable extends AbstractHelper
                 ));
             }
         }
-
-        $this->settingsForm->add(array(
-            'name' => 'submit',
-            'type' => 'Submit',
-            'attributes' => array(
-                'value' => $this->getView()->translate('Apply'),
-                'class' => 'btn btn-primary',
-            ),
-        ));
         echo $this->getView()->DataGridForm($this->settingsForm);
     }
 

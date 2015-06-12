@@ -63,6 +63,15 @@ class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInte
             // Dirty hack, because this->add() does not detect element or fieldset naming conflicts
             $this->iterator->insert($multiCheckbox, 0);
         }
+
+        $this->add(array(
+            'name' => 'submit',
+            'type' => 'Submit',
+            'attributes' => array(
+                'value' => 'Apply',
+                'class' => 'btn btn-primary',
+            ),
+        ));
     }
 
     /**
