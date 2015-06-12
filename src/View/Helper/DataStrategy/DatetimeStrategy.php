@@ -29,7 +29,7 @@ class DatetimeStrategy implements DataStrategyInterface
      */
     public function parse($data)
     {
-        echo sprintf(
+        return sprintf(
             '<time datetime="%s">%s</time>',
             $data->format('Y-m-d'),
             $this->view->dateFormat(

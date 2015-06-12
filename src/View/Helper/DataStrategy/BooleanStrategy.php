@@ -31,6 +31,7 @@ class BooleanStrategy implements DataStrategyInterface
         if ($data == true) {
             $cellValue = "yes";
         }
-        echo $this->view->translate($cellValue);
+
+        return $this->view->translate($cellValue);
     }
 }

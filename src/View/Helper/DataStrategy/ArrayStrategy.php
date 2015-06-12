@@ -29,13 +29,15 @@ class ArrayStrategy implements DataStrategyInterface, DataStrategyFilterInterfac
      */
     public function parse($data)
     {
-        echo '<ol>';
+        $html = '<ol>';
         foreach ($data as $value) {
-            echo '<li>';
-            echo $this->delegator->resolveAndParse($value);
-            echo '</li>';
+            $html .= '<li>';
+            $html .= $this->delegator->resolveAndParse($value);
+            $html .= '</li>';
         }
-        echo '</ol>';
+        $html .= '</ol>';
+
+        return $html;
     }
 
     /**

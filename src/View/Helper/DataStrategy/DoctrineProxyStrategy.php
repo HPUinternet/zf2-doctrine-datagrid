@@ -11,6 +11,6 @@ class DoctrineProxyStrategy implements DataStrategyInterface
      */
     public function parse($data)
     {
-        echo "@todo: implement parsing of proxy classes";
+        return "@todo: implement parsing of proxy classes";
     }
 }

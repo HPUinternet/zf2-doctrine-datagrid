@@ -17,10 +17,10 @@ class StringStrategy implements DataStrategyInterface, DataStrategyFilterInterfa
     public function parse($data)
     {
         if (strlen($data) > $this->maxLength) {
-            echo sprintf('%s...', mb_substr($data, 0, $this->maxLength));
-            return;
+            return sprintf('%s...', mb_substr($data, 0, $this->maxLength));
         }
-        echo $data;
+
+        return $data;
     }
 
     /**

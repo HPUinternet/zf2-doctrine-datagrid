@@ -11,6 +11,6 @@ class SmallintStrategy implements DataStrategyInterface
      */
     public function parse($data)
     {
-        echo $data;
+        return $data;
     }
 }

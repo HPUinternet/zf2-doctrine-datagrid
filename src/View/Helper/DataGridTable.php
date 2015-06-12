@@ -1,5 +1,6 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper;
 
+use IntlDateFormatter;
 use Zend\Di\ServiceLocator;
 use Zend\Form\Element;
 use Zend\Form\Form;
@@ -356,11 +357,20 @@ class DataGridTable extends AbstractHelper
 
         $valueOptions = array();
         foreach ($this->tableModel->getAvailableFilterValues()[$parentField] as $filterValues) {
-            // TODO: DateTime datatypes need rendering
-            if (isset($filterValues[$childField]) && !in_array($filterValues[$childField],
-                    $valueOptions) && !is_object($filterValues[$childField])
-            ) {
-                $valueOptions[$filterValues[$childField]] = $filterValues[$childField];
+            if (isset($filterValues[$childField]) && !in_array($filterValues[$childField], $valueOptions)) {
+                // TODO: this seems messy, consider moving it
+                $value = $filterValues[$childField];
+                $displayValue = $value;
+                if ($value instanceof \DateTime) {
+                    $value = $value->format('Y-m-d');
+                    $displayValue = $this->view->dateFormat(
+                        $displayValue,
+                        IntlDateFormatter::MEDIUM,
+                        IntlDateFormatter::NONE,
+                        $this->view->formLabel()->getTranslator()->getLocale()
+                    );
+                }
+                $valueOptions[$value] = $displayValue;
             }
         }
 

@@ -10,6 +10,6 @@ class ImageStrategy implements DataStrategyInterface
      */
     public function parse($data)
     {
-        echo '<img src="/' . $data . '" alt="' . $data . '" />';
+        return '<img src="/' . $data . '" alt="' . $data . '" />';
     }
 }
