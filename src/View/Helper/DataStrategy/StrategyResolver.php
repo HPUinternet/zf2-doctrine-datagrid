@@ -59,7 +59,7 @@ class StrategyResolver
         $strategy = false;
 
         // 1. Resolving based on configured values
-        if (!is_null($propertyName) && ($strategy = $this->getConfiguredStrategy($data, $propertyName))) {
+        if (($strategy = $this->getConfiguredStrategy($data, $propertyName))) {
             return $strategy;
         }
 
@@ -113,7 +113,11 @@ class StrategyResolver
      */
     public function getConfiguredStrategy($data, $propertyName)
     {
-        if (!is_array($data) && array_key_exists($propertyName, $this->configuredStrategies)) {
+        if (is_null($propertyName) || is_null($data) || is_array($data)) {
+            return false;
+        }
+
+        if (array_key_exists($propertyName, $this->configuredStrategies)) {
             $strategy = $this->configuredStrategies[$propertyName];
 
             return $this->di->get($this->getStrategyNamespace($strategy));
