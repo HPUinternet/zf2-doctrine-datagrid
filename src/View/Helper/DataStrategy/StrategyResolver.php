@@ -4,6 +4,7 @@ use DateTime;
 use Zend\Di\Di;
 use Doctrine\ORM\Proxy\Proxy;
 use Zend\Di\Exception\ClassNotFoundException;
+use Zend\Di\Exception\RuntimeException;
 
 class StrategyResolver
 {
@@ -50,21 +51,21 @@ class StrategyResolver
 
     /**
      * @param $data
+     * @param null $propertyName
      * @return DataStrategyInterface
      */
     public function resolve($data, $propertyName = null)
     {
-        $strategy = null;
+        $strategy = false;
 
         // 1. Resolving based on configured values
-        if (!is_null($propertyName) && ($configuredStrategy = $this->getConfiguredStrategy($propertyName))) {
-            return $this->di->get($configuredStrategy);
+        if (!is_null($propertyName) && ($strategy = $this->getConfiguredStrategy($data, $propertyName))) {
+            return $strategy;
         }
 
         // 2. Resolving based using if statements
-        $strategy = $this->quickResolve($data, $propertyName);
-        if ($strategy) {
-            return $this->di->get($strategy);
+        if (($strategy = $this->quickResolve($data, $propertyName))) {
+            return $strategy;
         }
 
         // 3. Resolving using the default strategy;
@@ -82,24 +83,26 @@ class StrategyResolver
     {
         switch (true) {
             case is_bool($data) || (($data === 1 || $data === 0) && strpos($propertyName, 'id') === false):
-                return __NAMESPACE__ . '\BooleanStrategy';
+                $strategyName = $this->getStrategyNamespace('Boolean');
                 break;
             case is_array($data) == true:
-                return __NAMESPACE__ . '\ArrayStrategy';
+                $strategyName = $this->getStrategyNamespace('Array');
                 break;
             case is_integer($data):
-                return __NAMESPACE__ . '\IntegerStrategy';
+                $strategyName = $this->getStrategyNamespace('Integer');
                 break;
             case $data instanceof DateTime:
-                return __NAMESPACE__ . '\DateTimeStrategy';
+                $strategyName = $this->getStrategyNamespace('Datetime');
                 break;
             case $data instanceof Proxy:
-                return __NAMESPACE__ . '\DoctrineProxyStrategy';
+                $strategyName = $this->getStrategyNamespace('DoctrineProxy');
                 break;
             default:
                 return false;
                 break;
         }
+
+        return $this->di->get($strategyName);
     }
 
     /**
@@ -108,13 +111,12 @@ class StrategyResolver
      * @param $propertyName
      * @return bool
      */
-    public function getConfiguredStrategy($propertyName)
+    public function getConfiguredStrategy($data, $propertyName)
     {
-        if (array_key_exists($propertyName, $this->configuredStrategies)) {
+        if (!is_array($data) && array_key_exists($propertyName, $this->configuredStrategies)) {
             $strategy = $this->configuredStrategies[$propertyName];
 
-            return strpos($strategy,
-                '\\') !== false ? $strategy : __NAMESPACE__ . '\\' . ucfirst($strategy) . 'Strategy';
+            return $this->di->get($this->getStrategyNamespace($strategy));
         }
 
         return false;
@@ -143,18 +145,33 @@ class StrategyResolver
      */
     public function displayFilterForDataType($elementName, $dataType)
     {
-        try {
-            $strategy = $this->di->get(
-                __NAMESPACE__ . '\\' . ucfirst($dataType) . 'Strategy'
-            );
-            if ($strategy instanceof DataStrategyFilterInterface) {
-                return $strategy->showFilter($elementName);
-            }
-        } catch (ClassNotFoundException $ex) {
-            return $this->defaultStrategy->showFilter($elementName);
+        $strategy = $this->di->get($this->getStrategyNamespace($dataType));
+        if ($strategy instanceof DataStrategyFilterInterface) {
+            return $strategy->showFilter($elementName);
         }
 
         return $this->defaultStrategy->showFilter($elementName);
+    }
+
+    /**
+     * This function Identifies internal or external strategies and converts namespaces accordingly
+     *
+     * @param $strategyName
+     * @return string
+     */
+    private function getStrategyNamespace($strategyName)
+    {
+        $isExternal = (strpos($strategyName, '\\') !== false);
+        if ($isExternal) {
+            return $strategyName;
+        }
+
+        preg_match('#^\p{Lu}#u', $strategyName, $matches);
+        if (count($matches) <= 0) {
+            $strategyName = ucfirst($strategyName);
+        }
+
+        return __NAMESPACE__ . '\\' . ucfirst($strategyName) . 'Strategy';
     }
 
     /**
