@@ -7,7 +7,6 @@ use Zend\Form\Form;
 use Zend\View\Helper\AbstractHelper;
 use Wms\Admin\DataGrid\Model\TableModel;
 use Wms\Admin\DataGrid\Fieldset\ColumnSettingsFieldset;
-use Wms\Admin\DataGrid\Fieldset\FilterSettingsFieldset;
 use Wms\Admin\DataGrid\View\Helper\DataStrategy\StrategyResolver;
 use Zend\Escaper\Escaper;
 
@@ -148,7 +147,8 @@ class DataGridTable extends AbstractHelper
         if (!in_array('advancedSearch', $this->displaySettings)) {
             return;
         }
-        $this->settingsForm->add(new FilterSettingsFieldset($this->tableModel));
+        // TODO: implement delayed feature
+//        $this->settingsForm->add(new FilterSettingsFieldset($this->tableModel));
     }
 
     /**
