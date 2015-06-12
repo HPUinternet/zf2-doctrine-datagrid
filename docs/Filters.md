@@ -1,6 +1,5 @@
 # HPU Datagrid Module - Filters
-After configuring the DataGrid to display your entity, you might want to consider adding some filtering.
-The filters are divided into two different formats:
+After configuring the DataGrid to display your entity, you might want to consider adding some filtering. The filters are divided into two different formats:
 
 1. Filter
 2. Search Filter
@@ -24,7 +23,7 @@ Filters should be configured in the datagrid module options. The targeted filter
     
     
 ### Adding parameters
-In the above sample i registered a filter class that filters the data on specific mimetypes. But i'm only able to hardcode the mimetype in the filter class itself. seems a bit devious right? luckily you are able to configure the filter parameters also by adding additional arguments to the filters key in the configuration array. An example below:
+In the above sample I've registered a filter class that filters the data on specific mimetypes. But i'm only able to hardcode the mimetype in the filter class itself. seems a bit devious right? luckily you are able to configure the filter parameters also by adding additional arguments to the filters key in the configuration array. An example below:
     
     
     'wms-datagrid' => array(
