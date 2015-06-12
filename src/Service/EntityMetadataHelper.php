@@ -97,7 +97,7 @@ class EntityMetadataHelper
     public function parseMetaDataToFieldArray(ClassMetadata $metaData)
     {
         $columns = array();
-        foreach ($metaData->reflFields as $fieldName => $reflectionData) {
+        foreach (array_keys($metaData->reflFields) as $fieldName) {
             if (array_key_exists($fieldName, $metaData->fieldMappings)) {
                 $fieldData = $metaData->getFieldMapping($fieldName);
                 $columns[$fieldName] = $fieldData;

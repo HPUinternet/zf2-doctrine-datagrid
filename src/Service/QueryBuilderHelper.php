@@ -200,7 +200,7 @@ class QueryBuilderHelper
 
         // Retrieve data from the primary query and re-order the array keys so they can be accessed more easily
         $result = $this->queryBuilder->getQuery()->execute();
-        foreach ($result as $key => $data) {
+        foreach ($result as $data) {
             $resultSet[$data[$primaryKey]] = $data;
         }
 

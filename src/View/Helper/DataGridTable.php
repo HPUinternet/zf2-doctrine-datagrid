@@ -276,12 +276,15 @@ class DataGridTable extends AbstractHelper
     /**
      * Looper for the table content
      *
-     * @param string $tdClass
+     * @param string $trClass
+     * @internal param string $tdClass
      */
-    protected function printTableContent($tdClass = "kolom")
+    protected function printTableContent($trClass = "")
     {
         foreach ($this->getTableModel()->getRows() as $row) {
+            echo empty($trClass) ? "<tr>" : sprintf("<tr class=\"%s\"", $trClass);
             $this->printTableContentRow($row);
+            echo "</tr>";
         }
     }
 
@@ -289,21 +292,19 @@ class DataGridTable extends AbstractHelper
      * Wrapper foreach row in the table
      *
      * @param array $rowData
-     * @param string $trClass
      */
-    protected function printTableContentRow(array $rowData, $trClass = "")
+    protected function printTableContentRow(array $rowData)
     {
-        echo empty($trClass) ? "<tr>" : sprintf("<tr class=\"%s\"", $trClass);
         foreach ($rowData as $cellName => $cellValue) {
             if ($this->tableModel->isHiddenColumn($cellName)) {
                 continue;
             }
             $this->printTableContentCell($cellValue, $cellName);
         }
+
         if (in_array('simpleSearch', $this->displaySettings)) {
             echo '<td></td>';
         }
-        echo "</tr>";
     }
 
     /**
