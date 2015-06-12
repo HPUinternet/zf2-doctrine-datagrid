@@ -32,7 +32,7 @@ class ModuleOptionsFactory implements FactoryInterface
                 'Wms\Admin\User\Filter\PersonalEntitiesFilter' => 'Wms\Admin\User\Filter\PersonalEntitiesFilterParams'
             ),
             'renders' => array(
-                'thumbnailFile.imagepath' => 'image'
+                'thumbnailFile.imagepath' => 'Wms\Admin\MediaManager\View\Helper\DataStrategy\ImageStrategy'
             )
         );
 //        $dummyOptions = array(
