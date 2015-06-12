@@ -137,6 +137,10 @@ class StrategyResolver
     {
         $strategy = $this->resolve($data, $propertyName);
 
+        if ($strategy instanceof RecursiveDataStrategyInterface) {
+            return $strategy->recursiveParse($data, $propertyName);
+        }
+
         return $strategy->parse($data);
     }
 
