@@ -371,8 +371,8 @@ class QueryBuilderHelper
                         $entityAlias = $join->getAlias();
                     }
                 }
-                $fieldName = end($fieldNameSegments);
             }
+            $fieldName = end($fieldNameSegments);
         }
 
         $query->andWhere(sprintf('%s %s :' . $fieldName . '1', $entityAlias . '.' . $fieldName, $operator));
