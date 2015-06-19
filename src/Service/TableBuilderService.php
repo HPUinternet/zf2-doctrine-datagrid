@@ -77,6 +77,7 @@ class TableBuilderService
         $table->setPageNumber($this->page);
         $table->setMaxPageNumber($this->calculateMaxPages());
         $table->setUsedFilterValues($this->usedFilters);
+        $table->setOptionRoutes($this->moduleOptions->getOptionRoutes());
         if ($this->resolveAssociationColumns) {
             $table->setAvailableFilterValues($this->queryBuilder->preLoadAllAssociationFields());
         }

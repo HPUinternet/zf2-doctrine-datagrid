@@ -43,6 +43,11 @@ class TableModel
     protected $nonFieldFilters;
 
     /**
+     * @var Array
+     */
+    protected $optionRoutes;
+
+    /**
      * @var int
      */
     protected $pageNumber;
@@ -63,6 +68,7 @@ class TableModel
         $this->dataTypes = array();
         $this->filters = array();
         $this->nonFieldFilters = array();
+        $this->optionLinks = array();
         $this->pageNumber = 1;
         $this->maxPageNumber = 1;
     }
@@ -381,5 +387,21 @@ class TableModel
     public function setNonFieldFilters($nonFieldFilters)
     {
         $this->nonFieldFilters = $nonFieldFilters;
+    }
+
+    /**
+     * @return Array
+     */
+    public function getOptionRoutes()
+    {
+        return $this->optionRoutes;
+    }
+
+    /**
+     * @param Array $optionRoutes
+     */
+    public function setOptionRoutes($optionRoutes)
+    {
+        $this->optionRoutes = $optionRoutes;
     }
 }

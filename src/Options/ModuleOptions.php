@@ -43,6 +43,11 @@ class ModuleOptions extends AbstractOptions
     protected $searchFilters = array();
 
     /**
+     * @var array
+     */
+    protected $optionRoutes = array();
+
+    /**
      * @param string $entityName
      */
     public function setEntityName($entityName)
@@ -152,5 +157,21 @@ class ModuleOptions extends AbstractOptions
     public function setSearchFilters($searchFilters)
     {
         $this->searchFilters = $searchFilters;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOptionRoutes()
+    {
+        return $this->optionRoutes;
+    }
+
+    /**
+     * @param array $optionRoutes
+     */
+    public function setOptionRoutes($optionRoutes)
+    {
+        $this->optionRoutes = $optionRoutes;
     }
 }

@@ -34,25 +34,30 @@ class ModuleOptionsFactory implements FactoryInterface
             'renders' => array(
                 'thumbnailFile.imagepath' => 'Wms\Admin\MediaManager\View\Helper\DataStrategy\ImageStrategy'
             ),
-            'searchFilters' => array(
-                'Wms\Admin\User'
-            ),
+            'optionRoutes' => array(
+                'edit' => 'zfcadmin/mediamanager/mediaitemaction',
+                'delete' => 'zfcadmin/mediamanager/mediaitemaction',
+            )
         );
-        $dummyOptions = array(
-            'entityName' => 'Wms\Admin\Shop\Entity\Product',
-            'defaultColumns' => array(
-                'id',
-                'productCode',
-                'name',
-                'startdate',
-                'enddate',
-                'price',
-                'stock'
-            ),
-            'searchFilters' => array(
-                'Wms\Admin\Shop\SearchFilter\VisibleProductSearchFilter'
-            ),
-        );
+//        $dummyOptions = array(
+//            'entityName' => 'Wms\Admin\Shop\Entity\Product',
+//            'defaultColumns' => array(
+//                'id',
+//                'productCode',
+//                'name',
+//                'startdate',
+//                'enddate',
+//                'price',
+//                'stock'
+//            ),
+//            'searchFilters' => array(
+//                'Wms\Admin\Shop\SearchFilter\VisibleProductSearchFilter'
+//            ),
+//            'optionRoutes' => array(
+//                'edit' => 'zfcadmin/shop/contentaction',
+//                'delete' => 'zfcadmin/shop/contentaction',
+//            )
+//        );
 //
 //        $dummyOptions = array(
 //            'entityName' => 'Wms\Admin\User\Entity\User',

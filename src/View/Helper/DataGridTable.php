@@ -62,7 +62,7 @@ class DataGridTable extends AbstractHelper
      */
     public function __invoke(
         TableModel $tableModel,
-        $displaySettings = array('columnsForm', 'pagination', 'ordering', 'simpleSearch', 'advancedSearch')
+        $displaySettings = array('columnsForm', 'pagination', 'ordering', 'simpleSearch', 'actionRoutes')
     ) {
         $this->escaper = new Escaper('utf-8');
         $this->additionalCells = 0;
@@ -231,6 +231,7 @@ class DataGridTable extends AbstractHelper
 
             echo '</th>';
         }
+
         if (in_array('simpleSearch', $this->displaySettings)) {
             foreach ($this->tableModel->getNonFieldFilters() as $filter) {
                 echo sprintf(
@@ -239,6 +240,10 @@ class DataGridTable extends AbstractHelper
                     $filter->getFilterName()
                 );
             }
+            echo '<th class="rowOptions">Options</th>';
+        }
+
+        if (!in_array('simpleSearch', $this->displaySettings) && in_array('actionRoutes', $this->displaySettings)) {
             echo '<th class="rowOptions">Options</th>';
         }
         echo '</tr>';
@@ -277,7 +282,22 @@ class DataGridTable extends AbstractHelper
             foreach ($this->tableModel->getNonFieldFilters() as $filterName => $filter) {
                 $this->printTableContentCell($filter->getFilterValue($rowData, $filterName));
             }
-            echo '<td></td>';
+            if (!in_array('actionRoutes', $this->displaySettings)) {
+                echo '<td></td>';
+            }
+        }
+
+        if (in_array('actionRoutes', $this->displaySettings)) {
+            $links = $this->tableModel->getOptionRoutes();
+            echo '<td>';
+            foreach ($links as $action => $url) {
+                echo sprintf(
+                    '<a class="options btn btn-mini" href="%s">%s</a>',
+                    $this->view->url($url, array('action' => $action, 'id' => $rowData['id'])),
+                    $action
+                );
+            }
+            echo '</td>';
         }
     }
 
