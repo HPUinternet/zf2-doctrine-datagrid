@@ -132,8 +132,11 @@ class TableBuilderService
             $this->usedFilters[$fieldName] = $searchParam;
 
             if ($this->searchFilterHelper->hasFilterForField($fieldName)) {
-                $this->queryBuilder = $this->searchFilterHelper->useFilterForField($fieldName, $searchParam,
-                    $this->queryBuilder);
+                $this->queryBuilder = $this->searchFilterHelper->useFilterForField(
+                    $fieldName,
+                    $searchParam,
+                    $this->queryBuilder
+                );
                 continue;
             }
 

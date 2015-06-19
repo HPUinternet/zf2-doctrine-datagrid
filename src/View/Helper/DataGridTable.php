@@ -233,8 +233,11 @@ class DataGridTable extends AbstractHelper
         }
         if (in_array('simpleSearch', $this->displaySettings)) {
             foreach ($this->tableModel->getNonFieldFilters() as $filter) {
-                echo sprintf('<th class="%s">%s</th>', $classes . " " . $filter->getFilterName(),
-                    $filter->getFilterName());
+                echo sprintf(
+                    '<th class="%s">%s</th>',
+                    $classes . " " . $filter->getFilterName(),
+                    $filter->getFilterName()
+                );
             }
             echo '<th class="rowOptions">Options</th>';
         }
