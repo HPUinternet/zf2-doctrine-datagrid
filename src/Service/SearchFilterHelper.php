@@ -22,7 +22,7 @@ class SearchFilterHelper
      * @param $fieldName
      * @return bool
      */
-    public function hasFilterForField($fieldName)
+    public function hasFilter($fieldName)
     {
         if (isset($this->filters[$fieldName]) && !empty($this->filters[$fieldName])) {
             return true;
@@ -39,7 +39,7 @@ class SearchFilterHelper
      * @param QueryBuilderService $queryBuilderService
      * @return mixed
      */
-    public function useFilterForField($fieldName, $searchParam, QueryBuilderService $queryBuilderService)
+    public function useFilter($fieldName, $searchParam, QueryBuilderService $queryBuilderService)
     {
         $filterInstance = $this->filters[$fieldName];
 

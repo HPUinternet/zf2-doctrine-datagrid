@@ -131,8 +131,8 @@ class TableBuilderService
             }
             $this->usedFilters[$fieldName] = $searchParam;
 
-            if ($this->searchFilterHelper->hasFilterForField($fieldName)) {
-                $this->queryBuilder = $this->searchFilterHelper->useFilterForField(
+            if ($this->searchFilterHelper->hasFilter($fieldName)) {
+                $this->queryBuilder = $this->searchFilterHelper->useFilter(
                     $fieldName,
                     $searchParam,
                     $this->queryBuilder

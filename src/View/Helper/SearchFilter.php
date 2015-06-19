@@ -47,37 +47,50 @@ class SearchFilter extends AbstractHelper
     {
         foreach ($this->tableModel->getUsedHeaders() as $tableHeader => $accessor) {
             echo '<td>';
-
-            if (isset($this->tableModel->getFilters()[$tableHeader])) {
-                echo $this->getView()->formElement($this->tableModel->getFilters()[$tableHeader]->getFilterElement());
-                continue;
-            }
-
-            $dataType = $this->tableModel->getDataTypeByHeader($tableHeader);
-            if ($tableHeader != $accessor) {
-                $dataType = "Array";
-            }
-
-            $element = $this->dataStrategyResolver->displayFilterForDataType('search[' . $tableHeader . ']', $dataType);
-            if ($element instanceof Element) {
-                $element = $this->setElementValues($element, $tableHeader);
-                $element = $this->setElementCurrentValue($element, $tableHeader);
-                echo $this->getView()->formElement($element);
-            } else {
-                echo $element;
-            }
-
+            echo $this->getFilterElement($tableHeader, $accessor);
             echo '</td>';
         }
 
         foreach ($this->tableModel->getNonFieldFilters() as $filter) {
             $filterElement = $filter->getFilterElement();
+            $filterElement = $this->setElementCurrentValue($filterElement, $filterElement->getName());
             $filterElement->setName('search[' . $filterElement->getName() . ']');
 
             echo '<td>';
             echo $this->getView()->formElement($filterElement);
             echo '</td>';
         }
+    }
+
+    /**
+     * @param $tableHeader
+     * @param $accessor
+     * @return string|Element
+     */
+    protected function getFilterElement($tableHeader, $accessor)
+    {
+        if (isset($this->tableModel->getFilters()[$tableHeader])) {
+            $filterElement = $this->tableModel->getFilters()[$tableHeader]->getFilterElement();
+            $filterElement->setName('search[' . $filterElement->getName() . ']');
+            $filterElement = $this->setElementCurrentValue($filterElement, $tableHeader);
+
+            return $this->getView()->formElement($filterElement);
+        }
+
+        $dataType = $this->tableModel->getDataTypeByHeader($tableHeader);
+        if ($tableHeader != $accessor) {
+            $dataType = "Array";
+        }
+
+        $element = $this->dataStrategyResolver->displayFilterForDataType('search[' . $tableHeader . ']', $dataType);
+        if ($element instanceof Element) {
+            $element = $this->setElementValues($element, $tableHeader);
+            $element = $this->setElementCurrentValue($element, $tableHeader);
+
+            return $this->getView()->formElement($element);
+        }
+
+        return $element;
     }
 
     /**

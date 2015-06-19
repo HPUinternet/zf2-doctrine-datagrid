@@ -13,21 +13,6 @@ interface SearchFilterInterface
     public function getFilterElement();
 
     /**
-     * Returns the value of which GET or POST parameter should be parsed by this SearchFilter
-     *
-     * @return string
-     */
-    public function getFilterName();
-
-    /**
-     * When adding "new" filters to the table, one could imagine the data should receive a additional field
-     * that can indicate if the row passes the filter values.
-     *
-     * @return mixed
-     */
-    public function getFilterValue();
-
-    /**
      * Parses the raw searchFilter parameters into QueryBuilder where clauses.
      * Note that the method will must return the same QueryBuilder instance.
      *

@@ -324,12 +324,12 @@ class QueryBuilderService
      * @see prioritizeSubQueries
      *
      * @param string $fieldName
+     * @param string $fieldValue
      * @param string $clause
-     * @param string $operator
      * @return bool|this
      * @throws \Exception
      */
-    public function where($fieldName, $clause, $operator = "LIKE")
+    public function where($fieldName, $fieldValue, $clause = "LIKE")
     {
         if (!array_key_exists($fieldName, $this->availableTableColumns)) {
             return false;
@@ -375,8 +375,18 @@ class QueryBuilderService
             $fieldName = end($fieldNameSegments);
         }
 
-        $query->andWhere(sprintf('%s %s :' . $fieldName . '1', $entityAlias . '.' . $fieldName, $operator));
-        $query->setParameter($fieldName . '1', $clause);
+        /**
+         * TODO: unprepared parameters might become a vulnerability (since I don't know how Doctrine handles this)
+         *  1. find a better way of handeling IS NULL clauses
+         *  2. never ever let someone inject raw query data
+         */
+        if (($fieldValue == 'NULL' || $fieldValue == 'NOT NULL') && strpos(strtolower($fieldValue), 'or ') === false) {
+            $query->andWhere(sprintf('%s %s %s', $entityAlias . '.' . $fieldName, $clause, $fieldValue));
+        } else {
+            $query->andWhere(sprintf('%s %s :' . $fieldName . '1', $entityAlias . '.' . $fieldName, $clause));
+            $query->setParameter($fieldName . '1', $fieldValue);
+        }
+
 
         return $this;
     }
