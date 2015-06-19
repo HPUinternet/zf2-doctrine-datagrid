@@ -38,12 +38,21 @@ class ModuleOptionsFactory implements FactoryInterface
                 'Wms\Admin\User'
             ),
         );
-//        $dummyOptions = array(
-//            'entityName' => 'Wms\Admin\Shop\Entity\Product',
-//            'defaultColumns' => array(
-//                'id', 'productCode', 'name'
-//            ),
-//        );
+        $dummyOptions = array(
+            'entityName' => 'Wms\Admin\Shop\Entity\Product',
+            'defaultColumns' => array(
+                'id',
+                'productCode',
+                'name',
+                'startdate',
+                'enddate',
+                'price',
+                'stock'
+            ),
+            'searchFilters' => array(
+                'Wms\Admin\Shop\SearchFilter\VisibleProductSearchFilter'
+            ),
+        );
 //
 //        $dummyOptions = array(
 //            'entityName' => 'Wms\Admin\User\Entity\User',

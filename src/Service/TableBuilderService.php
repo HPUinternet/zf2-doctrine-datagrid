@@ -26,6 +26,11 @@ class TableBuilderService
     private $queryBuilder;
 
     /**
+     * @var SearchFilterHelper
+     */
+    private $searchFilterHelper;
+
+    /**
      * @var Boolean since resolving association columns rapidly leads to more queries, you can turn it off here
      */
     public $resolveAssociationColumns = true;
@@ -33,11 +38,17 @@ class TableBuilderService
     /**
      * @param ModuleOptions $moduleOptions
      * @param QueryBuilderService $queryBuilderService
+     * @param SearchFilterHelper $searchFilterHelper
      */
-    public function __construct(ModuleOptions $moduleOptions, QueryBuilderService $queryBuilderService)
+    public function __construct(
+        ModuleOptions $moduleOptions,
+        QueryBuilderService $queryBuilderService,
+        SearchFilterHelper $searchFilterHelper
+    )
     {
         $this->setModuleOptions($moduleOptions);
         $this->queryBuilder = $queryBuilderService;
+        $this->searchFilterHelper = $searchFilterHelper;
 
         // Make sure data retrieval is default when not configured
         $this->queryBuilder->refreshColumns($this->moduleOptions->getProhibitedColumns());
@@ -63,6 +74,7 @@ class TableBuilderService
         $table->setDataTypes(
             array_merge($this->queryBuilder->getTableColumnTypes(), $this->moduleOptions->getRenders())
         );
+        $table->setAndParseFilters($this->searchFilterHelper->getFilters());
         $table->setPageNumber($this->page);
         $table->setMaxPageNumber($this->calculateMaxPages());
         $table->setUsedFilterValues($this->usedFilters);
@@ -114,10 +126,18 @@ class TableBuilderService
     public function search(array $searchParams)
     {
         foreach ($searchParams as $fieldName => $searchParam) {
-            if (!empty($searchParam)) {
-                $this->queryBuilder->where($fieldName, "%" . $searchParam . "%");
-                $this->usedFilters[$fieldName] = $searchParam;
+            if (empty($searchParam)) {
+                continue;
             }
+            $this->usedFilters[$fieldName] = $searchParam;
+
+            if ($this->searchFilterHelper->hasFilterForField($fieldName)) {
+                $this->queryBuilder = $this->searchFilterHelper->useFilterForField($fieldName, $searchParam,
+                    $this->queryBuilder);
+                continue;
+            }
+
+            $this->queryBuilder->where($fieldName, "%" . $searchParam . "%");
         }
     }
 

@@ -38,6 +38,11 @@ class ModuleOptions extends AbstractOptions
     protected $renders = array();
 
     /**
+     * @var array
+     */
+    protected $searchFilters = array();
+
+    /**
      * @param string $entityName
      */
     public function setEntityName($entityName)
@@ -131,5 +136,21 @@ class ModuleOptions extends AbstractOptions
     public function setRenders($renders)
     {
         $this->renders = $renders;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSearchFilters()
+    {
+        return $this->searchFilters;
+    }
+
+    /**
+     * @param array $searchFilters
+     */
+    public function setSearchFilters($searchFilters)
+    {
+        $this->searchFilters = $searchFilters;
     }
 }

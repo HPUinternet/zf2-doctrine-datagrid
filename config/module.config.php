@@ -5,6 +5,7 @@ return array(
     'service_manager' => array(
         'factories' => array(
             'Wms\Admin\DataGrid\Service\QueryFilterHelper' => 'Wms\Admin\DataGrid\Factory\QueryFilterHelperFactory',
+            'Wms\Admin\DataGrid\Service\SearchFilterHelper' => 'Wms\Admin\DataGrid\Factory\SearchFilterHelperFactory',
             'Wms\Admin\DataGrid\Service\QueryBuilderService' => 'Wms\Admin\DataGrid\Factory\QueryBuilderServiceFactory',
             'Wms\Admin\DataGrid\Service\EntityMetadataHelper' => 'Wms\Admin\DataGrid\Factory\EntityMetadataHelperFactory',
             'Wms\Admin\DataGrid\Service\TableBuilderService' => 'Wms\Admin\DataGrid\Factory\TableBuilderServiceFactory',
@@ -28,6 +29,7 @@ return array(
     'view_helpers' => array(
         'invokables' => array(
             'DataGridTable' => 'Wms\Admin\DataGrid\View\Helper\DataGridTable',
+            'DataGridSearchFilter' => 'Wms\Admin\DataGrid\View\Helper\SearchFilter',
             'UrlWithQuery' => 'Wms\Admin\DataGrid\View\Helper\UrlWithQuery',
             'DataGridForm' => 'Wms\Admin\DataGrid\View\Form\Form',
             'DataGridFormRow' => 'Wms\Admin\DataGrid\View\Form\FormRow',

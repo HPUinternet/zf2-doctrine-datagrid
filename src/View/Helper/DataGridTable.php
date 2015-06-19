@@ -32,6 +32,9 @@ class DataGridTable extends AbstractHelper
      */
     private $settingsForm;
 
+    /**
+     * @var Escaper
+     */
     private $escaper;
 
     /**
@@ -62,6 +65,7 @@ class DataGridTable extends AbstractHelper
         $displaySettings = array('columnsForm', 'pagination', 'ordering', 'simpleSearch', 'advancedSearch')
     ) {
         $this->escaper = new Escaper('utf-8');
+        $this->additionalCells = 0;
 
         $this->setTableModel($tableModel);
         $this->displaySettings = $displaySettings;
@@ -148,43 +152,9 @@ class DataGridTable extends AbstractHelper
      */
     public function printTableFilterRow()
     {
-        if (!in_array('simpleSearch', $this->displaySettings)) {
-            echo '</thead>';
-
-            return;
-        }
-        echo '<tr class="simpleSearch">';
-
-        /**
-         * 1. kijk of er een speciale filter verklaard is voor dat veld, gebruik die
-         * 2. // TODO: kijk of het een doctrine extension is, gebruik die
-         * 3. kijk wat de datatype is, spuug een filter uit aan de hand van de type
-         */
-        foreach ($this->tableModel->getUsedHeaders() as $tableHeader => $accessor) {
-            echo '<td>';
-            $dataType = $this->tableModel->getDataTypeByHeader($tableHeader);
-            if ($tableHeader != $accessor) {
-                $dataType = "Array";
-            }
-
-            $element = $this->dataStrategyResolver->displayFilterForDataType('search[' . $tableHeader . ']', $dataType);
-            if ($element instanceof Element) {
-                $element = $this->setElementValues($element, $tableHeader);
-                $element = $this->setElementCurrentValue($element, $tableHeader);
-                echo $this->getView()->formElement($element);
-            } else {
-                echo $element;
-            }
-            echo '</td>';
-        }
         if (in_array('simpleSearch', $this->displaySettings)) {
-            echo '<td>
-                <button type="submit" class="btn btn-primary max-width">
-                    <span class="glyphicon glyphicon-search"></span> Search
-                </button>
-                </td>';
+            $this->view->DataGridSearchFilter($this->tableModel, $this->dataStrategyResolver);
         }
-        echo '</tr>';
         echo '</thead>';
     }
 
@@ -252,13 +222,20 @@ class DataGridTable extends AbstractHelper
             if ($this->tableModel->isHiddenColumn($column)) {
                 continue;
             }
+
             echo sprintf('<th class="%s">%s', $classes . " " . $column, $column);
+
             if ($column == $accessor) {
                 $this->printOrderOption($column);
             }
+
             echo '</th>';
         }
         if (in_array('simpleSearch', $this->displaySettings)) {
+            foreach ($this->tableModel->getNonFieldFilters() as $filter) {
+                echo sprintf('<th class="%s">%s</th>', $classes . " " . $filter->getFilterName(),
+                    $filter->getFilterName());
+            }
             echo '<th class="rowOptions">Options</th>';
         }
         echo '</tr>';
@@ -294,6 +271,9 @@ class DataGridTable extends AbstractHelper
         }
 
         if (in_array('simpleSearch', $this->displaySettings)) {
+            foreach ($this->tableModel->getNonFieldFilters() as $filterName => $filter) {
+                $this->printTableContentCell($filter->getFilterValue($rowData, $filterName));
+            }
             echo '<td></td>';
         }
     }
@@ -322,65 +302,6 @@ class DataGridTable extends AbstractHelper
             echo '<form method="GET">';
         }
         echo sprintf('<table class="%s">', $classes);
-    }
-
-    /**
-     * If the TableModel contains FilterData this method can provide the input element with the right optional values
-     *
-     * @param Element $element
-     * @param $fieldName
-     * @return Element
-     */
-    protected function setElementValues(Element $element, $fieldName)
-    {
-        // If the fieldname is not nested, there is no way the joined query returns data for you.
-        $fieldNameSegments = explode(".", $fieldName);
-        if (count($fieldNameSegments) <= 1) {
-            return $element;
-        }
-
-        $parentField = $fieldNameSegments[0];
-        $childField = $fieldNameSegments[1];
-
-
-        if (!isset($this->tableModel->getAvailableFilterValues()[$parentField])) {
-            return $element;
-        }
-
-        $valueOptions = array();
-        foreach ($this->tableModel->getAvailableFilterValues()[$parentField] as $filterValues) {
-            if (isset($filterValues[$childField]) && !in_array($filterValues[$childField], $valueOptions)) {
-                $value = $filterValues[$childField];
-                $displayValue = $this->dataStrategyResolver->resolveAndParse($value, $fieldName);
-                $valueOptions[$value] = $displayValue;
-            }
-        }
-
-        if (method_exists($element, 'setValueOptions') && method_exists($element, 'setEmptyOption')) {
-            $emptyLabel = $this->getView()->Translate('Select') . ' ' . $this->getView()->Translate($fieldName);
-            $element->setEmptyOption($emptyLabel);
-            $element->setValueOptions($valueOptions);
-        }
-
-        return $element;
-    }
-
-    /**
-     * If the TableModel holds information about filters that where applied, we pass them into the form element
-     *
-     * @param Element $element
-     * @param $fieldName
-     * @return Element
-     */
-    protected function setElementCurrentValue(Element $element, $fieldName)
-    {
-        if (!array_key_exists($fieldName, $this->tableModel->getUsedFilterValues())) {
-            return $element;
-        }
-
-        $element->setValue($this->tableModel->getUsedFilterValues()[$fieldName]);
-
-        return $element;
     }
 
     /**

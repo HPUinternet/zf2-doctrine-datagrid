@@ -33,6 +33,16 @@ class TableModel
     protected $dataTypes;
 
     /**
+     * @var array
+     */
+    protected $filters;
+
+    /**
+     * @var Array
+     */
+    protected $nonFieldFilters;
+
+    /**
      * @var int
      */
     protected $pageNumber;
@@ -51,6 +61,8 @@ class TableModel
         $this->availableHeaders = array();
         $this->usedHeaders = array();
         $this->dataTypes = array();
+        $this->filters = array();
+        $this->nonFieldFilters = array();
         $this->pageNumber = 1;
         $this->maxPageNumber = 1;
     }
@@ -85,6 +97,21 @@ class TableModel
         }
 
         return $this;
+    }
+
+    /**
+     * Sets the filters, but also resolves filters that can't be matched with fieldValues
+     *
+     * @param array $filters
+     */
+    public function setAndParseFilters(array $filters)
+    {
+        foreach ($filters as $fieldname => $filterinstance) {
+            if (!array_key_exists($fieldname, $this->usedHeaders)) {
+                $this->nonFieldFilters[$fieldname] = $filterinstance;
+            }
+        }
+        $this->setFilters($filters);
     }
 
     /**
@@ -322,5 +349,37 @@ class TableModel
     public function setUsedFilterValues($usedFilterValues)
     {
         $this->usedFilterValues = $usedFilterValues;
+    }
+
+    /**
+     * @return Array
+     */
+    public function getFilters()
+    {
+        return $this->filters;
+    }
+
+    /**
+     * @param Array $filters
+     */
+    public function setFilters($filters)
+    {
+        $this->filters = $filters;
+    }
+
+    /**
+     * @return Array
+     */
+    public function getNonFieldFilters()
+    {
+        return $this->nonFieldFilters;
+    }
+
+    /**
+     * @param Array $nonFieldFilters
+     */
+    public function setNonFieldFilters($nonFieldFilters)
+    {
+        $this->nonFieldFilters = $nonFieldFilters;
     }
 }
