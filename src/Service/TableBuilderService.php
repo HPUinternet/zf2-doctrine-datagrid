@@ -5,7 +5,6 @@ use Wms\Admin\DataGrid\Model\TableModel as Table;
 
 class TableBuilderService
 {
-
     /**
      * @var Int
      */
@@ -22,7 +21,7 @@ class TableBuilderService
     private $moduleOptions;
 
     /**
-     * @var QueryBuilderHelper
+     * @var QueryBuilderService
      */
     private $queryBuilder;
 
@@ -33,12 +32,12 @@ class TableBuilderService
 
     /**
      * @param ModuleOptions $moduleOptions
-     * @param QueryBuilderHelper $queryBuilderHelper
+     * @param QueryBuilderService $queryBuilderService
      */
-    public function __construct(ModuleOptions $moduleOptions, QueryBuilderHelper $queryBuilderHelper)
+    public function __construct(ModuleOptions $moduleOptions, QueryBuilderService $queryBuilderService)
     {
         $this->setModuleOptions($moduleOptions);
-        $this->queryBuilder = $queryBuilderHelper;
+        $this->queryBuilder = $queryBuilderService;
 
         // Make sure data retrieval is default when not configured
         $this->queryBuilder->refreshColumns($this->moduleOptions->getProhibitedColumns());
@@ -153,7 +152,7 @@ class TableBuilderService
     }
 
     /**
-     * @return QueryBuilderHelper
+     * @return QueryBuilderService
      */
     public function getQueryBuilder()
     {
@@ -161,7 +160,7 @@ class TableBuilderService
     }
 
     /**
-     * @param QueryBuilderHelper $queryBuilder
+     * @param QueryBuilderService $queryBuilder
      */
     public function setQueryBuilder($queryBuilder)
     {

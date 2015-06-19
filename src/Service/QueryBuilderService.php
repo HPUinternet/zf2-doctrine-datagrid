@@ -5,7 +5,7 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo as MetaData;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query\Expr;
 
-class QueryBuilderHelper
+class QueryBuilderService
 {
     /**
      * @var Array
@@ -504,8 +504,8 @@ class QueryBuilderHelper
 
     /**
      * When showing HTML select filters on association fields, all possible data
-     * should be preloaded into the filter fields. Since the QueryBuilderHelper
-     * keeps track on what is joined in a separate query, the QueryBuilderHelper is able to
+     * should be preloaded into the filter fields. Since the QueryBuilderService
+     * keeps track on what is joined in a separate query, the QueryBuilderService is able to
      * "eager load" this association data relatively easy.
      *
      * @throws \Doctrine\ORM\Mapping\MappingException

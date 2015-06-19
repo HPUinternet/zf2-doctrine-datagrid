@@ -33,7 +33,10 @@ class ModuleOptionsFactory implements FactoryInterface
             ),
             'renders' => array(
                 'thumbnailFile.imagepath' => 'Wms\Admin\MediaManager\View\Helper\DataStrategy\ImageStrategy'
-            )
+            ),
+            'searchFilters' => array(
+                'Wms\Admin\User'
+            ),
         );
 //        $dummyOptions = array(
 //            'entityName' => 'Wms\Admin\Shop\Entity\Product',

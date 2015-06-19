@@ -16,7 +16,7 @@ class TableBuilderServiceFactory implements FactoryInterface
     {
         return new TableBuilderService(
             $serviceLocator->get('Wms\Admin\DataGrid\Options\ModuleOptions'),
-            $serviceLocator->get('Wms\Admin\DataGrid\Service\QueryBuilderHelper')
+            $serviceLocator->get('Wms\Admin\DataGrid\Service\QueryBuilderService')
         );
     }
 }

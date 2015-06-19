@@ -5,7 +5,7 @@ return array(
     'service_manager' => array(
         'factories' => array(
             'Wms\Admin\DataGrid\Service\QueryFilterHelper' => 'Wms\Admin\DataGrid\Factory\QueryFilterHelperFactory',
-            'Wms\Admin\DataGrid\Service\QueryBuilderHelper' => 'Wms\Admin\DataGrid\Factory\QueryBuilderHelperFactory',
+            'Wms\Admin\DataGrid\Service\QueryBuilderService' => 'Wms\Admin\DataGrid\Factory\QueryBuilderServiceFactory',
             'Wms\Admin\DataGrid\Service\EntityMetadataHelper' => 'Wms\Admin\DataGrid\Factory\EntityMetadataHelperFactory',
             'Wms\Admin\DataGrid\Service\TableBuilderService' => 'Wms\Admin\DataGrid\Factory\TableBuilderServiceFactory',
             'Wms\Admin\DataGrid\Options\ModuleOptions' => 'Wms\Admin\DataGrid\Factory\ModuleOptionsFactory',
