@@ -44,8 +44,7 @@ class TableBuilderService
         ModuleOptions $moduleOptions,
         QueryBuilderService $queryBuilderService,
         SearchFilterHelper $searchFilterHelper
-    )
-    {
+    ) {
         $this->setModuleOptions($moduleOptions);
         $this->queryBuilder = $queryBuilderService;
         $this->searchFilterHelper = $searchFilterHelper;
