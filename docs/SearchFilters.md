@@ -4,24 +4,109 @@ After configuring the DataGrid to display your entity, you might want to conside
 1. Filter
 2. Search Filter
 
-Whilst the (normal) filter is a permanent layer that can only be enabled or disabled by the programmer through the module configuration, the search filter allows the users of the datagrid to alter its values in the browser on a request basis.
+Whilst the (normal) filter is a permanent layer that can only be enabled or disabled by the programmer using the module configuration, the search filter allows the users of the DataGrid to alter its values on a request basis.
 
 ## Configuring a search filter
 Just like many other things in the datagrid module, searchfilters can be configured in the datagrid module options. Have a look at an example configuration below.
     
     
     'wms-datagrid' => array(
-        'entityName' => 'Wms\Admin\Blog\Entity\BlogItem',
+        'entityName' => 'Wms\Admin\Shop\Entity\Product',
         'defaultColumns' => array(
-            'id', 'title', 'content', 'categories.name', 'created'
+            'id', 'title', 'price', 'stock', 'categories.name', 'created', 'published'
         ),
         'searchFilters' => array(
-            'Wms\Admin\Blog\SearchFilter\ListedonHomepage'
+            'Wms\Admin\Shop\SearchFilter\VisibleProductSeachFilter'
         ),
     );
     
     
 ### Your search filter class
-In the above sample I've registered a filter class that is able to filter my BlogItems based on several predetermined parameters. In this scenario, a Blogpost is only listed on the homepage if: 1. Published is set to true, 2. The entity is within the last 10 posts, ordered by the created field.
+In the above sample I've registered a filter class that is able to filter my imaginary web shop products based on several predetermined parameters. In this scenario, a product is only visible in my shop if: 1. Published is set to true, 2. The product has a stock of 1 or higher and 3. the price is set. Since a costum searchfilter will be interacting with the core of the DataGrid module we've set up two interfaces that SearchFilters classes should abide before being implemented in a DataGrid. These interfaces can be found back in the code of the repository. An sample implementation of these interfaces can be found below.
 
-@todo implmentatie hier
+    <?php namespace Wms\Admin\Shop\SearchFilter;
+    
+    use Wms\Admin\DataGrid\SearchFilter\NonFieldSearchFilterInterface;
+    use Wms\Admin\DataGrid\Service\QueryBuilderService;
+    use Zend\Form\ElementInterface;
+    use Zend\Form\Element\Select;
+    
+    class VisibleProductSearchFilter implements NonFieldSearchFilterInterface
+    {
+    
+        private $elementName = 'visible';
+    
+        /**
+         * Provides the DataGrid view helper with an instance of a Zend form Element.
+         *
+         * @return ElementInterface;
+         */
+        public function getFilterElement()
+        {
+            $element = new Select($this->elementName);
+            $element->setValueOptions(array('yes' => 'yes', 'no' => 'no'));
+    
+            return $element;
+        }
+    
+        /**
+         * Returns the value of which GET or POST parameter should be parsed by this SearchFilter
+         *
+         * @return string
+         */
+        public function getFilterName()
+        {
+            return $this->elementName;
+        }
+    
+        /**
+         * Parses the raw searchFilter parameters into QueryBuilder where clauses.
+         * Note that the method will must return the same QueryBuilder instance.
+         *
+         * @param $searchParams
+         * @param QueryBuilderService $queryBuilderService
+         * @return QueryBuilderService $queryBuilderService
+         */
+        public function search($searchParams, QueryBuilderService $queryBuilderService)
+        {
+            if ($searchParams == "yes") {
+                $queryBuilderService->where('published', 1, '=');
+                $queryBuilderService->where('stock', 1, '>=');
+                $queryBuilderService->where('price', 'NULL', 'NOT IS');
+            }
+    
+            return $queryBuilderService;
+        }
+    
+        /**
+         * When adding "new" filters to the table, one could imagine the data should receive a additional field
+         * that can indicate if the row passes the filter values.
+         *
+         * @param $rowData array current result row that is being parsed by the Datagrid table
+         * @return mixed
+         */
+        public function getFilterValue($rowData)
+        {
+            if($rowData['state'] == 1 && $rowData['price'] > 0 && !empty($rowData['price'])) {
+                return 'yes';
+            }
+            return 'no';
+        }
+    }
+
+Notice how the `search` method implementation retrieves a reference of the current QueryBuilderService.  The QueryBuilderService is the class that communicates directly with the Doctrine ORM and firers queries against your configured datasource. With the power of the QueryBuilderService comes some responsibility: you are required to filter your RAW input data in the search function before passing it into the QueryBuilder. **If you fail to clean or check the input data, corrupted or corrupting queries can occur against your datasource.**
+
+### Replacing a standard search filter with your custom one
+The above configuration will add an aditional column in your datagrid table. but what if you want to replace a searchfilter for a existing field, generated by the datagrid? the answer is simple: 
+    
+    'wms-datagrid' => array(
+        'entityName' => 'Wms\Admin\Shop\Entity\Product',
+        'defaultColumns' => array(
+            'id', 'title', 'price', 'stock', 'categories.name', 'created', 'published'
+        ),
+        'searchFilters' => array(
+            'published' = > 'Wms\Admin\Shop\SearchFilter\VisibleProductSeachFilter'
+        ),
+    );
+    
+ The example above shows you how name your custom search filters. if the name of the search filter is the same as a column name. your search filter will be used to replace the inline search form.

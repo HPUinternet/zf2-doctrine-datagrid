@@ -16,7 +16,8 @@ interface NonFieldSearchFilterInterface extends SearchFilterInterface
      * When adding "new" filters to the table, one could imagine the data should receive a additional field
      * that can indicate if the row passes the filter values.
      *
+     * @param $rowData array current result row that is being parsed by the DataGrid table
      * @return mixed
      */
-    public function getFilterValue();
+    public function getFilterValue($rowData);
 }

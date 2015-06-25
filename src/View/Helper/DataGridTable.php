@@ -280,7 +280,7 @@ class DataGridTable extends AbstractHelper
 
         if (in_array('simpleSearch', $this->displaySettings)) {
             foreach ($this->tableModel->getNonFieldFilters() as $filterName => $filter) {
-                $this->printTableContentCell($filter->getFilterValue($rowData, $filterName));
+                $this->printTableContentCell($filter->getFilterValue($rowData));
             }
             if (!in_array('actionRoutes', $this->displaySettings)) {
                 echo '<td></td>';
