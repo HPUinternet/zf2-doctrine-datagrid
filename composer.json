@@ -11,6 +11,10 @@
             "name": "HPU Internet Services",
             "email": "service@hpu.nl",
             "homepage": "http://hpu.nl/"
+        },
+      {
+        "name": "Nico Stapelbroek @ HPU",
+        "email": "nstapelbroek@gmail.com"
         }
     ],
     "support": {
@@ -29,6 +33,10 @@
         }
     ],
     "autoload": {
+        "psr-4": {
+            "Wms\\Admin\\DataGrid\\": "src/",
+            "Wms\\Admin\\DataGrid\\Tests\\": "tests/"
+        },
         "classmap": [
             "./Module.php"
         ]
