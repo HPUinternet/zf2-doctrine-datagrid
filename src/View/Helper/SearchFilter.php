@@ -29,7 +29,7 @@ class SearchFilter extends AbstractHelper
         $this->tableModel = $tableModel;
         $this->dataStrategyResolver = $dataStrategyResolver;
 
-        echo '<tr class="simpleSearch">';
+        echo '<tr class="simpleSearch tabelZoekBalk">';
         echo $this->printFilterFields();
         echo '<td>
                 <span class="pull-right">
