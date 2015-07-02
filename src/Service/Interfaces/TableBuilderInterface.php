@@ -46,5 +46,4 @@ interface TableBuilderInterface
      * @param array $searchParams
      */
     public function search(array $searchParams);
-
 }

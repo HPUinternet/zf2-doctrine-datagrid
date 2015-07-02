@@ -62,5 +62,4 @@ class ModuleOptionsFactory implements FactoryInterface
 
         return false;
     }
-
 }
