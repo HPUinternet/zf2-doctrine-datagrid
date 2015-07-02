@@ -241,11 +241,11 @@ class DataGridTable extends AbstractHelper
                     $filter->getFilterName()
                 );
             }
-            echo '<th class="tabelHeader rowOptions">Options</th>';
+            echo '<th class="tabelHeader rowOptions"></th>';
         }
 
         if (!in_array('simpleSearch', $this->displaySettings) && in_array('actionRoutes', $this->displaySettings)) {
-            echo '<th class="tabelHeader rowOptions">Options</th>';
+            echo '<th class="tabelHeader rowOptions"></th>';
         }
         echo '</tr>';
     }
@@ -281,7 +281,7 @@ class DataGridTable extends AbstractHelper
 
         if (in_array('simpleSearch', $this->displaySettings)) {
             foreach ($this->tableModel->getNonFieldFilters() as $filterName => $filter) {
-                $this->printTableContentCell($filter->getFilterValue($rowData));
+                $this->printTableContentCell($filter->getFilterValue($rowData), $filterName);
             }
             if (!in_array('actionRoutes', $this->displaySettings)) {
                 echo '<td></td>';
@@ -290,15 +290,11 @@ class DataGridTable extends AbstractHelper
 
         if (in_array('actionRoutes', $this->displaySettings)) {
             $links = $this->tableModel->getOptionRoutes();
-            echo '<td>';
+            echo '<td class="kolom rowOptions"><span class="pull-right iconenNaarLinks">';
             foreach ($links as $action => $url) {
-                echo sprintf(
-                    '<a class="options btn btn-mini" href="%s">%s</a>',
-                    $this->view->url($url, array('action' => $action, 'id' => $rowData['id'])),
-                    $action
-                );
+                echo $this->getActionLink($action, $url, $rowData['id']);
             }
-            echo '</td>';
+            echo '</span></td>';
         }
     }
 
@@ -379,5 +375,37 @@ class DataGridTable extends AbstractHelper
                 'text/javascript'
             );
         }
+    }
+
+    /**
+     * Tries to add a glyph icon to an action link
+     *
+     * @param $action
+     * @param $url
+     * @param $id
+     * @return string
+     */
+    protected function getActionLink($action, $url, $id)
+    {
+        $knownActions = array(
+            'edit' => 'pencil',
+            'delete' => 'trash',
+            'view' => 'search',
+        );
+
+        if (in_array('noStyling', $this->displaySettings) || !array_key_exists($action, $knownActions)) {
+            return sprintf(
+                '<a class="options btn btn-mini" href="%s" title="%s">%s</a>',
+                $this->view->url($url, array('action' => $action, 'id' => $id)),
+                $action
+            );
+        }
+
+        return sprintf(
+            '<a href="%s" title="%s"><i class="glyphicon glyphicon-%s icoonNaarLinks"></i></a>',
+            $this->view->url($url, array('action' => $action, 'id' => $id)),
+            $action,
+            $knownActions[$action]
+        );
     }
 }

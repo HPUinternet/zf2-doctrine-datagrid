@@ -32,9 +32,11 @@ class SearchFilter extends AbstractHelper
         echo '<tr class="simpleSearch">';
         echo $this->printFilterFields();
         echo '<td>
-                <button type="submit" class="btn btn-primary max-width">
-                    <span class="glyphicon glyphicon-search"></span> Search
-                </button>
+                <span class="pull-right">
+                    <button type="submit" class="btn knopSearch">
+                        <span class="glyphicon glyphicon-search"></span> Search
+                    </button>
+                </span>
                 </td>';
         echo '</tr>';
         echo '</thead>';
