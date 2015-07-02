@@ -1,6 +1,8 @@
 <?php namespace Wms\Admin\DataGrid\Controller\Plugin;
 
 use Wms\Admin\DataGrid\Service\Interfaces\TableBuilderInterface;
+use Zend\Json\Exception\RuntimeException;
+use Zend\Json\Json;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 use Wms\Admin\DataGrid\Service\TableBuilderService;
 
@@ -39,26 +41,26 @@ class DataGridPlugin extends AbstractPlugin
      */
     public function processQueryParameters(array $queryParameters)
     {
-        if ($columns = $this->getParameter($queryParameters, 'columns')) {
-            $this->getTableBuilderService()->selectColumns($this->isJson($columns) ? json_decode($columns) : $columns);
+        if (isset($queryParameters['columns'])) {
+            $columns = $this->parseValue($queryParameters['columns']);
+            $this->getTableBuilderService()->selectColumns($columns);
         }
 
-        if (($page = $this->getParameter($queryParameters, 'page'))) {
-            $this->getTableBuilderService()->setPage($this->isJson($page) ? json_decode($page) : $page);
+        if (isset($queryParameters['page'])) {
+            $page = $this->parseValue($queryParameters['page']);
+            $this->getTableBuilderService()->setPage($page);
         }
 
-        if (
-            ($sort = $this->getParameter($queryParameters, 'sort')) &&
-            ($order = $this->getParameter($queryParameters, 'order'))
-        ) {
-            $this->getTableBuilderService()->orderBy(
-                $this->isJson($sort) ? json_decode($sort) : $sort,
-                $this->isJson($order) ? json_decode($order) : $order
-            );
+        if (isset($queryParameters['sort']) && isset($queryParameters['order'])) {
+            $sort = $this->parseValue($queryParameters['sort']);
+            $order = $this->parseValue($queryParameters['order']);
+
+            $this->getTableBuilderService()->orderBy($sort, $order);
         }
 
-        if ($search = $this->getParameter($queryParameters, 'search')) {
-            $this->getTableBuilderService()->search($this->isJson($search) ? json_decode($search) : $search);
+        if (isset($queryParameters['search'])) {
+            $search = $this->parseValue($queryParameters['search']);
+            $this->getTableBuilderService()->search($search);
         }
     }
 
@@ -81,17 +83,19 @@ class DataGridPlugin extends AbstractPlugin
      * wrapper around a if statement. will return the value in the array if available
      * else returns false
      *
-     * @param array $queryParameters
-     * @param $parameterName
+     * @param $value
      * @return mixed
      */
-    protected function getParameter(array $queryParameters, $parameterName)
+    protected function parseValue($value)
     {
-        if (isset($queryParameters[$parameterName]) && !empty($queryParameters[$parameterName])) {
-            return $queryParameters[$parameterName];
+        if (!is_array($value)) {
+            try {
+                return Json::decode($value);
+            } catch (RuntimeException $ex) {
+            }
         }
 
-        return false;
+        return $value;
     }
 
     /**
@@ -106,7 +110,7 @@ class DataGridPlugin extends AbstractPlugin
             return false;
         }
 
-        json_decode($string);
+        Json::decode($string);
 
         return (json_last_error() == JSON_ERROR_NONE);
     }
