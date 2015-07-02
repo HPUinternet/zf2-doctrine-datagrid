@@ -17,7 +17,11 @@ return array(
             'Wms\Admin\DataGrid\Controller\DataGridController' => 'Wms\Admin\DataGrid\Factory\DataGridControllerFactory',
         ),
     ),
-
+    'controller_plugins' => array(
+        'factories' => array(
+            'DataGridPlugin' => 'Wms\Admin\DataGrid\Factory\DataGridControllerPluginFactory',
+        )
+    ),
     'view_manager' => array(
         'template_path_stack' => array(
             __DIR__ . '/../view',
@@ -36,23 +40,5 @@ return array(
             'DataGridFormCollection' => 'Wms\Admin\DataGrid\View\Form\FormCollection',
             'DataGridNestedFormCollection' => 'Wms\Admin\DataGrid\View\Form\NestedFormCollection',
         ),
-    ),
-    'router' => array(
-        'routes' => array(
-            'zfcadmin' => array(
-                'child_routes' => array(
-                    'datagrid' => array(
-                        'type'    => 'Segment',
-                        'options' => array(
-                            'route'    => '/datagrid',
-                            'defaults' => array(
-                                'controller'    => 'Wms\Admin\DataGrid\Controller\DataGridController',
-                                'action' => 'index'
-                            ),
-                        ),
-                    )
-                )
-            )
-        )
     ),
 );
