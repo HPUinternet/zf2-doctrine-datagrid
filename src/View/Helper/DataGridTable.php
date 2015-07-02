@@ -1,6 +1,5 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper;
 
-use IntlDateFormatter;
 use Zend\Di\ServiceLocator;
 use Zend\Form\Element;
 use Zend\Form\Form;
@@ -90,6 +89,8 @@ class DataGridTable extends AbstractHelper
         echo '<div class="datagrid after col-md-12">';
         $this->printPagination();
         echo '</div>';
+
+        $this->printStyling();
     }
 
     /**
@@ -360,6 +361,18 @@ class DataGridTable extends AbstractHelper
             }
 
             echo '</form>';
+        }
+    }
+
+    /**
+     * Appends / Prepends CSS and JS files for an enhanced UI/UX
+     */
+    protected function printStyling()
+    {
+        if (!in_array('noStyling', $this->displaySettings)) {
+            $this->view->headLink()->prependStylesheet($this->view->basePath() . '/css/Admin/DataGrid/Dist/dataGrid.css');
+            $this->view->headScript()->appendFile($this->view->basePath() . '/js/Admin/DataGrid/Dist/dataGrid.js',
+                'text/javascript');
         }
     }
 }
