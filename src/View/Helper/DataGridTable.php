@@ -370,9 +370,14 @@ class DataGridTable extends AbstractHelper
     protected function printStyling()
     {
         if (!in_array('noStyling', $this->displaySettings)) {
-            $this->view->headLink()->prependStylesheet($this->view->basePath() . '/css/Admin/DataGrid/Dist/dataGrid.css');
-            $this->view->headScript()->appendFile($this->view->basePath() . '/js/Admin/DataGrid/Dist/dataGrid.js',
-                'text/javascript');
+            $this->view->headLink()->prependStylesheet(
+                $this->view->basePath() . '/css/Admin/DataGrid/Dist/dataGrid.css'
+            );
+
+            $this->view->headScript()->appendFile(
+                $this->view->basePath() . '/js/Admin/DataGrid/Dist/dataGrid.js',
+                'text/javascript'
+            );
         }
     }
 }
