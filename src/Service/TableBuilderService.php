@@ -49,11 +49,7 @@ class TableBuilderService implements TableBuilderInterface
         $this->setModuleOptions($moduleOptions);
         $this->queryBuilder = $queryBuilderService;
         $this->searchFilterHelper = $searchFilterHelper;
-
-        // Make sure data retrieval is default when not configured
-        $this->queryBuilder->refreshColumns($this->moduleOptions->getProhibitedColumns());
-        $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
-        $this->setPage($this->page, $this->getModuleOptions()->getItemsPerPage());
+        $this->init();
     }
 
     /**
@@ -108,7 +104,7 @@ class TableBuilderService implements TableBuilderInterface
      * @param $column
      * @param $order
      */
-    public function orderBy($column, $order)
+    public function orderBy($column, $order = 'asc')
     {
         // @todo: input valdiation should be handled by zend form
         if (in_array($column, $this->queryBuilder->getAvailableTableColumns())
@@ -157,6 +153,16 @@ class TableBuilderService implements TableBuilderInterface
         }
 
         return ceil($maxResults / $itemsPerPage);
+    }
+
+    /**
+     * Sets default options and parameters, read from the module configuration
+     */
+    private function init()
+    {
+        $this->queryBuilder->refreshColumns($this->getModuleOptions()->getProhibitedColumns());
+        $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
+        $this->setPage($this->page, $this->getModuleOptions()->getItemsPerPage());
     }
 
     /**
