@@ -240,11 +240,11 @@ class DataGridTable extends AbstractHelper
                     $filter->getFilterName()
                 );
             }
-            echo '<th class="rowOptions">Options</th>';
+            echo '<th class="tabelHeader rowOptions">Options</th>';
         }
 
         if (!in_array('simpleSearch', $this->displaySettings) && in_array('actionRoutes', $this->displaySettings)) {
-            echo '<th class="rowOptions">Options</th>';
+            echo '<th class="tabelHeader rowOptions">Options</th>';
         }
         echo '</tr>';
     }
