@@ -6,7 +6,7 @@ use Zend\Form\ElementInterface;
 class StringStrategy implements DataStrategyInterface, DataStrategyFilterInterface
 {
 
-    protected $maxLength = 32;
+    protected $maxLength = 64;
 
     /**
      * Parse the data to a html representation

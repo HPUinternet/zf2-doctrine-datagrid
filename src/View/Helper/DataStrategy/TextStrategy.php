@@ -2,5 +2,5 @@
 
 class TextStrategy extends StringStrategy implements DataStrategyInterface, DataStrategyFilterInterface
 {
-    protected $maxLength = 64;
+    protected $maxLength = 128;
 }
