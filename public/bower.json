@@ -1,27 +1,17 @@
 {
   "name": "wms-module",
   "dependencies": {
-    "datatables": "1.10.5"
+	  "bootstrap-switch": "3.3.2"
   },
   "install": {
     "path": "vendor",
     "sources": {
-      "datatables" : [
-        "bower_components/datatables/media/js/jquery.dataTables.min.js",
-        "bower_components/datatables/media/css/jquery.dataTables.min.css",
-        "bower_components/datatables/media/images/back_disabled.png",
-        "bower_components/datatables/media/images/back_enabled.png",
-        "bower_components/datatables/media/images/back_enabled_hover.png",
-        "bower_components/datatables/media/images/favicon.ico",
-        "bower_components/datatables/media/images/forward_disabled.png",
-        "bower_components/datatables/media/images/forward_enabled.png",
-        "bower_components/datatables/media/images/forward_enabled_hover.png",
-        "bower_components/datatables/media/images/sort_asc.png",
-        "bower_components/datatables/media/images/sort_asc_disabled.png",
-        "bower_components/datatables/media/images/sort_both.png",
-        "bower_components/datatables/media/images/sort_desc.png",
-        "bower_components/datatables/media/images/sort_desc_disabled.png"
-      ]
+		"bootstrap-switch": [
+			"bower_components/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.min.css",
+			"bower_components/bootstrap-switch/dist/js/bootstrap-switch.min.js"
+		],
+		"bootstrap": [ ],
+		"jquery": [ ]
     }
   }
 }

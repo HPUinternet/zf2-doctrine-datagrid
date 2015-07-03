@@ -6,4 +6,6 @@ $(document).ready(function () {
             $(this).tab('show');
         });
     });
+
+    // $('tr.simpleSearch input[type="checkbox"]').bootstrapSwitch();
 });

@@ -123,7 +123,7 @@ class TableBuilderService implements TableBuilderInterface
     public function search(array $searchParams)
     {
         foreach ($searchParams as $fieldName => $searchParam) {
-            if (empty($searchParam)) {
+            if ($searchParam == "") {
                 continue;
             }
             $this->usedFilters[$fieldName] = $searchParam;

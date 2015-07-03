@@ -3,7 +3,7 @@
 use Zend\Form\Element\Select;
 use Zend\Form\ElementInterface;
 
-class ArrayStrategy implements DataStrategyInterface, RecursiveDataStrategyInterface, DataStrategyFilterInterface
+class ArrayStrategy implements RecursiveDataStrategyInterface, DataStrategyFilterInterface
 {
 
     /**
@@ -29,15 +29,7 @@ class ArrayStrategy implements DataStrategyInterface, RecursiveDataStrategyInter
      */
     public function parse($data)
     {
-        $html = '<ol>';
-        foreach ($data as $value) {
-            $html .= '<li>';
-            $html .= $this->delegator->resolveAndParse($value);
-            $html .= '</li>';
-        }
-        $html .= '</ol>';
-
-        return $html;
+        return $this->recursiveParse($data, null);
     }
 
     /**

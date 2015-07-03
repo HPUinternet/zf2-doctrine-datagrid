@@ -123,6 +123,10 @@ class SearchFilter extends AbstractHelper
             if (isset($filterValues[$childField]) && !in_array($filterValues[$childField], $valueOptions)) {
                 $value = $filterValues[$childField];
                 $displayValue = $this->dataStrategyResolver->resolveAndParse($value, $fieldName);
+                if ($value instanceof \DateTime) {
+                    $valueOptions[$value->format('Y-m-d')] = $value->format('Y-m-d');
+                    continue;
+                }
                 $valueOptions[$value] = $displayValue;
             }
         }
