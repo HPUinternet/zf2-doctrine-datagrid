@@ -41,24 +41,24 @@ class DataGridPlugin extends AbstractPlugin
      */
     public function processQueryParameters(array $queryParameters)
     {
-        if (isset($queryParameters['columns'])) {
+        if (isset($queryParameters['columns']) && !empty($queryParameters['columns'])) {
             $columns = $this->parseValue($queryParameters['columns']);
             $this->getTableBuilderService()->selectColumns($columns);
         }
 
-        if (isset($queryParameters['page'])) {
+        if (isset($queryParameters['page'])&& !empty($queryParameters['page'])) {
             $page = $this->parseValue($queryParameters['page']);
             $this->getTableBuilderService()->setPage($page);
         }
 
-        if (isset($queryParameters['sort']) && isset($queryParameters['order'])) {
+        if (isset($queryParameters['sort']) && isset($queryParameters['order']) && !empty($queryParameters['sort'])) {
             $sort = $this->parseValue($queryParameters['sort']);
             $order = $this->parseValue($queryParameters['order']);
 
             $this->getTableBuilderService()->orderBy($sort, $order);
         }
 
-        if (isset($queryParameters['search'])) {
+        if (isset($queryParameters['search']) && !empty($queryParameters['search'])) {
             $search = $this->parseValue($queryParameters['search']);
             $this->getTableBuilderService()->search($search);
         }
