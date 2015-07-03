@@ -477,6 +477,9 @@ class QueryBuilderService
         return $returnData;
     }
 
+    /**
+     * Reset the queryBuilder to an initial state
+     */
     protected function reset()
     {
         $this->selectedTableColumns = array();
