@@ -129,11 +129,7 @@ class TableBuilderService implements TableBuilderInterface
             $this->usedFilters[$fieldName] = $searchParam;
 
             if ($this->searchFilterHelper->hasFilter($fieldName)) {
-                $this->queryBuilder = $this->searchFilterHelper->useFilter(
-                    $fieldName,
-                    $searchParam,
-                    $this->queryBuilder
-                );
+                $this->searchFilterHelper->useFilter($fieldName, $searchParam, $this->queryBuilder);
                 continue;
             }
 
@@ -163,6 +159,7 @@ class TableBuilderService implements TableBuilderInterface
         $this->queryBuilder->refreshColumns($this->getModuleOptions()->getProhibitedColumns());
         $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
         $this->setPage($this->page, $this->getModuleOptions()->getItemsPerPage());
+        $this->searchFilterHelper->prepareFilters($this->queryBuilder);
     }
 
     /**
@@ -179,21 +176,5 @@ class TableBuilderService implements TableBuilderInterface
     public function setModuleOptions($moduleOptions)
     {
         $this->moduleOptions = $moduleOptions;
-    }
-
-    /**
-     * @return QueryBuilderService
-     */
-    public function getQueryBuilder()
-    {
-        return $this->queryBuilder;
-    }
-
-    /**
-     * @param QueryBuilderService $queryBuilder
-     */
-    public function setQueryBuilder($queryBuilder)
-    {
-        $this->queryBuilder = $queryBuilder;
     }
 }

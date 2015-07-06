@@ -47,6 +47,20 @@ class SearchFilterHelper
     }
 
     /**
+     * Allows filters to change the QueryBuilderService even before filtering.
+     *
+     * @param QueryBuilderService $queryBuilderService
+     */
+    public function prepareFilters(QueryBuilderService $queryBuilderService)
+    {
+        foreach ($this->filters as $filter) {
+            if (method_exists($filter, 'prepare')) {
+                $filter->prepare($queryBuilderService);
+            }
+        }
+    }
+
+    /**
      * @return array
      */
     public function getFilters()

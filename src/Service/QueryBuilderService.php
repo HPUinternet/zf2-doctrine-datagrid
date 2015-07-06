@@ -9,9 +9,9 @@ class QueryBuilderService
 {
     protected $availableTableColumns = array();
     protected $selectedTableColumns = array();
-    protected $prohibitedColumns = array();
-    protected $prioritizedSubQueries = array();
+    protected $additionalWhereColumns = array();
     protected $subQueries = array();
+    protected $prioritizedSubQueries = array();
     private $iterator = 0;
 
     /**
@@ -37,25 +37,21 @@ class QueryBuilderService
     /**
      * @return Array
      */
-    public function getProhibitedColumns()
-    {
-        return $this->prohibitedColumns;
-    }
-
-    /**
-     * @param Array $prohibitedColumns
-     */
-    public function setProhibitedColumns($prohibitedColumns)
-    {
-        $this->prohibitedColumns = $prohibitedColumns;
-    }
-
-    /**
-     * @return Array
-     */
     public function getSelectedTableColumns()
     {
-        return $this->selectedTableColumns;
+        $returnData = $this->selectedTableColumns;
+        foreach ($this->additionalWhereColumns as $columnName) {
+            if ($this->isSelectedField($columnName)) {
+                $columnSegments = explode('.', $columnName);
+                if (count($columnSegments) >= 2) {
+                    unset($returnData[$columnSegments[0]][$columnSegments[1]]);
+                    continue;
+                }
+                unset($returnData[$columnSegments[0]]);
+            }
+        }
+
+        return $returnData;
     }
 
     /**
@@ -130,45 +126,26 @@ class QueryBuilderService
     }
 
     /**
-     * Naming things in doctrine can be hard. This method resolves your FieldName into the named
-     * column of the doctrine query. an essential tool when hooking into the QueryBuilderService
+     * Wrapper around getSelectorForField that assures the field will be available for a where clause.
+     * An essential tool when hooking into the QueryBuilderService, the only way this method will return false is when
+     * you are trying to retrieve a field that is not available in the configured entity due to column restrictions
+     * or your entity lacking it.
      *
      * @param $fieldName
      * @return bool|string
      * @throws \Exception
      */
-    public function getSelectorForField($fieldName)
+    public function getColumnNameForField($fieldName)
     {
-        if (!$this->isSelectedField($fieldName)) {
-            return false;
+        $selector = $this->getSelectorForField($fieldName);
+        if ($selector) {
+            return $selector;
         }
 
-        $isSubQuery = $this->needsSubQuery($fieldName);
-        $query = $this->getQueryForField($fieldName);
-        $fieldNameSegments = explode(".", $fieldName);
-        $fieldName = reset($fieldNameSegments);
-        $entityAlias = $query->getDQLPart('from')[0]->getAlias();
+        $this->addSingleSelect($fieldName);
+        $this->additionalWhereColumns[] = $fieldName;
 
-        // When dealing with one-to-one or many-to-many associations, the entityAlias is the joined alias
-        if (count($fieldNameSegments) >= 2 && !$isSubQuery || $isSubQuery) {
-            $associationType = $this->entityMetadataHelper->getAssociationType($this->sourceEntityName, $fieldName);
-            if (!$associationType) {
-                throw new \Exception("Could not determine the association type when building a where clause");
-            }
-
-            $changedEntityAliasTypes = array(MetaData::ONE_TO_ONE, MetaData::MANY_TO_MANY, MetaData::MANY_TO_ONE);
-            if (in_array($associationType, $changedEntityAliasTypes)) {
-                $joins = $query->getDQLPart('join');
-                foreach ($joins[$entityAlias] as $join) {
-                    if ($join->getJoin() == $entityAlias . '.' . $fieldName) {
-                        $entityAlias = $join->getAlias();
-                    }
-                }
-            }
-            $fieldName = end($fieldNameSegments);
-        }
-
-        return $entityAlias . '.' . $fieldName;
+        return $this->getSelectorForField($fieldName);
     }
 
     /**
@@ -232,9 +209,8 @@ class QueryBuilderService
                 $joinedProperties[$fieldName] = $joinAlias;
             }
 
-            $fieldAlias = implode($fieldNameSegments);
-            $this->queryBuilder->addSelect($joinAlias . '.' . end($fieldNameSegments) . ' AS ' . $fieldAlias);
-            $this->addToSelectedTableColumns($fieldAlias);
+            $this->queryBuilder->addSelect($joinAlias . '.' . end($fieldNameSegments) . ' AS ' . implode($fieldNameSegments));
+            $this->addToSelectedTableColumns(implode('.', $fieldNameSegments));
         }
 
         return $this;
@@ -256,8 +232,8 @@ class QueryBuilderService
      */
     public function where($fieldName, $fieldValue, $clause = "LIKE")
     {
-        if (!$this->isSelectedField($fieldName)) {
-            throw new \Exception('Adding whereclauses to unselected fields is not supported in this method');
+        if (!$this->isSelectedField($fieldName) && !$this->addSingleSelect($fieldName)) {
+            return false;
         }
 
         $isSubQuery = $this->needsSubQuery($fieldName);
@@ -280,6 +256,19 @@ class QueryBuilderService
         }
 
         return $this;
+    }
+
+    /**
+     * Fire a raw where statement into the query
+     *
+     * @note please escape your rawStatement properly since this is a bit more vulnerable for injections
+     * @param $fieldName
+     * @param $rawStatement
+     */
+    public function whereRaw($fieldName, $rawStatement)
+    {
+        $query = $this->getQueryForField($fieldName);
+        $query->andWhere($rawStatement);
     }
 
     /**
@@ -333,7 +322,7 @@ class QueryBuilderService
         $sourceEntityMetaData = $this->entityMetadataHelper->getEntityMetadata($this->sourceEntityName);
         $primaryKey = $sourceEntityMetaData->getSingleIdentifierFieldName();
 
-        // if we have any prioritized Sub Queries, fire them before our many query.
+        // if we have any prioritized Sub Queries, the results will become a where clause for our main query
         if (!empty($this->prioritizedSubQueries)) {
             foreach ($this->prioritizedSubQueries as $fieldName => $queryBuilder) {
                 $results = $queryBuilder->getQuery()->execute();
@@ -350,13 +339,13 @@ class QueryBuilderService
             }
         }
 
-        // Retrieve data from the primary query and re-order the array keys so they can be accessed more easily
+        // Retrieve the primary results and re-order the array keys for easy insertion of subQuery data
         $result = $this->queryBuilder->getQuery()->execute();
         foreach ($result as $data) {
             $resultSet[$data[$primaryKey]] = $data;
         }
 
-        // Retrieve data from the subQueries
+        // Retrieve data from the subQueries and merge them in the results
         foreach ($this->subQueries as $fieldName => $queryBuilder) {
             $queryBuilder->setParameter('resultIds', array_column($resultSet, $primaryKey));
             $results = $queryBuilder->getQuery()->execute();
@@ -370,7 +359,7 @@ class QueryBuilderService
             }
         }
 
-        // At last, merge the prioritized Sub Query results if applicable
+        // Merge the prioritized Sub Query results into the rest of the results
         foreach ($subQueryResultSet as $fieldName => $results) {
             foreach ($results as $result) {
                 $resultSetKey = $result['association'];
@@ -416,17 +405,19 @@ class QueryBuilderService
     }
 
     /**
-     * Use this method to internally clean up the queryBuilder between each complete call
+     * Use this method to reload the queryBuilder's available columns.
+     * Changing this between calls allows custom filters to override prohibited column configuration
+     *
+     *
      * @param $prohibitedColumns
      * @return $this
      * @throws \Exception
      */
-    public function refreshColumns($prohibitedColumns)
+    public function refreshColumns($prohibitedColumns = array())
     {
-        $this->prohibitedColumns = $prohibitedColumns;
         $this->availableTableColumns = $this->entityMetadataHelper->resolveAvailableTableColumns(
             $this->sourceEntityName,
-            $this->prohibitedColumns
+            $prohibitedColumns
         );
 
         return $this;
@@ -465,7 +456,6 @@ class QueryBuilderService
             $query = $this->entityManager->createQueryBuilder($associationField);
             $fieldData = $entityMetadata->getAssociationMapping($associationField);
             $query->from($fieldData['targetEntity'], $associationField);
-
             foreach ($this->selectedTableColumns[$associationField] as $field) {
                 $query->addSelect(str_replace($associationField, $associationField . '.', $field));
             }
@@ -512,7 +502,31 @@ class QueryBuilderService
             $this->getEntityShortName($targetEntityName) . '.' . $targetFieldName,
             $sourceFieldName . $targetFieldName
         ));
-        $this->addToSelectedTableColumns($sourceFieldName . $targetFieldName, $sourceFieldName);
+        $this->addToSelectedTableColumns($sourceFieldName . '.' . $targetFieldName, $sourceFieldName);
+    }
+
+    /**
+     * Appends a column to the selected columns by re-selecting all fields
+     *
+     * TODO: obviously a dirty/intensive way of adding a single column, we should look for a better implementation
+     *
+     * @param $fieldName
+     * @return bool
+     * @throws \Exception
+     */
+    private function addSingleSelect($fieldName)
+    {
+        if (!array_key_exists($fieldName, $this->availableTableColumns)) {
+            return false;
+        }
+
+        $newColumns = array();
+        array_walk_recursive($this->selectedTableColumns, function ($selectedColumn) use (&$newColumns) {
+            $newColumns[] = $selectedColumn;
+        });
+
+        $newColumns[] = $fieldName;
+        $this->select($newColumns);
     }
 
     /**
@@ -546,10 +560,10 @@ class QueryBuilderService
 
     /**
      * Simple wrapper around if statements to retrieve the correct subQuery
-     * Because a subQuery might be contained by the subQueries property or the prioritizedSubQueries.
+     * Because a subQuery might be contained by the subQueries or the prioritizedSubQueries property.
      *
      * @param $key
-     * @return bool
+     * @return QueryBuilder|bool
      */
     private function getSubQuery($key)
     {
@@ -640,6 +654,48 @@ class QueryBuilderService
     }
 
     /**
+     * Naming things in doctrine can be hard. This method resolves your FieldName into the named
+     * column of the doctrine query.
+     *
+     * @param $fieldName
+     * @return bool|string
+     * @throws \Exception
+     */
+    private function getSelectorForField($fieldName)
+    {
+        if (!$this->isSelectedField($fieldName)) {
+            return false;
+        }
+
+        $isSubQuery = $this->needsSubQuery($fieldName);
+        $query = $this->getQueryForField($fieldName);
+        $fieldNameSegments = explode(".", $fieldName);
+        $fieldName = reset($fieldNameSegments);
+        $entityAlias = $query->getDQLPart('from')[0]->getAlias();
+
+        // When dealing with one-to-one or many-to-many associations, the entityAlias is the joined alias
+        if (count($fieldNameSegments) >= 2 && !$isSubQuery || $isSubQuery) {
+            $associationType = $this->entityMetadataHelper->getAssociationType($this->sourceEntityName, $fieldName);
+            if (!$associationType) {
+                throw new \Exception("Could not determine the association type when building a where clause");
+            }
+
+            $changedEntityAliasTypes = array(MetaData::ONE_TO_ONE, MetaData::MANY_TO_MANY, MetaData::MANY_TO_ONE);
+            if (in_array($associationType, $changedEntityAliasTypes)) {
+                $joins = $query->getDQLPart('join');
+                foreach ($joins[$entityAlias] as $join) {
+                    if ($join->getJoin() == $entityAlias . '.' . $fieldName) {
+                        $entityAlias = $join->getAlias();
+                    }
+                }
+            }
+            $fieldName = end($fieldNameSegments);
+        }
+
+        return $entityAlias . '.' . $fieldName;
+    }
+
+    /**
      * Recursive replacement of PHP's in_array()
      *
      * @param $fieldName
@@ -664,14 +720,15 @@ class QueryBuilderService
      */
     private function addToSelectedTableColumns($name, $parent = false)
     {
+        $value = str_replace('.', '', $name);
         if ($parent) {
             if (!isset($this->selectedTableColumns[$parent])) {
                 $this->selectedTableColumns[$parent] = array();
             }
-            $this->selectedTableColumns[$parent][$name] = $name;
+            $this->selectedTableColumns[$parent][$name] = $value;
 
             return;
         }
-        $this->selectedTableColumns[$name] = $name;
+        $this->selectedTableColumns[$name] = $value;
     }
 }
