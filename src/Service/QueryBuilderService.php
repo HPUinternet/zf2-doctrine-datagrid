@@ -209,7 +209,8 @@ class QueryBuilderService
                 $joinedProperties[$fieldName] = $joinAlias;
             }
 
-            $this->queryBuilder->addSelect($joinAlias . '.' . end($fieldNameSegments) . ' AS ' . implode($fieldNameSegments));
+            $fieldAlias = implode($fieldNameSegments);
+            $this->queryBuilder->addSelect($joinAlias . '.' . end($fieldNameSegments) . ' AS ' . $fieldAlias);
             $this->addToSelectedTableColumns(implode('.', $fieldNameSegments));
         }
 
