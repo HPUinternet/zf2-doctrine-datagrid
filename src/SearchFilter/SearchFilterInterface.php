@@ -18,7 +18,6 @@ interface SearchFilterInterface
      *
      * @param $searchParams
      * @param QueryBuilderService $queryBuilderService
-     * @return QueryBuilderService $queryBuilderService
      */
     public function search($searchParams, QueryBuilderService $queryBuilderService);
 }

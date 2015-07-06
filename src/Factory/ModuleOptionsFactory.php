@@ -40,7 +40,7 @@ class ModuleOptionsFactory implements FactoryInterface
      *
      * @param MvcEvent $mvcEvent
      * @param $config
-     * @return bool
+     * @return mixed|bool
      */
     protected function getControllerConfig(MvcEvent $mvcEvent, $config)
     {
