@@ -59,14 +59,16 @@ class TableBuilderService implements TableBuilderInterface
      */
     public function getTable()
     {
-        $table = new Table();
+        if (empty($this->queryBuilder->getSelectedTableColumns())) {
+            $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
+        }
 
-        // configure the minimal TableModel
+
+        $table = new Table();
         $table->setAvailableHeaders($this->queryBuilder->getAvailableTableColumns());
         $table->setUsedHeaders($table->calculateTableHeader($this->queryBuilder->getSelectedTableColumns()));
         $table->setAndParseRows($this->queryBuilder->getResultSet());
 
-        // configure TableModel extensions and additions
         $table->setDataTypes(
             array_merge($this->queryBuilder->getTableColumnTypes(), $this->moduleOptions->getRenders())
         );
@@ -89,6 +91,7 @@ class TableBuilderService implements TableBuilderInterface
     public function selectColumns(array $columns)
     {
         $this->queryBuilder->select($columns);
+        $this->searchFilterHelper->prepareFilters($this->queryBuilder);
     }
 
     /**
@@ -157,9 +160,7 @@ class TableBuilderService implements TableBuilderInterface
     private function init()
     {
         $this->queryBuilder->refreshColumns($this->getModuleOptions()->getProhibitedColumns());
-        $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
         $this->setPage($this->page, $this->getModuleOptions()->getItemsPerPage());
-        $this->searchFilterHelper->prepareFilters($this->queryBuilder);
     }
 
     /**
