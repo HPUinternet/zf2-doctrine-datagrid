@@ -522,9 +522,16 @@ class QueryBuilderService
         }
 
         $newColumns = array();
-        array_walk_recursive($this->selectedTableColumns, function ($selectedColumn) use (&$newColumns) {
-            $newColumns[] = $selectedColumn;
-        });
+        foreach ($this->selectedTableColumns as $columnName => $value) {
+            if (!is_array($value)) {
+                $newColumns[] = $columnName;
+                continue;
+            }
+
+            foreach ($value as $selectedColumn => $safeName) {
+                $newColumns[] = $selectedColumn;
+            }
+        }
 
         $newColumns[] = $fieldName;
         $this->select($newColumns);
