@@ -8,7 +8,6 @@ use Zend\Di\Exception\RuntimeException;
 
 class StrategyResolver
 {
-
     /**
      * @var View
      */

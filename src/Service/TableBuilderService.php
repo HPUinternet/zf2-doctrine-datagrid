@@ -59,27 +59,22 @@ class TableBuilderService implements TableBuilderInterface
      */
     public function getTable()
     {
-        if (empty($this->queryBuilder->getSelectedTableColumns())) {
-            $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
-        }
-
+        $dataTypes = array_merge($this->queryBuilder->getTableColumnTypes(), $this->moduleOptions->getRenders());
+        $filterValues = $this->resolveAssociationColumns ? $this->queryBuilder->preLoadAllAssociationFields() : array();
 
         $table = new Table();
-        $table->setAvailableHeaders($this->queryBuilder->getAvailableTableColumns());
-        $table->setUsedHeaders($table->calculateTableHeader($this->queryBuilder->getSelectedTableColumns()));
-        $table->setAndParseRows($this->queryBuilder->getResultSet());
-
-        $table->setDataTypes(
-            array_merge($this->queryBuilder->getTableColumnTypes(), $this->moduleOptions->getRenders())
+        $table->setDataTypes($dataTypes);
+        $table->addHeaders(
+            $this->queryBuilder->getAvailableTableColumns(),
+            $this->queryBuilder->getSelectedTableColumns()
         );
-        $table->setAndParseFilters($this->searchFilterHelper->getFilters());
+
+        $table->addRows($this->queryBuilder->getResultSet());
+        $table->setPrefetchedFilterValues($filterValues);
+        $table->addFilters($this->searchFilterHelper->getFilters(), $this->usedFilters);
         $table->setPageNumber($this->page);
         $table->setMaxPageNumber($this->calculateMaxPages());
-        $table->setUsedFilterValues($this->usedFilters);
         $table->setOptionRoutes($this->moduleOptions->getOptionRoutes());
-        if ($this->resolveAssociationColumns) {
-            $table->setAvailableFilterValues($this->queryBuilder->preLoadAllAssociationFields());
-        }
 
         return $table;
     }
@@ -161,6 +156,9 @@ class TableBuilderService implements TableBuilderInterface
     {
         $this->queryBuilder->refreshColumns($this->getModuleOptions()->getProhibitedColumns());
         $this->setPage($this->page, $this->getModuleOptions()->getItemsPerPage());
+        if (empty($this->queryBuilder->getSelectedTableColumns())) {
+            $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
+        }
     }
 
     /**

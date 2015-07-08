@@ -32,8 +32,8 @@ return array(
     ),
     'view_helpers' => array(
         'invokables' => array(
-            'DataGridTable' => 'Wms\Admin\DataGrid\View\Helper\DataGridTable',
-            'DataGridSearchFilter' => 'Wms\Admin\DataGrid\View\Helper\SearchFilter',
+            'DataGridTable' => 'Wms\Admin\DataGrid\View\Helper\DataGrid\Table',
+            'DataGridSearchFilter' => 'Wms\Admin\DataGrid\View\Helper\DataGrid\SearchFilter',
             'UrlWithQuery' => 'Wms\Admin\DataGrid\View\Helper\UrlWithQuery',
             'DataGridForm' => 'Wms\Admin\DataGrid\View\Form\Form',
             'DataGridFormRow' => 'Wms\Admin\DataGrid\View\Form\FormRow',

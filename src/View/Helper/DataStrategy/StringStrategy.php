@@ -5,7 +5,6 @@ use Zend\Form\ElementInterface;
 
 class StringStrategy implements DataStrategyInterface, DataStrategyFilterInterface
 {
-
     protected $maxLength = 128;
 
     /**

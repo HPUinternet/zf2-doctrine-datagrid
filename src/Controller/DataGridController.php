@@ -7,7 +7,6 @@ use Zend\View\Model\ViewModel;
 
 class DataGridController extends AbstractActionController
 {
-
     /**
      * @var TableBuilderService
      */
@@ -28,7 +27,6 @@ class DataGridController extends AbstractActionController
      */
     public function indexAction()
     {
-
         if ($this->params()->fromQuery('columns')) {
             $columns = $this->params()->fromQuery('columns');
             $this->tableBuilderService->selectColumns($this->isJson($columns) ? json_decode($columns) : $columns);

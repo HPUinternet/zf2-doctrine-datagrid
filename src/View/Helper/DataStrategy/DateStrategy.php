@@ -5,8 +5,6 @@ use Zend\View\Renderer\RendererInterface as View;
 
 class DateStrategy implements DataStrategyInterface
 {
-
-
     /**
      * @var View;
      */

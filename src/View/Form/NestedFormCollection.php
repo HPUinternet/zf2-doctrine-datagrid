@@ -5,7 +5,6 @@ use Zend\Form\View\Helper\FormCollection as BaseFormCollectionHelper;
 
 class NestedFormCollection extends BaseFormCollectionHelper
 {
-
     protected $defaultElementHelper = 'DataGridFormRow';
 
     /**

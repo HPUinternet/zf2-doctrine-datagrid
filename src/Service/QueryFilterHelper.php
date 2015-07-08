@@ -12,7 +12,6 @@ use Doctrine\ORM\EntityManager;
 
 class QueryFilterHelper
 {
-
     /**
      * @var Array
      */

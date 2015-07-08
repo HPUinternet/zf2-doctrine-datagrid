@@ -2,7 +2,6 @@
 
 class SearchFilterHelper
 {
-
     /**
      * @var array
      */

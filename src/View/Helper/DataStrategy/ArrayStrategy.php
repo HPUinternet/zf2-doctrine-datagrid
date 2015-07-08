@@ -5,7 +5,6 @@ use Zend\Form\ElementInterface;
 
 class ArrayStrategy implements RecursiveDataStrategyInterface, DataStrategyFilterInterface
 {
-
     /**
      * @var StrategyResolver;
      */

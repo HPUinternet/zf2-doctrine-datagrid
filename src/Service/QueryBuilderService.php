@@ -462,7 +462,6 @@ class QueryBuilderService
             }
 
             $returnData[$associationField] = $query->getQuery()->getResult();
-
         }
 
         return $returnData;

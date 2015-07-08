@@ -6,7 +6,6 @@ use Zend\View\Renderer\RendererInterface as View;
 
 class BooleanStrategy implements DataStrategyInterface, DataStrategyFilterInterface
 {
-
     /**
      * @var View;
      */

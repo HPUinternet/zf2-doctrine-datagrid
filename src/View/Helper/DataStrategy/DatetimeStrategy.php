@@ -2,5 +2,4 @@
 
 class DatetimeStrategy extends DateStrategy
 {
-
 }
