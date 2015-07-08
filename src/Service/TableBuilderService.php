@@ -67,7 +67,8 @@ class TableBuilderService implements TableBuilderInterface
         $table->setDataTypes($dataTypes);
         $table->addHeaders(
             $this->queryBuilder->getAvailableTableColumns(),
-            $this->queryBuilder->getSelectedTableColumns()
+            $this->queryBuilder->getSelectedTableColumns(),
+            $this->moduleOptions->getColumnWidths()
         );
 
         $table->addRows($this->queryBuilder->getResultSet());

@@ -191,10 +191,16 @@ class Table extends AbstractHelper
         /** @var TableHeaderCellModel $tableHeader */
         foreach ($this->displayedHeaders as $tableHeader) {
             $html .= sprintf(
-                '<th class="%s">%s',
-                $classes . " " . $tableHeader->getSafeName(),
-                $tableHeader->getName()
+                '<th class="%s" ',
+                $classes . " " . $tableHeader->getSafeName()
             );
+
+            if ($tableHeader->getWidth() > 0) {
+                $html .= 'style="width: ' . $tableHeader->getWidth() . 'px;"';
+            }
+
+            $html .= '>';
+            $html .= $tableHeader->getName();
 
             if ($tableHeader->getName() == $tableHeader->getAccessor()) {
                 $html .= $this->printOrderOption($tableHeader->getName());

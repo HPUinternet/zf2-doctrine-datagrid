@@ -302,8 +302,9 @@ class TableModel
      *
      * @param array $headerData
      * @param array $visibleHeaders
+     * @param array $columnWidths
      */
-    public function addHeaders(array $headerData, array $visibleHeaders = array())
+    public function addHeaders(array $headerData, array $visibleHeaders = array(), $columnWidths = array())
     {
         if (!empty($visibleHeaders)) {
             $visibleHeaders = $this->flattenHeadersArray($visibleHeaders);
@@ -314,6 +315,10 @@ class TableModel
 
             if (!empty($visibleHeaders)) {
                 $newHeader->setVisible(in_array($header, $visibleHeaders));
+            }
+
+            if (!empty($columnWidths) && array_key_exists($header, $columnWidths)) {
+                $newHeader->setWidth($columnWidths[$header]);
             }
 
             if (!empty($this->dataTypes) && isset($this->dataTypes[$header])) {
