@@ -161,8 +161,12 @@ class QueryBuilderService
 
         // Always assure the Identifier field is also in the select statement, this field is needed to join subqueries
         $entityMetaData = $this->entityMetadataHelper->getEntityMetadata($this->sourceEntityName);
-        if (!in_array('id', $columns)) {
-            $columns[] = $entityMetaData->getSingleIdentifierFieldName();
+        $identifierField = $entityMetaData->getSingleIdentifierFieldName();
+        if (!in_array($identifierField, $columns)) {
+            $this->additionalWhereColumns[] = $identifierField;
+            $columns[] = $identifierField;
+
+            return $this->select($columns);
         }
 
         $joinedProperties = array();
