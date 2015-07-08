@@ -83,28 +83,26 @@ class SearchFilter extends AbstractHelper
      */
     protected function getFilterElement($tableHeader)
     {
-        if (!is_null($tableHeader->getFilter()) && !is_null($tableHeader->getFilter()->getInstance())) {
-            $filterElement = $tableHeader->getFilter()->getFilterElement();
+        $filter = $this->tableModel->getTableFilter($tableHeader->getName());
+        if ($filter && !is_null($filter->getInstance())) {
+            $filterElement = $tableHeader->getFilter()->getInstance()->getFilterElement();
             $filterElement->setName('search[' . $filterElement->getName() . ']');
-            $filterElement = $this->setElementCurrentValue($filterElement, $tableHeader);
-
+            $this->setElementCurrentValue($filterElement, $tableHeader->getSafeName());
             return $this->getView()->formElement($filterElement);
         }
 
         $dataType = $tableHeader->getDataType();
-        if ($tableHeader->getName() != $tableHeader->getAccessor()) {
+        if ($this->tableModel->getPrefetchedValuesByName($tableHeader->getName())) {
             $dataType = "Array";
         }
 
         $filterName = 'search[' . $tableHeader->getName() . ']';
         $element = $this->dataStrategyResolver->displayFilterForDataType($filterName, $dataType);
         if ($element instanceof Element) {
-            $element = $this->setElementValues($element, $tableHeader->getName());
-
-            if (!is_null($tableHeader->getFilter()) && !empty($tableHeader->getFilter()->getAvailableValues())) {
-                $element = $this->setElementCurrentValue($element, $tableHeader);
+            $this->setElementCurrentValue($element, $tableHeader->getSafeName());
+            if ($dataType == "Array") {
+                $this->setElementValues($element, $tableHeader->getName());
             }
-
             return $this->getView()->formElement($element);
         }
 
@@ -120,8 +118,18 @@ class SearchFilter extends AbstractHelper
      */
     protected function setElementValues(Element $element, $fieldName)
     {
-        $valueOptions = $this->tableModel->getPrefetchedValuesByName($fieldName);
-        if ($valueOptions && method_exists($element, 'setValueOptions')) {
+        $values = $this->tableModel->getPrefetchedValuesByName($fieldName);
+        if ($values && method_exists($element, 'setValueOptions')) {
+            $valueOptions = array();
+            foreach ($values as $value) {
+                if ($value instanceof \DateTime) {
+                    $valueOptions[$value->format('Y-m-d')] = $value->format('Y-m-d');
+                    continue;
+                }
+
+                $valueOptions[$value] = $value;
+            }
+
             $element->setValueOptions($valueOptions);
         }
 
@@ -142,11 +150,10 @@ class SearchFilter extends AbstractHelper
      */
     protected function setElementCurrentValue(Element $element, $fieldName)
     {
-        //        if (!array_key_exists($fieldName, $this->tableModel->getUsedFilterValues())) {
-//            return $element;
-//        }
-//
-//        $element->setValue($this->tableModel->getUsedFilterValues()[$fieldName]);
+        $filter = $this->tableModel->getTableFilter($fieldName);
+        if ($filter && !empty($filter->getSelectedValue())) {
+            $element->setValue($filter->getSelectedValue());
+        }
 
         return $element;
     }

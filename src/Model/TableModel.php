@@ -77,6 +77,19 @@ class TableModel
         $this->prefetchedFilterValues = $prefetchedFilterValues;
     }
 
+    /**
+     * @param $filterName
+     * @return TableFilterModel|bool
+     */
+    public function getTableFilter($filterName)
+    {
+        if (isset($this->tableFilters[$filterName])) {
+            return $this->tableFilters[$filterName];
+        }
+
+        return false;
+    }
+
 
     /**
      * Parses the custom configurable filter instances into this model instance
@@ -133,14 +146,12 @@ class TableModel
         $fieldNameSegments = explode('.', $fieldName);
         $rootSegment = $fieldNameSegments[0];
         if (!isset($this->prefetchedFilterValues[$rootSegment])) {
-            ;
-
             return false;
         }
 
         $filterValues = array();
         foreach ($this->prefetchedFilterValues[$rootSegment] as $filterValueCollection) {
-            $filterValues[$filterValueCollection[$fieldNameSegments[1]]] = $filterValueCollection[$fieldNameSegments[1]];
+            $filterValues[] = $filterValueCollection[$fieldNameSegments[1]];
         }
 
         return $filterValues;
@@ -215,7 +226,7 @@ class TableModel
             return $this->tableHeaders[$name];
         }
 
-        throw new \Exception('Could not find a configured tableHeader for field ' . $name);
+        return false;
     }
 
     /**

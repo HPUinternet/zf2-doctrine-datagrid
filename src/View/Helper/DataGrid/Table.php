@@ -295,13 +295,22 @@ class Table extends AbstractHelper
     {
         $html = '';
         foreach ($this->displayedFields as $field) {
-            $html .= $this->printTableContentCell($tableRow->getCell($field));
+            $cell = $tableRow->getCell($field);
+            if (!$cell) {
+                $cell = null;
+            }
+            $html .= $this->printTableContentCell($cell);
         }
 
         if (in_array('simpleSearch', $this->displaySettings)) {
             foreach ($this->tableModel->getTableFilters() as $filter) {
                 if (!is_null($filter->getHeader()) && !is_null($filter->getInstance())) {
-                    $html .= $this->printTableContentCell($filter->getFilterValue($tableRow), $filter->getName());
+                    $html .= sprintf("<td class=\"%s\">", "kolom " . $filter->getName());
+                    $html .= $this->dataStrategyResolver->resolveAndParse(
+                        $filter->getFilterValue($tableRow),
+                        $filter->getName()
+                    );
+                    $html .= '</td>';
                 }
             }
             if (!in_array('actionRoutes', $this->displaySettings)) {
@@ -330,11 +339,13 @@ class Table extends AbstractHelper
      * @internal param $cellValue
      * @internal param string $cellName
      */
-    protected function printTableContentCell(TableCellModel $cell, $tdClass = "kolom")
+    protected function printTableContentCell(TableCellModel $cell = null, $tdClass = "kolom")
     {
-        $html = '';
-        $html .= sprintf("<td class=\"%s\">", $tdClass . " " . $cell->getSafeName());
-        $html .= $this->dataStrategyResolver->resolveAndParse($cell->getValue(), $cell->getName());
+        $html = '<td class="' . $tdClass . '">';
+        if (!is_null($cell)) {
+            $html = sprintf("<td class=\"%s\">", $tdClass . " " . $cell->getSafeName());
+            $html .= $this->dataStrategyResolver->resolveAndParse($cell->getValue(), $cell->getName());
+        }
         $html .= '</td>';
 
         return $html;
