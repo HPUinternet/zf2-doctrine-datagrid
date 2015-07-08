@@ -70,10 +70,11 @@ class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInte
 
         $this->add(array(
             'name' => 'submit',
-            'type' => 'Submit',
+            'type' => 'submit',
+            'label' => '<span class="glyphicon glyphicon glyphicon-refresh"></span>',
             'attributes' => array(
                 'value' => 'Apply',
-                'class' => 'btn btn-primary',
+                'class' => 'btn knopSearch',
             ),
         ));
     }
