@@ -191,7 +191,8 @@ class Table extends AbstractHelper
         /** @var TableHeaderCellModel $tableHeader */
         foreach ($this->displayedHeaders as $tableHeader) {
             $html .= sprintf(
-                '<th class="%s">%s', $classes . " " . $tableHeader->getSafeName(),
+                '<th class="%s">%s',
+                $classes . " " . $tableHeader->getSafeName(),
                 $tableHeader->getName()
             );
 
@@ -318,9 +319,10 @@ class Table extends AbstractHelper
 
         $downUrl = $this->getView()->UrlWithQuery(array('sort' => $columName, 'order' => 'desc'));
         $upUrl = $this->getView()->UrlWithQuery(array('sort' => $columName, 'order' => 'asc'));
+        $iconClass = 'glyphicon glyphicon-chevron';
         $html = '<span class="pull-right">';
-        $html .= '<a href="' . $downUrl . '" class="tabelHeadOpties"><i class="glyphicon glyphicon-chevron-down"></i></a>';
-        $html .= '<a href="' . $upUrl . '" class="tabelHeadOpties"><i class="glyphicon glyphicon-chevron-up"></i></a>';
+        $html .= '<a href="' . $downUrl . '" class="tabelHeadOpties"><i class="' . $iconClass . '-down"></i></a>';
+        $html .= '<a href="' . $upUrl . '" class="tabelHeadOpties"><i class="' . $iconClass . '-up"></i></a>';
         $html .= '</span>';
 
         return $html;
@@ -448,5 +450,4 @@ class Table extends AbstractHelper
 
         return $html;
     }
-
 }

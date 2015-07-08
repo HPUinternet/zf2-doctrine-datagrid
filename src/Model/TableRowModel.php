@@ -46,6 +46,11 @@ class TableRowModel
         $this->cells = $cells;
     }
 
+    /**
+     * Add a single tableCell to the cells property
+     *
+     * @param TableCellModel $cellModel
+     */
     public function addCell(TableCellModel $cellModel)
     {
         $this->cells[$cellModel->getName()] = $cellModel;

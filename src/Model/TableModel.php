@@ -38,51 +38,81 @@ class TableModel
         return $this->tableFilters;
     }
 
+    /**
+     * @return int
+     */
     public function getPageNumber()
     {
         return $this->pageNumber;
     }
 
+    /**
+     * @param int $pageNumber
+     */
     public function setPageNumber($pageNumber)
     {
         $this->pageNumber = $pageNumber;
     }
 
+    /**
+     * @return int
+     */
     public function getMaxPageNumber()
     {
         return $this->maxPageNumber;
     }
 
+    /**
+     * @param int $maxPageNumber
+     */
     public function setMaxPageNumber($maxPageNumber)
     {
         $this->maxPageNumber = $maxPageNumber;
     }
 
+    /**
+     * @return array
+     */
     public function getOptionRoutes()
     {
         return $this->optionRoutes;
     }
 
+    /**
+     * @param array $optionRoutes
+     */
     public function setOptionRoutes($optionRoutes)
     {
         $this->optionRoutes = $optionRoutes;
     }
 
+    /**
+     * @return array
+     */
     public function getDataTypes()
     {
         return $this->dataTypes;
     }
 
+    /**
+     * @param array $dataTypes
+     */
     public function setDataTypes($dataTypes)
     {
         $this->dataTypes = $dataTypes;
     }
 
+    /**
+     * @return array
+     */
     public function getPrefetchedFilterValues()
     {
         return $this->prefetchedFilterValues;
     }
 
+    /**
+     * @param array $prefetchedFilterValues
+     */
     public function setPrefetchedFilterValues($prefetchedFilterValues)
     {
         $this->prefetchedFilterValues = $prefetchedFilterValues;
@@ -266,6 +296,13 @@ class TableModel
         throw new \Exception('Could not find a correct value for ' . $cellName);
     }
 
+    /**
+     * Parse an array of headers and an array of visible header names into multiple
+     * TableHeaderCellModels, stored in the tableHeaders property of this object.
+     *
+     * @param array $headerData
+     * @param array $visibleHeaders
+     */
     public function addHeaders(array $headerData, array $visibleHeaders = array())
     {
         if (!empty($visibleHeaders)) {
@@ -287,6 +324,15 @@ class TableModel
         }
     }
 
+    /**
+     * Because the TableBuilderService will provide us with an nested assocative array
+     * of selected values, a simple conversion is needed before parsing them into TableHeaderCellModels
+     * internal method used by addHeaders()
+     *
+     * @see TableModel::addHeaders()
+     * @param array $associativeArray
+     * @return array
+     */
     private function flattenHeadersArray(array $associativeArray)
     {
         $fieldNames = array();

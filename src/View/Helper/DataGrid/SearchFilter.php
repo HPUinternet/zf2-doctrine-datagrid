@@ -6,6 +6,7 @@ use Wms\Admin\DataGrid\Model\TableModel;
 use Wms\Admin\DataGrid\View\Helper\DataStrategy\StrategyResolver;
 use Zend\Di\ServiceLocator;
 use Zend\Form\Element;
+use Zend\Form\ElementInterface;
 use Zend\View\Helper\AbstractHelper;
 
 class SearchFilter extends AbstractHelper
@@ -53,13 +54,19 @@ class SearchFilter extends AbstractHelper
         return $this->invoke();
     }
 
+    /**
+     * converts TableFilterModels into html by resolving them through a filterinstance or
+     * calling the data resolver for a zend form element
+     *
+     * @return string
+     */
     public function invoke()
     {
         $output = '<tr class="simpleSearch tabelZoekBalk">';
 
         $elements = $this->getFilterElements();
         foreach ($elements as $element) {
-            $output .= '<td>' . $element . '</td>';
+            $output .= '<td>' . $this->getView()->formElement($element) . '</td>';
         }
 
         $output .= '<td>
@@ -75,6 +82,12 @@ class SearchFilter extends AbstractHelper
         return $output;
     }
 
+    /**
+     * Resolves tableHeaders and additional filters into a single array of
+     * Zend ElementInterface forms
+     *
+     * @return ElementInterface[]
+     */
     protected function getFilterElements()
     {
         $elements = array();
@@ -87,7 +100,7 @@ class SearchFilter extends AbstractHelper
             if (!is_null($filter->getInstance())) {
                 $filterElement = $filter->getInstance()->getFilterElement();
                 $filterElement->setName('search[' . $filterElement->getName() . ']');
-                $elements[] = $this->getView()->formElement($filterElement);
+                $elements[] = $filterElement;
                 continue;
             }
 
@@ -104,14 +117,14 @@ class SearchFilter extends AbstractHelper
                 $this->setElementValues($element, $tableHeader->getName());
             }
 
-            $elements[] = $this->getView()->formElement($element);
+            $elements[] = $element;
         }
 
         // Append additional filters
         foreach ($this->additionalFilters as $filter) {
             $filterElement = $filter->getInstance()->getFilterElement($filter);
             $filterElement->setName('search[' . $filterElement->getName() . ']');
-            $elements[] = $this->getView()->formElement($filterElement);
+            $elements[] = $filterElement;
             continue;
         }
 

@@ -9,6 +9,12 @@ class TableFilterModel
     protected $selectedValue = null;
     protected $availableValues = array();
 
+    /**
+     * Creates a new instance of the TableFilterModel
+     *
+     * @param $name
+     * @param null $instance
+     */
     public function __construct($name, $instance = null)
     {
         $this->setName($name);

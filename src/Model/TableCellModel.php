@@ -8,6 +8,12 @@ class TableCellModel
     protected $dataType = '';
     protected $visible = true;
 
+    /**
+     * Create's a new instance of the TableCellModel
+     *
+     * @param $name
+     * @param $value
+     */
     public function __construct($name, $value)
     {
         $nameSegments = explode('.', $name);
