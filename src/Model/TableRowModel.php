@@ -31,7 +31,7 @@ class TableRowModel
     }
 
     /**
-     * @return mixed
+     * @return TableCellModel[]
      */
     public function getCells()
     {

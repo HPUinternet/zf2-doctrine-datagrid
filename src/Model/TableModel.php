@@ -1,5 +1,7 @@
 <?php namespace Wms\Admin\DataGrid\Model;
 
+use Wms\Admin\DataGrid\SearchFilter\SearchFilterInterface;
+
 class TableModel
 {
     protected $tableHeaders = array();
@@ -12,16 +14,25 @@ class TableModel
     private $dataTypes = array();
     private $optionRoutes = array();
 
+    /**
+     * @return TableHeaderCellModel[]
+     */
     public function getTableHeaders()
     {
         return $this->tableHeaders;
     }
 
+    /**
+     * @return TableRowModel[]
+     */
     public function getTableRows()
     {
         return $this->tableRows;
     }
 
+    /**
+     * @return TableFilterModel[]
+     */
     public function getTableFilters()
     {
         return $this->tableFilters;
@@ -104,24 +115,21 @@ class TableModel
         if (empty($this->tableHeaders)) {
             throw new \Exception("Please provide the table model with table header information first");
         }
-        $allFilters = array_merge($currentValues, $filters);
-        foreach ($allFilters as $fieldName => $filterInstance) {
-            $filter = new TableFilterModel($fieldName);
-            if (array_key_exists($fieldName, $filters)) {
-                $filter->setInstance($filterInstance);
-            }
 
-            // Associate TableHeaderCell with the filter
-            if (array_key_exists($filter->getSafeName(), $this->tableHeaders)) {
-                $header = $this->getTableHeader($filter->getSafeName());
-                $filter->setHeader($header);
-                $header->setFilter($filter);
+        // Create a filtermodel for each header
+        foreach ($this->getTableHeaders() as $header) {
+            $filterName = $header->getName();
+            $filter = new TableFilterModel($filterName);
+            $header->setFilter($filter);
+            $filter->setHeader($header);
+            if (array_key_exists($filterName, $filters)) {
+                $filter->setInstance($filters[$filterName]);
+                unset($filters[$filterName]);
             }
 
             // Set current value (if applicable)
-            if (isset($currentValues[$fieldName])) {
-                $filter->setSelectedValue($currentValues[$fieldName]);
-                unset($currentValues[$fieldName]);
+            if (isset($currentValues[$filterName])) {
+                $filter->setSelectedValue($currentValues[$filterName]);
             }
 
             $this->tableFilters[$filter->getSafeName()] = $filter;
@@ -132,6 +140,18 @@ class TableModel
                 $values ? $filter->setAvailableValues($values) : null;
             }
         }
+
+        // Create additional filters out of the configuration
+        /** @var SearchFilterInterface $filterInstance */
+        foreach ($filters as $filterInstance) {
+            $filterName = $filterInstance->getFilterName();
+            $filter = new TableFilterModel($filterName, $filterInstance);
+            $this->tableFilters[$filter->getSafeName()] = $filter;
+            if (isset($currentValues[$filterName])) {
+                $filter->setSelectedValue($currentValues[$filterName]);
+            }
+        }
+
     }
 
     /**
@@ -151,7 +171,9 @@ class TableModel
 
         $filterValues = array();
         foreach ($this->prefetchedFilterValues[$rootSegment] as $filterValueCollection) {
-            $filterValues[] = $filterValueCollection[$fieldNameSegments[1]];
+            if (isset($filterValueCollection[$fieldNameSegments[1]])) {
+                $filterValues[] = $filterValueCollection[$fieldNameSegments[1]];
+            }
         }
 
         return $filterValues;
@@ -208,7 +230,7 @@ class TableModel
 
             $tableCell->setVisible($tableHeader->isVisible());
             $tableCell->setDataType($tableHeader->getDataType());
-            $returnData[$tableHeader->getName()] = $tableCell;
+            $returnData[$tableHeader->getSafeName()] = $tableCell;
         }
 
         return $returnData;

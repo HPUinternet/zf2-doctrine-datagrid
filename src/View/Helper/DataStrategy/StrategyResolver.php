@@ -5,6 +5,8 @@ use Zend\Di\Di;
 use Doctrine\ORM\Proxy\Proxy;
 use Zend\Di\Exception\ClassNotFoundException;
 use Zend\Di\Exception\RuntimeException;
+use Zend\Form\Element;
+use Zend\Form\ElementInterface;
 
 class StrategyResolver
 {
@@ -148,7 +150,7 @@ class StrategyResolver
      *
      * @param $elementName
      * @param $dataType
-     * @return string
+     * @return ElementInterface
      */
     public function displayFilterForDataType($elementName, $dataType)
     {

@@ -1,5 +1,6 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper\DataGrid;
 
+use Wms\Admin\DataGrid\Model\TableFilterModel;
 use Wms\Admin\DataGrid\Model\TableHeaderCellModel;
 use Wms\Admin\DataGrid\Model\TableModel;
 use Wms\Admin\DataGrid\View\Helper\DataStrategy\StrategyResolver;
@@ -13,6 +14,15 @@ class SearchFilter extends AbstractHelper
      * @var TableModel
      */
     private $tableModel;
+    /**
+     * @var TableHeaderCellModel[]
+     */
+    private $tableHeaders = array();
+
+    /**
+     * @var TableFilterModel[]
+     */
+    private $additionalFilters = array();
 
     /**
      * @var StrategyResolver
@@ -22,17 +32,36 @@ class SearchFilter extends AbstractHelper
     /**
      * If configured, this view helper will print the inline simple filter right after the
      * initial table heading.
+     *
      * @param TableModel $tableModel
+     * @param array $tableHeaders
+     * @param array $additionalFilters
      * @param StrategyResolver $dataStrategyResolver
      * @return string
      */
-    public function __invoke(TableModel $tableModel, StrategyResolver $dataStrategyResolver)
-    {
+    public function __invoke(
+        TableModel $tableModel,
+        array $tableHeaders,
+        array $additionalFilters,
+        StrategyResolver $dataStrategyResolver
+    ) {
         $this->tableModel = $tableModel;
+        $this->tableHeaders = $tableHeaders;
+        $this->additionalFilters = $additionalFilters;
         $this->dataStrategyResolver = $dataStrategyResolver;
 
+        return $this->invoke();
+    }
+
+    public function invoke()
+    {
         $output = '<tr class="simpleSearch tabelZoekBalk">';
-        $output .= $this->printFilterFields();
+
+        $elements = $this->getFilterElements();
+        foreach ($elements as $element) {
+            $output .= '<td>' . $element . '</td>';
+        }
+
         $output .= '<td>
                     <span class="pull-right">
                         <button type="submit" class="btn knopSearch">
@@ -46,67 +75,47 @@ class SearchFilter extends AbstractHelper
         return $output;
     }
 
-    /**
-     * Prints the form elements per field
-     */
-    public function printFilterFields()
+    protected function getFilterElements()
     {
-        $html = '';
-        // Get the configured filter foreach table header
-        foreach ($this->tableModel->getTableHeaders() as $tableHeader) {
-            if ($tableHeader->isVisible()) {
-                $html .= '<td>';
-                $html .= $this->getFilterElement($tableHeader);
-                $html .= '</td>';
-            }
-        }
+        $elements = array();
 
-        // Get additional search filters that do not belong to a table header
-        foreach ($this->tableModel->getTableFilters() as $filter) {
-            if (is_null($filter->getHeader())) {
+        // Get all filters that can be placed above a header
+        foreach ($this->tableHeaders as $tableHeader) {
+            $filter = $tableHeader->getFilter();
+
+            // Are you a extra configured filter, good we'll call you directly
+            if (!is_null($filter->getInstance())) {
                 $filterElement = $filter->getInstance()->getFilterElement();
-                $filterElement = $this->setElementCurrentValue($filterElement, $filterElement);
                 $filterElement->setName('search[' . $filterElement->getName() . ']');
-
-                $html .= '<td>';
-                $html .= $this->getView()->formElement($filterElement);
-                $html .= '</td>';
+                $elements[] = $this->getView()->formElement($filterElement);
+                continue;
             }
-        }
 
-        return $html;
-    }
+            // No filter instance has been configured, create a new FormElement throughout the strategy resolver
+            $dataType = $tableHeader->getDataType();
+            if ($this->tableModel->getPrefetchedValuesByName($tableHeader->getName())) {
+                $dataType = "Array";
+            }
 
-    /**
-     * @param TableHeaderCellModel $tableHeader
-     * @return string|Element
-     */
-    protected function getFilterElement($tableHeader)
-    {
-        $filter = $this->tableModel->getTableFilter($tableHeader->getName());
-        if ($filter && !is_null($filter->getInstance())) {
-            $filterElement = $tableHeader->getFilter()->getInstance()->getFilterElement();
-            $filterElement->setName('search[' . $filterElement->getName() . ']');
-            $this->setElementCurrentValue($filterElement, $tableHeader->getSafeName());
-            return $this->getView()->formElement($filterElement);
-        }
-
-        $dataType = $tableHeader->getDataType();
-        if ($this->tableModel->getPrefetchedValuesByName($tableHeader->getName())) {
-            $dataType = "Array";
-        }
-
-        $filterName = 'search[' . $tableHeader->getName() . ']';
-        $element = $this->dataStrategyResolver->displayFilterForDataType($filterName, $dataType);
-        if ($element instanceof Element) {
+            $filterName = 'search[' . $filter->getName() . ']';
+            $element = $this->dataStrategyResolver->displayFilterForDataType($filterName, $dataType);
             $this->setElementCurrentValue($element, $tableHeader->getSafeName());
             if ($dataType == "Array") {
                 $this->setElementValues($element, $tableHeader->getName());
             }
-            return $this->getView()->formElement($element);
+
+            $elements[] = $this->getView()->formElement($element);
         }
 
-        return $element;
+        // Append additional filters
+        foreach ($this->additionalFilters as $filter) {
+            $filterElement = $filter->getInstance()->getFilterElement($filter);
+            $filterElement->setName('search[' . $filterElement->getName() . ']');
+            $elements[] = $this->getView()->formElement($filterElement);
+            continue;
+        }
+
+        return $elements;
     }
 
     /**
@@ -145,7 +154,7 @@ class SearchFilter extends AbstractHelper
      * If the TableModel holds information about filters that where applied, we pass them into the form element
      *
      * @param Element $element
-     * @param $fieldName
+     * @param string $fieldName
      * @return Element
      */
     protected function setElementCurrentValue(Element $element, $fieldName)

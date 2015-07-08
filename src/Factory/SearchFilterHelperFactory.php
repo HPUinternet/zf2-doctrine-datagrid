@@ -27,17 +27,12 @@ class SearchFilterHelperFactory implements FactoryInterface
                 $filterClassInstance = new $filterClass();
             }
 
-            if ($filterClassInstance instanceof NonFieldSearchFilterInterface) {
+            if ($filterClassInstance instanceof SearchFilterInterface) {
                 $filters[$filterClassInstance->getFilterName()] = $filterClassInstance;
                 continue;
             }
 
-            if ($filterClassInstance instanceof SearchFilterInterface) {
-                $filters[$fieldName] = $filterClassInstance;
-                continue;
-            }
-
-            throw new \Exception(sprintf('%s does not implement one of the searchFilter interfaces', $filterClass));
+            throw new \Exception(sprintf('%s does not implement the searchFilter interface', $filterClass));
         }
 
         return new SearchFilterHelper($filters);

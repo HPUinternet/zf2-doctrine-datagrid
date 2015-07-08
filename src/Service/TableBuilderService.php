@@ -59,6 +59,7 @@ class TableBuilderService implements TableBuilderInterface
      */
     public function getTable()
     {
+        $this->searchFilterHelper->prepareFilters($this->queryBuilder);
         $dataTypes = array_merge($this->queryBuilder->getTableColumnTypes(), $this->moduleOptions->getRenders());
         $filterValues = $this->resolveAssociationColumns ? $this->queryBuilder->preLoadAllAssociationFields() : array();
 
@@ -86,7 +87,6 @@ class TableBuilderService implements TableBuilderInterface
     public function selectColumns(array $columns)
     {
         $this->queryBuilder->select($columns);
-        $this->searchFilterHelper->prepareFilters($this->queryBuilder);
     }
 
     /**
