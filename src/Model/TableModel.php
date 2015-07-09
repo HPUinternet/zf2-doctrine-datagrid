@@ -241,12 +241,16 @@ class TableModel
      * @return array containing TableCellModel objects
      * @throws \Exception
      */
-    private function parseCells(array $cells)
+    private function parseCells(array $cells, $namedIndex = true)
     {
         $returnData = array();
         foreach ($cells as $cellName => $cellValue) {
             if (is_array($cellValue)) {
-                $returnData = array_merge($returnData, $this->parseCells($cellValue));
+                $merges = array();
+                foreach ($cellValue as $childField) {
+                    $merges = array_merge($merges, $this->parseCells($childField, false));
+                }
+                $returnData = $this->mergeNestedCells($returnData, $merges);
                 continue;
             }
 
@@ -260,8 +264,30 @@ class TableModel
 
             $tableCell->setVisible($tableHeader->isVisible());
             $tableCell->setDataType($tableHeader->getDataType());
-            $returnData[$tableHeader->getSafeName()] = $tableCell;
+            $namedIndex ? $returnData[$tableHeader->getSafeName()] = $tableCell : $returnData[] = $tableCell;
         }
+
+        return $returnData;
+    }
+
+    /**
+     * This method makes it easy to merge multiple cells of the same name into an row array
+     *
+     * @param $returnData
+     * @param $merges
+     * @return mixed
+     */
+    private function mergeNestedCells($returnData, $merges)
+    {
+        $mergeResult = $merges[0];
+        if (count($merges) > 1) {
+            $values = array();
+            foreach ($merges as $merge) {
+                $values[] = $merge->getValue();
+            }
+            $mergeResult->setValue($values);
+        }
+        $returnData[$mergeResult->getSafeName()] = $mergeResult;
 
         return $returnData;
     }
