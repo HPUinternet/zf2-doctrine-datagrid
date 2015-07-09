@@ -134,9 +134,8 @@ class TableBuilderService implements TableBuilderInterface
      */
     public function search(array $searchParams)
     {
-        if (!$this->filtersPrepared) {
-            $this->searchFilterHelper->prepareFilters($this->queryBuilder);
-            $this->filtersPrepared = true;
+        if (empty($this->queryBuilder->getSelectedTableColumns())) {
+            $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
         }
 
         foreach ($searchParams as $fieldName => $searchParam) {
