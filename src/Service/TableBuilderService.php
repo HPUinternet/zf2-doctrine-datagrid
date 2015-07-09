@@ -37,6 +37,11 @@ class TableBuilderService implements TableBuilderInterface
     public $resolveAssociationColumns = true;
 
     /**
+     * @var Keeps track if the filters are prepared
+     */
+    private $filtersPrepared = false;
+
+    /**
      * @param ModuleOptions $moduleOptions
      * @param QueryBuilderService $queryBuilderService
      * @param SearchFilterHelper $searchFilterHelper
@@ -59,7 +64,11 @@ class TableBuilderService implements TableBuilderInterface
      */
     public function getTable()
     {
-        $this->searchFilterHelper->prepareFilters($this->queryBuilder);
+        if (empty($this->queryBuilder->getSelectedTableColumns())) {
+            $this->filtersPrepared = false;
+            $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
+        }
+
         $dataTypes = array_merge($this->queryBuilder->getTableColumnTypes(), $this->moduleOptions->getRenders());
         $filterValues = $this->resolveAssociationColumns ? $this->queryBuilder->preLoadAllAssociationFields() : array();
 
@@ -88,6 +97,10 @@ class TableBuilderService implements TableBuilderInterface
     public function selectColumns(array $columns)
     {
         $this->queryBuilder->select($columns);
+        if (!$this->filtersPrepared) {
+            $this->searchFilterHelper->prepareFilters($this->queryBuilder);
+            $this->filtersPrepared = true;
+        }
     }
 
     /**
@@ -121,6 +134,11 @@ class TableBuilderService implements TableBuilderInterface
      */
     public function search(array $searchParams)
     {
+        if (!$this->filtersPrepared) {
+            $this->searchFilterHelper->prepareFilters($this->queryBuilder);
+            $this->filtersPrepared = true;
+        }
+
         foreach ($searchParams as $fieldName => $searchParam) {
             if ($searchParam == "") {
                 continue;
@@ -157,9 +175,6 @@ class TableBuilderService implements TableBuilderInterface
     {
         $this->queryBuilder->refreshColumns($this->getModuleOptions()->getProhibitedColumns());
         $this->setPage($this->page, $this->getModuleOptions()->getItemsPerPage());
-        if (empty($this->queryBuilder->getSelectedTableColumns())) {
-            $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
-        }
     }
 
     /**

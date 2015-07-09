@@ -137,15 +137,22 @@ class QueryBuilderService
      */
     public function getColumnNameForField($fieldName)
     {
-        $selector = $this->getSelectorForField($fieldName);
-        if ($selector) {
-            return $selector;
-        }
-
-        $this->addSingleSelect($fieldName);
-        $this->additionalWhereColumns[] = $fieldName;
-
+        $this->assureSelected($fieldName);
         return $this->getSelectorForField($fieldName);
+    }
+
+    /**
+     * Assures an field is selected in a query. if it was not selected in the initial state,
+     * it will add the field to the additionalWhereColumns, resulting in a hidden column
+     *
+     * @param $fieldName
+     */
+    public function assureSelected($fieldName)
+    {
+        if (!$this->isSelectedField($fieldName) && array_key_exists($fieldName, $this->availableTableColumns)) {
+            $this->additionalWhereColumns[] = $fieldName;
+            $this->addSingleSelect($fieldName);
+        }
     }
 
     /**
@@ -237,7 +244,7 @@ class QueryBuilderService
      */
     public function where($fieldName, $fieldValue, $clause = "LIKE")
     {
-        if (!$this->isSelectedField($fieldName) && !$this->addSingleSelect($fieldName)) {
+        if (!$this->isSelectedField($fieldName)) {
             return false;
         }
 
@@ -521,7 +528,7 @@ class QueryBuilderService
     private function addSingleSelect($fieldName)
     {
         if (!array_key_exists($fieldName, $this->availableTableColumns)) {
-            return false;
+            throw new \Exception($fieldName . ' is not available in the Entity');
         }
 
         $newColumns = array();
@@ -674,10 +681,6 @@ class QueryBuilderService
      */
     private function getSelectorForField($fieldName)
     {
-        if (!$this->isSelectedField($fieldName)) {
-            return false;
-        }
-
         $isSubQuery = $this->needsSubQuery($fieldName);
         $query = $this->getQueryForField($fieldName);
         $fieldNameSegments = explode(".", $fieldName);
