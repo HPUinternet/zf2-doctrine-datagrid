@@ -200,7 +200,7 @@ class Table extends AbstractHelper
             }
 
             $html .= '>';
-            $html .= $tableHeader->getName();
+            $html .= $this->view->translate($tableHeader->getName());
 
             if ($tableHeader->getName() == $tableHeader->getAccessor()) {
                 $html .= $this->printOrderOption($tableHeader->getName());
