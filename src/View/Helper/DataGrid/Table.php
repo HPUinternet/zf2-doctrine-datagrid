@@ -408,17 +408,22 @@ class Table extends AbstractHelper
 
         if (in_array('noStyling', $this->displaySettings) || !array_key_exists($action, $knownActions)) {
             return sprintf(
-                '<a class="options btn btn-mini" href="%s" title="%s">%s</a>',
+                '<a class="options btn btn-mini %s" href="%s" title="%s" data-id="%s">%s</a>',
+                $action,
                 $this->view->url($url, array('action' => $action, 'id' => $id)),
+                $action,
+                $id,
                 $action
             );
         }
 
         return sprintf(
-            '<a href="%s" title="%s"><i class="glyphicon glyphicon-%s icoonNaarLinks"></i></a>',
+            '<a href="%s" title="%s" data-id="%s"><i class="glyphicon glyphicon-%s icoonNaarLinks %s"></i></a>',
             $this->view->url($url, array('action' => $action, 'id' => $id)),
             $action,
-            $knownActions[$action]
+            $id,
+            $knownActions[$action],
+            $action
         );
     }
 
