@@ -238,6 +238,7 @@ class TableModel
      * @see TableModel::addRows
      * @see TableCellModel
      * @param array $cells
+     * @param bool $namedIndex
      * @return array containing TableCellModel objects
      * @throws \Exception
      */
@@ -274,22 +275,29 @@ class TableModel
      * This method makes it easy to merge multiple cells of the same name into an row array
      *
      * @param $returnData
-     * @param $merges
+     * @param array $cells
      * @return mixed
      */
-    private function mergeNestedCells($returnData, $merges)
+    private function mergeNestedCells($returnData, array $cells)
     {
-        $mergeResult = $merges[0];
-        if (count($merges) > 1) {
-            $values = array();
-            foreach ($merges as $merge) {
-                $values[] = $merge->getValue();
+        /** @var TableCellModel $cell */
+        foreach ($cells as $cell) {
+            if (!array_key_exists($cell->getSafeName(), $returnData)) {
+                $cell->setValue(array($cell->getValue()));
+                $returnData[$cell->getSafeName()] = $cell;
+                continue;
             }
-            $mergeResult->setValue($values);
-        }
-        $returnData[$mergeResult->getSafeName()] = $mergeResult;
 
+            $tableCell = $returnData[$cell->getSafeName()];
+            $currentValues = $tableCell->getValue();
+            if ($cell->getValue() != "") {
+                $currentValues[] = $cell->getValue();
+            }
+
+            $tableCell->setValue($currentValues);
+        }
         return $returnData;
+        $mergeResult = $merges[0];
     }
 
 
