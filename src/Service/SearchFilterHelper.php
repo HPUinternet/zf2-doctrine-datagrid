@@ -2,7 +2,6 @@
 
 class SearchFilterHelper
 {
-
     /**
      * @var array
      */
@@ -44,6 +43,20 @@ class SearchFilterHelper
         $filterInstance = $this->filters[$fieldName];
 
         return $filterInstance->search($searchParam, $queryBuilderService);
+    }
+
+    /**
+     * Allows filters to change the QueryBuilderService even before filtering.
+     *
+     * @param QueryBuilderService $queryBuilderService
+     */
+    public function prepareFilters(QueryBuilderService $queryBuilderService)
+    {
+        foreach ($this->filters as $filter) {
+            if (method_exists($filter, 'prepare')) {
+                $filter->prepare($queryBuilderService);
+            }
+        }
     }
 
     /**

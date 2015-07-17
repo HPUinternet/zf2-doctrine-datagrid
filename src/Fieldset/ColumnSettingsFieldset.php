@@ -1,5 +1,6 @@
 <?php namespace Wms\Admin\DataGrid\Fieldset;
 
+use Wms\Admin\DataGrid\Model\TableHeaderCellModel;
 use Wms\Admin\DataGrid\Model\TableModel;
 use Zend\Form\Element\MultiCheckbox;
 use Zend\Form\Fieldset;
@@ -7,7 +8,6 @@ use Zend\InputFilter\InputFilterProviderInterface;
 
 class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInterface
 {
-
     public $checkboxName = 'columns';
 
     /**
@@ -22,31 +22,35 @@ class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInte
     {
         parent::__construct('Display');
         $this->tableModel = $table;
-        $columns = $this->tableModel->getAvailableHeaders();
+        $tableHeaders = $this->tableModel->getTableHeaders();
 
         // Group checkboxes by property
         $columnGroups = array();
-        foreach ($columns as $column) {
-            $columnNameSegments = explode('.', $column);
+        foreach ($tableHeaders as $tableHeader) {
+            /** @var TableHeaderCellModel $tableHeader */
+            $columnNameSegments = explode('.', $tableHeader->getName());
             if (!array_key_exists($columnNameSegments[0], $columnGroups)) {
                 $columnGroups[$columnNameSegments[0]] = array();
             }
         }
 
         // Create all values for each property
-        foreach ($columns as $column) {
-            $columnNameSegments = explode('.', $column);
-            $label = $column;
+        foreach ($tableHeaders as $tableHeader) {
+            $columnNameSegments = explode('.', $tableHeader->getName());
+            $label = $tableHeader->getName();
+
             if (count($columnNameSegments) > 1) {
                 $segments = $columnNameSegments;
                 unset($segments[0]);
                 $label = implode('.', $segments);
             }
+
             $valueOption = array(
-                'value' => $column,
+                'value' => $tableHeader->getName(),
                 'label' => $label,
-                'selected' => !$this->tableModel->isHiddenColumn($column),
+                'selected' => $tableHeader->isVisible(),
             );
+
             $columnGroups[$columnNameSegments[0]][] = $valueOption;
         }
 
@@ -66,10 +70,11 @@ class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInte
 
         $this->add(array(
             'name' => 'submit',
-            'type' => 'Submit',
+            'type' => 'submit',
+            'label' => '<span class="glyphicon glyphicon glyphicon-refresh"></span>',
             'attributes' => array(
                 'value' => 'Apply',
-                'class' => 'btn btn-primary',
+                'class' => 'btn knopSearch',
             ),
         ));
     }

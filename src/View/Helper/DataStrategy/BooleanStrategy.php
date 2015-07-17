@@ -1,10 +1,11 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper\DataStrategy;
 
+use Zend\Form\Element\Checkbox;
+use Zend\Form\Element\Select;
 use Zend\View\Renderer\RendererInterface as View;
 
-class BooleanStrategy implements DataStrategyInterface
+class BooleanStrategy implements DataStrategyInterface, DataStrategyFilterInterface
 {
-
     /**
      * @var View;
      */
@@ -33,5 +34,23 @@ class BooleanStrategy implements DataStrategyInterface
         }
 
         return $this->view->translate($cellValue);
+    }
+
+    /**
+     * returns a input element for the inline filter
+     *
+     * @param $elementName
+     * @return string|\Zend\Form\ElementInterface
+     */
+    public function showFilter($elementName)
+    {
+        $select = new Select($elementName);
+        $select->setEmptyOption('');
+        $select->setValueOptions(array(
+            '0' => $this->view->translate('no'),
+            '1' => $this->view->translate('yes')
+        ));
+
+        return $select;
     }
 }

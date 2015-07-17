@@ -2,8 +2,9 @@
 
 use Wms\Admin\DataGrid\Options\ModuleOptions;
 use Wms\Admin\DataGrid\Model\TableModel as Table;
+use Wms\Admin\DataGrid\Service\Interfaces\TableBuilderInterface;
 
-class TableBuilderService
+class TableBuilderService implements TableBuilderInterface
 {
     /**
      * @var Int
@@ -36,6 +37,11 @@ class TableBuilderService
     public $resolveAssociationColumns = true;
 
     /**
+     * @var Keeps track if the filters are prepared
+     */
+    private $filtersPrepared = false;
+
+    /**
      * @param ModuleOptions $moduleOptions
      * @param QueryBuilderService $queryBuilderService
      * @param SearchFilterHelper $searchFilterHelper
@@ -48,11 +54,7 @@ class TableBuilderService
         $this->setModuleOptions($moduleOptions);
         $this->queryBuilder = $queryBuilderService;
         $this->searchFilterHelper = $searchFilterHelper;
-
-        // Make sure data retrieval is default when not configured
-        $this->queryBuilder->refreshColumns($this->moduleOptions->getProhibitedColumns());
-        $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
-        $this->setPage($this->page, $this->getModuleOptions()->getItemsPerPage());
+        $this->init();
     }
 
     /**
@@ -62,25 +64,28 @@ class TableBuilderService
      */
     public function getTable()
     {
+        if (empty($this->queryBuilder->getSelectedTableColumns())) {
+            $this->filtersPrepared = false;
+            $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
+        }
+
+        $dataTypes = array_merge($this->queryBuilder->getTableColumnTypes(), $this->moduleOptions->getRenders());
+        $filterValues = $this->resolveAssociationColumns ? $this->queryBuilder->preLoadAllAssociationFields() : array();
+
         $table = new Table();
-
-        // configure the minimal TableModel
-        $table->setAvailableHeaders($this->queryBuilder->getAvailableTableColumns());
-        $table->setUsedHeaders($table->calculateTableHeader($this->queryBuilder->getSelectedTableColumns()));
-        $table->setAndParseRows($this->queryBuilder->getResultSet());
-
-        // configure TableModel extensions and additions
-        $table->setDataTypes(
-            array_merge($this->queryBuilder->getTableColumnTypes(), $this->moduleOptions->getRenders())
+        $table->setDataTypes($dataTypes);
+        $table->addHeaders(
+            $this->queryBuilder->getAvailableTableColumns(),
+            $this->queryBuilder->getSelectedTableColumns(),
+            $this->moduleOptions->getColumnWidths()
         );
-        $table->setAndParseFilters($this->searchFilterHelper->getFilters());
+
+        $table->addRows($this->queryBuilder->getResultSet());
+        $table->setPrefetchedFilterValues($filterValues);
+        $table->addFilters($this->searchFilterHelper->getFilters(), $this->usedFilters);
         $table->setPageNumber($this->page);
         $table->setMaxPageNumber($this->calculateMaxPages());
-        $table->setUsedFilterValues($this->usedFilters);
         $table->setOptionRoutes($this->moduleOptions->getOptionRoutes());
-        if ($this->resolveAssociationColumns) {
-            $table->setAvailableFilterValues($this->queryBuilder->preLoadAllAssociationFields());
-        }
 
         return $table;
     }
@@ -92,6 +97,10 @@ class TableBuilderService
     public function selectColumns(array $columns)
     {
         $this->queryBuilder->select($columns);
+        if (!$this->filtersPrepared) {
+            $this->searchFilterHelper->prepareFilters($this->queryBuilder);
+            $this->filtersPrepared = true;
+        }
     }
 
     /**
@@ -107,7 +116,7 @@ class TableBuilderService
      * @param $column
      * @param $order
      */
-    public function orderBy($column, $order)
+    public function orderBy($column, $order = 'asc')
     {
         // @todo: input valdiation should be handled by zend form
         if (in_array($column, $this->queryBuilder->getAvailableTableColumns())
@@ -125,18 +134,18 @@ class TableBuilderService
      */
     public function search(array $searchParams)
     {
+        if (empty($this->queryBuilder->getSelectedTableColumns())) {
+            $this->selectColumns($this->getModuleOptions()->getDefaultColumns());
+        }
+
         foreach ($searchParams as $fieldName => $searchParam) {
-            if (empty($searchParam)) {
+            if ($searchParam == "") {
                 continue;
             }
             $this->usedFilters[$fieldName] = $searchParam;
 
             if ($this->searchFilterHelper->hasFilter($fieldName)) {
-                $this->queryBuilder = $this->searchFilterHelper->useFilter(
-                    $fieldName,
-                    $searchParam,
-                    $this->queryBuilder
-                );
+                $this->searchFilterHelper->useFilter($fieldName, $searchParam, $this->queryBuilder);
                 continue;
             }
 
@@ -159,6 +168,15 @@ class TableBuilderService
     }
 
     /**
+     * Sets default options and parameters, read from the module configuration
+     */
+    private function init()
+    {
+        $this->queryBuilder->refreshColumns($this->getModuleOptions()->getProhibitedColumns());
+        $this->setPage($this->page, $this->getModuleOptions()->getItemsPerPage());
+    }
+
+    /**
      * @return ModuleOptions
      */
     public function getModuleOptions()
@@ -172,21 +190,5 @@ class TableBuilderService
     public function setModuleOptions($moduleOptions)
     {
         $this->moduleOptions = $moduleOptions;
-    }
-
-    /**
-     * @return QueryBuilderService
-     */
-    public function getQueryBuilder()
-    {
-        return $this->queryBuilder;
-    }
-
-    /**
-     * @param QueryBuilderService $queryBuilder
-     */
-    public function setQueryBuilder($queryBuilder)
-    {
-        $this->queryBuilder = $queryBuilder;
     }
 }

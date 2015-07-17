@@ -5,6 +5,5 @@ use Wms\Admin\DataGrid\Options\ModuleOptions;
 
 interface FilterParameterProviderInterface
 {
-
     public function resolveParameters(ServiceLocatorInterface $serviceLocator);
 }

@@ -2,7 +2,6 @@
 
 class SmallintStrategy implements DataStrategyInterface
 {
-
     /**
      * Parse the data to a html representation
      *
