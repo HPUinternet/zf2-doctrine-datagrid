@@ -446,7 +446,7 @@ class QueryBuilderService
     {
         $nameSpaceSegments = explode('\\', $entityName);
 
-        return strtoupper(end($nameSpaceSegments));
+        return 'En_'.strtoupper(end($nameSpaceSegments));
     }
 
 
