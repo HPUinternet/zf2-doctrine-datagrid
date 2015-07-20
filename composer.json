@@ -42,5 +42,10 @@
 			"./Module.php"
 		]
 	},
-	"version": "0.99-dev"
+	"extra": {
+		"branch-alias": {
+			"dev-develop": "0.99-dev",
+			"dev-master": "1.0.x"
+		}
+	}
 }
