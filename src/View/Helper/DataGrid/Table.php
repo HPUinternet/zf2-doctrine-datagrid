@@ -22,27 +22,27 @@ class Table extends AbstractHelper
     /**
      * @var array
      */
-    private $displaySettings;
+    protected $displaySettings;
 
     /**
      * @var TableModel;
      */
-    private $tableModel;
+    protected $tableModel;
 
     /**
      * @var StrategyResolver
      */
-    private $dataStrategyResolver;
+    protected $dataStrategyResolver;
 
     /**
      * @var Form
      */
-    private $settingsForm;
+    protected $settingsForm;
 
     /**
      * @var Escaper
      */
-    private $escaper;
+    protected $escaper;
 
     /**
      * @return TableModel
