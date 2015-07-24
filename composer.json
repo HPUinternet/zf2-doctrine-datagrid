@@ -22,7 +22,8 @@
 	},
 	"require": {
 		"doctrine/doctrine-orm-module": "0.*",
-		"zendframework/zendframework": "~2"
+		"zendframework/zendframework": "~2.5",
+		"rwoverdijk/assetmanager": "~1.4"
 	},
 	"suggest": {
 		"hpu/wms-installers": "Installs the DataGrid module in a WMS friendly directory structure"

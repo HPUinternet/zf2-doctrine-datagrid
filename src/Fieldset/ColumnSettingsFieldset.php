@@ -1,9 +1,12 @@
 <?php namespace Wms\Admin\DataGrid\Fieldset;
 
+use ReflectionFunction;
 use Wms\Admin\DataGrid\Model\TableHeaderCellModel;
 use Wms\Admin\DataGrid\Model\TableModel;
 use Zend\Form\Element\MultiCheckbox;
+use Zend\Form\ElementPrepareAwareInterface;
 use Zend\Form\Fieldset;
+use Zend\Form\FormInterface;
 use Zend\InputFilter\InputFilterProviderInterface;
 
 class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInterface
@@ -65,7 +68,7 @@ class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInte
             }
 
             // Dirty hack, because this->add() does not detect element or fieldset naming conflicts
-            $this->iterator->insert($multiCheckbox, 0);
+            $this->iterator->insert($property, $multiCheckbox, 0);
         }
 
         $this->add(array(
@@ -88,5 +91,20 @@ class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInte
     public function getInputFilterSpecification()
     {
         return array();
+    }
+
+    /**
+     * @param FormInterface $form
+     * @return mixed|void
+     */
+    public function prepareElement(FormInterface $form)
+    {
+        foreach ($this->iterator as $elementOrFieldset) {
+
+            // Recursively prepare elements
+            if ($elementOrFieldset instanceof ElementPrepareAwareInterface) {
+                $elementOrFieldset->prepareElement($form);
+            }
+        }
     }
 }
