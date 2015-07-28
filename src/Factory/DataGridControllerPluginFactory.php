@@ -16,7 +16,7 @@ class DataGridControllerPluginFactory implements FactoryInterface
     {
         $sl = $serviceLocator->getServiceLocator();
         $plugin = new DataGridPlugin();
-        $plugin->setTableBuilderService($sl->get('Wms\Admin\DataGrid\Service\TableBuilderService'));
+        $plugin->setTableBuilderService($sl->get('DataGrid_TableBuilderService'));
 
         return $plugin;
     }

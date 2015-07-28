@@ -15,9 +15,9 @@ class QueryBuilderServiceFactory implements FactoryInterface
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
         return new QueryBuilderService(
-            $serviceLocator->get('Wms\Admin\DataGrid\Options\ModuleOptions')->getEntityName(),
-            $serviceLocator->get('Wms\Admin\DataGrid\Service\QueryFilterHelper')->getFilteredEntityManager(),
-            $serviceLocator->get('Wms\Admin\DataGrid\Service\EntityMetadataHelper')
+            $serviceLocator->get('DataGrid_ModuleOptions')->getEntityName(),
+            $serviceLocator->get('DataGrid_QueryFilterHelper')->getFilteredEntityManager(),
+            $serviceLocator->get('DataGrid_EntityMetadataHelper')
         );
     }
 }

@@ -19,7 +19,7 @@ class SearchFilterHelperFactory implements FactoryInterface
     {
         // Directly invoke or instantiate the filter Class
         $filters = array();
-        $configuredFilters = $serviceLocator->get('Wms\Admin\DataGrid\Options\ModuleOptions')->getSearchFilters();
+        $configuredFilters = $serviceLocator->get('DataGrid_ModuleOptions')->getSearchFilters();
         foreach ($configuredFilters as $fieldName => $filterClass) {
             if ($serviceLocator->has($filterClass)) {
                 $filterClassInstance = $serviceLocator->get($filterClass);
