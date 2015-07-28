@@ -8,7 +8,7 @@ use Wms\Admin\DataGrid\View\Helper\DataGrid\Table;
  * instance in your DataGrid Controller Plugin.
  *
  * Interface TableBuilderInterface
- * @package Wms\Admin\DataGrid\Service\Interfaces
+ * @package Wms\Admin\DataGrid\Service
  */
 interface TableBuilderInterface
 {
