@@ -1,8 +1,7 @@
 <?php namespace Wms\Admin\DataGrid\Factory;
 
-use Wms\Admin\DataGrid\SearchFilter\NonFieldSearchFilterInterface;
 use Wms\Admin\DataGrid\SearchFilter\SearchFilterInterface;
-use Wms\Admin\DataGrid\Service\SearchFilterHelper;
+use Wms\Admin\DataGrid\SearchFilter\SearchFilterHelper;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 

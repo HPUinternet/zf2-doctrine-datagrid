@@ -2,6 +2,7 @@
 
 use Wms\Admin\DataGrid\Options\ModuleOptions;
 use Wms\Admin\DataGrid\Model\TableModel as Table;
+use Wms\Admin\DataGrid\SearchFilter\SearchFilterHelper;
 
 class TableBuilderService implements TableBuilderInterface
 {

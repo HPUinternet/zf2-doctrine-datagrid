@@ -1,7 +1,7 @@
 <?php namespace Wms\Admin\DataGrid\Factory;
 
 use Wms\Admin\DataGrid\Filter\FilterParameterProviderInterface;
-use Wms\Admin\DataGrid\Service\QueryFilterHelper;
+use Wms\Admin\DataGrid\Filter\QueryFilterHelper;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 

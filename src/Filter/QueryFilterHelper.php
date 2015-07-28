@@ -1,15 +1,16 @@
-<?php namespace Wms\Admin\DataGrid\Service;
-
-/**
- * http://www.bdfi.info/img_forum/laravel_administrator001.jpg
- * https://raw.githubusercontent.com/jordillonch/CrudGeneratorBundle/master/screenshot.png
- *
- * Class QueryFilterHelper
- * @package Wms\Admin\DataGrid\Service
- */
+<?php namespace Wms\Admin\DataGrid\Filter;
 
 use Doctrine\ORM\EntityManager;
 
+/**
+ * Class QueryFilterHelper
+ *
+ * This class will dynamically enable your configured filters in the Doctrine Entity Manager,
+ * used by the TableBuilderService. Please note that resolving your filter parameters is done in the
+ * Factory of this helper.
+ *
+ * @package Wms\Admin\DataGrid\Filter
+ */
 class QueryFilterHelper
 {
     /**
