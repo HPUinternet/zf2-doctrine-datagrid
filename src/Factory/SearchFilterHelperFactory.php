@@ -1,8 +1,7 @@
 <?php namespace Wms\Admin\DataGrid\Factory;
 
-use Wms\Admin\DataGrid\SearchFilter\NonFieldSearchFilterInterface;
 use Wms\Admin\DataGrid\SearchFilter\SearchFilterInterface;
-use Wms\Admin\DataGrid\Service\SearchFilterHelper;
+use Wms\Admin\DataGrid\SearchFilter\SearchFilterHelper;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
@@ -19,7 +18,7 @@ class SearchFilterHelperFactory implements FactoryInterface
     {
         // Directly invoke or instantiate the filter Class
         $filters = array();
-        $configuredFilters = $serviceLocator->get('Wms\Admin\DataGrid\Options\ModuleOptions')->getSearchFilters();
+        $configuredFilters = $serviceLocator->get('DataGrid_ModuleOptions')->getSearchFilters();
         foreach ($configuredFilters as $fieldName => $filterClass) {
             if ($serviceLocator->has($filterClass)) {
                 $filterClassInstance = $serviceLocator->get($filterClass);

@@ -222,6 +222,8 @@ class Table extends AbstractHelper
             $html .= '<th class="tabelHeader rowOptions"></th>';
         }
 
+        $html .= '</tr>';
+
         $html .= $this->getView()->DataGridSearchFilter(
             $this->tableModel,
             $this->displayedHeaders,
@@ -229,7 +231,6 @@ class Table extends AbstractHelper
             $this->dataStrategyResolver
         );
 
-        $html .= '</tr>';
         $html .= '</thead>';
 
         return $html;
@@ -244,7 +245,15 @@ class Table extends AbstractHelper
     protected function printTableContent($trClass = "")
     {
         $html = '';
-        foreach ($this->tableModel->getTableRows() as $row) {
+        $rows = $this->tableModel->getTableRows();
+
+        if(empty($rows)) {
+            $html .= '<tr><td colspan="42">';
+            $html .= $this->view->translate('No data found matching your criteria');
+            $html .= '</td></tr>';
+        }
+
+        foreach ($rows as $row) {
             $html .= '<tr class="' . $trClass . '">';
             $html .= $this->printTableContentRow($row);
             $html .= "</tr>";

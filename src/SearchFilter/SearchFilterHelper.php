@@ -1,5 +1,15 @@
-<?php namespace Wms\Admin\DataGrid\Service;
+<?php namespace Wms\Admin\DataGrid\SearchFilter;
 
+use Wms\Admin\DataGrid\Service\QueryBuilderService;
+
+/**
+ * Class SearchFilterHelper
+ *
+ * This helper will enable your configured searchFilter by acting as a delegator for the TableBuilderService.
+ * Please note that resolving your filter parameters is done in the Factory of this helper.
+ *
+ * @package Wms\Admin\DataGrid\SearchFilter
+ */
 class SearchFilterHelper
 {
     /**
