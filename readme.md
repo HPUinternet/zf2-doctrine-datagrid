@@ -1,4 +1,4 @@
-# HPU Datagrid Module
+# HPU DataGrid Module
 Helps you select and display the data of an Doctrine Entity in a customizable and extensible DataGrid table.
 
 The goal is to prevent duplication of code between pages or even projects by re-using one simple solution for displaying data.
@@ -16,8 +16,7 @@ This gives us more control on the quantity of queries we shoot against our datas
 - Turning features on/off in the view helper
 
 ## Installation
-Please take a look at the installation docs.
-
+Please take a look at the [installation docs](docs/1. Installation.md).
 
 ## Feature roadmap
 The following features are not yet supported by the module:
