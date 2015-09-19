@@ -77,7 +77,6 @@ class SearchFilter extends AbstractHelper
                     </span>
                     </td>';
         $output .= '</tr>';
-        $output .= '</thead>';
 
         return $output;
     }

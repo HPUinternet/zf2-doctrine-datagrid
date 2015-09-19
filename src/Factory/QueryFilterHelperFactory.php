@@ -1,7 +1,7 @@
 <?php namespace Wms\Admin\DataGrid\Factory;
 
 use Wms\Admin\DataGrid\Filter\FilterParameterProviderInterface;
-use Wms\Admin\DataGrid\Service\QueryFilterHelper;
+use Wms\Admin\DataGrid\Filter\QueryFilterHelper;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
@@ -18,7 +18,7 @@ class QueryFilterHelperFactory implements FactoryInterface
     {
 
         // Resolve any dynamic filters, if any
-        $filters = $serviceLocator->get('Wms\Admin\DataGrid\Options\ModuleOptions')->getFilters();
+        $filters = $serviceLocator->get('DataGrid_ModuleOptions')->getFilters();
         foreach ($filters as $filterName => $filterParameters) {
             if (is_array($filterParameters) || (is_int($filterName) && !empty($filterParameters))) {
                 continue;

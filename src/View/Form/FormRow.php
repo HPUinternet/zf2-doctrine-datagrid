@@ -10,7 +10,7 @@ class FormRow extends BaseFormRowHelper
     /**
      * @inheritdoc
      */
-    public function render(ElementInterface $element, $labelPosition = NULL)
+    public function render(ElementInterface $element, $labelPosition = null)
     {
         $wrapper = '<div class="col-md-12">%s</div>';
         if ($element->getAttribute('type') == 'multi_checkbox') {

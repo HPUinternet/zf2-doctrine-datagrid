@@ -1,6 +1,6 @@
 <?php namespace Wms\Admin\DataGrid\Controller\Plugin;
 
-use Wms\Admin\DataGrid\Service\Interfaces\TableBuilderInterface;
+use Wms\Admin\DataGrid\Service\TableBuilderInterface;
 use Zend\Json\Exception\RuntimeException;
 use Zend\Json\Json;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;

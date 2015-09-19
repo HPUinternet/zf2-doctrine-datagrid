@@ -64,7 +64,7 @@ The above filter will filter entities that only belong to the logged in user (so
     
     /**
      * The OnlyOwnEntitiesFilter is build as a demonstration filter for the datagrid module.
-     * When configured to run, this filter will tell the datagrid module to only retrieve entities that have the creator_id
+     * When configured to run, this filter will tell the datagrid module to only retrieve entities that have the creator
      * property matched with the current user identity.
      *
      * Class OnlyOwnEntitiesFilter
@@ -83,8 +83,8 @@ The above filter will filter entities that only belong to the logged in user (so
         public function addFilterConstraint(ClassMetadata $targetEntity, $targetTableAlias)
         {
             if ($targetEntity->name == $this->cleanParameter($this->getParameter('entityName'))
-                && $targetEntity->hasField('creator_id') && $this->getParameter('userId')) {
-                return $targetTableAlias . '.creator_id = ' . $this->getParameter('userId');
+                && $targetEntity->hasField('createdBy') && $this->getParameter('userId')) {
+                return $targetTableAlias . '.createdBy = ' . $this->getParameter('userId');
             }
             return '';
         }
