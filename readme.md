@@ -28,4 +28,3 @@ The following features are not yet supported by the module:
 - Entities which consists of a multi column primary key
 - Advanced filtering (an interface for the user to drag/drop their own search filters)
 - Unit tests & Integration tests
-- contribution docs
