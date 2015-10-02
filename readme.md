@@ -23,7 +23,7 @@ The following features are not yet supported by the module:
 
 - publishing this in packagist
 - Frontend styling
-- Many-To-Many associations where the joinTable holds data aswel (disguised as an OneToMany whereas the targetted entity has "joinable" (Many-to-One, One-to-One")fields
+- Many-To-Many associations where the joinTable holds data as well (a pivot table)
 - Entities which consists of a multi column primary key
 - Advanced filtering (an interface for the user to drag/drop their own search filters)
 - Unit tests & Integration tests
