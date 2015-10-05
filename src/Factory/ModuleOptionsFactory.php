@@ -32,6 +32,10 @@ class ModuleOptionsFactory implements FactoryInterface
             throw new \Exception('Could not find a valid DataGrid configuration for your current controller');
         }
 
+        if (!isset($moduleOptions['entityName']) || !isset($moduleOptions['defaultColumns'])) {
+            throw new \Exception('Missing the bare minimum entityName and defaultColumns in your configuration');
+        }
+
         return new ModuleOptions($moduleOptions);
     }
 

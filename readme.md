@@ -22,7 +22,6 @@ Please take a look at the [installation docs](docs/1. Installation.md).
 The following features are not yet supported by the module:
 
 - publishing this in packagist
-- Ordering the columns in a most basic way
 - Frontend styling
 - Many-To-Many associations where the joinTable holds data as well (a pivot table)
 - Entities which consists of a multi column primary key
