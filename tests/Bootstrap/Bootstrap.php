@@ -1,5 +1,4 @@
-<?php
-namespace Wms\Admin\DataGrid\tests;
+<?php namespace Wms\Admin\DataGrid\Tests\Bootstrap;
 
 use Zend\Loader\AutoloaderFactory;
 use Zend\Mvc\Service\ServiceManagerConfig;

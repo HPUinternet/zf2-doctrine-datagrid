@@ -1,0 +1,30 @@
+<?php
+return array(
+    'modules' => array(
+        'Wms\Admin\DataGrid\Tests\Bootstrap\Application',
+        'DoctrineModule',
+        'DoctrineORMModule',
+        'Wms\Admin\DataGrid',
+    ),
+    'module_listener_options' => array(
+        'module_paths' => array(
+            __DIR__,
+            './vendor',
+        ),
+    ),
+    'doctrine' => array(
+            'connection' => array(
+                'orm_default' => array(
+                    'driverClass' => 'Doctrine\DBAL\Driver\PDOMySql\Driver',
+                    'params' => array(
+                        'host'     => '127.0.0.1',
+                        'port'     => '3306',
+                        'user'     => 'root',
+                        'password' => '',
+                        'dbname'   => 'wms_datagrid_test',
+                    )
+                )
+            )
+        ),
+
+);
