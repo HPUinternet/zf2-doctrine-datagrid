@@ -19,7 +19,7 @@ class Bootstrap
     {
         // Load the user-defined test configuration file, if it exists; otherwise, load
         if (is_readable(__DIR__ . '/TestConfig.php')) {
-            $testConfig = include __DIR__ . '/TestConfig.php.dist';
+            $testConfig = include __DIR__ . '/TestConfig.php';
         } else {
             $testConfig = include __DIR__ . '/TestConfig.php.dist';
         }
@@ -35,7 +35,7 @@ class Bootstrap
             }
         }
 
-        $zf2ModulePaths  = implode(PATH_SEPARATOR, $zf2ModulePaths) . PATH_SEPARATOR;
+        $zf2ModulePaths = implode(PATH_SEPARATOR, $zf2ModulePaths) . PATH_SEPARATOR;
         $zf2ModulePaths .= getenv('ZF2_MODULES_TEST_PATHS') ?: (defined('ZF2_MODULES_TEST_PATHS') ? ZF2_MODULES_TEST_PATHS : '');
 
         static::initAutoloader();
@@ -84,13 +84,13 @@ class Bootstrap
         }
 
         AutoloaderFactory::factory(array(
-                'Zend\Loader\StandardAutoloader' => array(
-                    'autoregister_zf' => true,
-                    'namespaces' => array(
-                        __NAMESPACE__ => __DIR__ . '/' . __NAMESPACE__,
-                    ),
+            'Zend\Loader\StandardAutoloader' => array(
+                'autoregister_zf' => true,
+                'namespaces' => array(
+                    __NAMESPACE__ => __DIR__ . '/' . __NAMESPACE__,
                 ),
-            ));
+            ),
+        ));
     }
 
     protected static function findParentPath($path)
@@ -107,5 +107,3 @@ class Bootstrap
         return $dir . '/' . $path;
     }
 }
-
-Bootstrap::init();

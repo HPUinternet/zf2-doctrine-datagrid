@@ -110,9 +110,9 @@ return array(
             ),
             'orm_default' => array(
                 'drivers' => array(
-                    'Application\Entity' => 'my_annotation_driver'
+                    __NAMESPACE__.'\Entity' => 'my_annotation_driver'
                 )
             )
         )
-    )
+    ),
 );
