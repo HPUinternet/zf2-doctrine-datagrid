@@ -14,7 +14,7 @@ class DataGridPlugin extends AbstractPlugin
     protected $tableBuilderService;
 
     /**
-     * @return TableBuilderService
+     * @return TableBuilderInterface
      * @throws \Exception
      */
     public function getTableBuilderService()

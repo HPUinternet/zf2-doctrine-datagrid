@@ -247,7 +247,7 @@ class Table extends AbstractHelper
         $html = '';
         $rows = $this->tableModel->getTableRows();
 
-        if(empty($rows)) {
+        if (empty($rows)) {
             $html .= '<tr><td colspan="42">';
             $html .= $this->view->translate('No data found matching your criteria');
             $html .= '</td></tr>';
