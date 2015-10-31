@@ -14,7 +14,7 @@ env:
     - APP_ENV=testing
     - DOCTRINE_HOST=127.0.0.1
     - DOCTRINE_USER=root
-    - DOCTRINE_PASSWORD=
+    - DOCTRINE_PASSWORD=''
     - DOCTRINE_DATABASE=ci_tests
 
 before_script:
