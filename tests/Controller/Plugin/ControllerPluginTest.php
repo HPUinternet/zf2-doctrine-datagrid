@@ -38,6 +38,7 @@ class ControllerPluginTest extends AbstractTestCase
 
         $mock = $this->getTableBuilderMock();
         $mock->expects($this->once())->method('getTable');
+        $plugin->setTableBuilderService($mock);
 
         $plugin->getTable();
     }
