@@ -25,8 +25,10 @@ Please take a look at the [installation docs](docs/1. Installation.md).
 The following features are not yet supported by the module:
 
 - publishing this in packagist
+- Rebuild the view helper
+- Add a beter way to configure your entity configuration / multi table support on a page
 - Frontend styling
 - Many-To-Many associations where the joinTable holds data as well (a pivot table)
 - Entities which consists of a multi column primary key
 - Advanced filtering (an interface for the user to drag/drop their own search filters)
-- Unit tests & Integration tests
+- More testing Unit tests & Integration tests
