@@ -1,4 +1,7 @@
 # HPU DataGrid Module
+
+[![Build Status](https://travis-ci.org/HPUinternet/zf2-doctrine-datagrid.svg)](https://travis-ci.org/HPUinternet/zf2-doctrine-datagrid)
+
 Helps you select and display the data of an Doctrine Entity in a customizable and extensible DataGrid table.
 
 The goal is to prevent duplication of code between pages or even projects by re-using one simple solution for displaying data.
