@@ -25,6 +25,10 @@
 		"zendframework/zendframework": "~2.5",
 		"rwoverdijk/assetmanager": "~1.4"
 	},
+  	"require-dev": {
+	  "squizlabs/php_codesniffer": "~2",
+	  "phpunit/phpunit": "~4"
+	},
 	"suggest": {
 		"hpu/wms-installers": "Installs the DataGrid module in a WMS friendly directory structure"
 	},

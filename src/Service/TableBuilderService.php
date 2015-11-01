@@ -71,11 +71,15 @@ class TableBuilderService implements TableBuilderInterface
 
         $dataTypes = array_merge($this->queryBuilder->getTableColumnTypes(), $this->moduleOptions->getRenders());
         $filterValues = $this->resolveAssociationColumns ? $this->queryBuilder->preLoadAllAssociationFields() : array();
+        $tableHeaders = $this->sortColumns(
+            $this->queryBuilder->getAvailableTableColumns(),
+            $this->moduleOptions->getDefaultColumns()
+        );
 
         $table = new Table();
         $table->setDataTypes($dataTypes);
         $table->addHeaders(
-            $this->queryBuilder->getAvailableTableColumns(),
+            $tableHeaders,
             $this->queryBuilder->getSelectedTableColumns(),
             $this->moduleOptions->getColumnWidths()
         );
@@ -165,6 +169,28 @@ class TableBuilderService implements TableBuilderInterface
         }
 
         return ceil($maxResults / $itemsPerPage);
+    }
+
+    /**
+     * Sorts array values by an second array, containing the sort order
+     *
+     * @param $tableColumns
+     * @param $defaultOrder
+     * @return array
+     */
+    protected function sortColumns($tableColumns, $defaultOrder)
+    {
+        $orderedColumns = array();
+
+        foreach ($defaultOrder as $column) {
+            $orderedColumns[] = $column;
+            if ($key = array_search($column, $tableColumns)) {
+                unset($tableColumns[$key]);
+            }
+        }
+        $orderedColumns = array_merge($orderedColumns, $tableColumns);
+
+        return $orderedColumns;
     }
 
     /**

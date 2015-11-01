@@ -297,7 +297,6 @@ class TableModel
             $tableCell->setValue($currentValues);
         }
         return $returnData;
-        $mergeResult = $merges[0];
     }
 
 

@@ -100,7 +100,6 @@ class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInte
     public function prepareElement(FormInterface $form)
     {
         foreach ($this->iterator as $elementOrFieldset) {
-
             // Recursively prepare elements
             if ($elementOrFieldset instanceof ElementPrepareAwareInterface) {
                 $elementOrFieldset->prepareElement($form);
