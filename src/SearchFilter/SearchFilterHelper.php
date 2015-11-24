@@ -8,7 +8,7 @@ use Wms\Admin\DataGrid\Service\QueryBuilderService;
  * This helper will enable your configured searchFilter by acting as a delegator for the TableBuilderService.
  * Please note that resolving your filter parameters is done in the Factory of this helper.
  *
- * @package Wms\Admin\DataGrid\SearchFilter
+ * @package Wms\Admin\DataGrid\TableSearchFilter
  */
 class SearchFilterHelper
 {

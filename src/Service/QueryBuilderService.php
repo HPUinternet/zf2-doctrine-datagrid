@@ -4,9 +4,14 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadataInfo as MetaData;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query\Expr;
+use Wms\Admin\DataGrid\Event\DataGridEvents;
+use Zend\EventManager\EventManagerAwareInterface;
+use Zend\EventManager\EventManagerAwareTrait;
 
-class QueryBuilderService
+class QueryBuilderService implements EventManagerAwareInterface
 {
+    use EventManagerAwareTrait;
+
     protected $availableTableColumns = array();
     protected $selectedTableColumns = array();
     protected $additionalWhereColumns = array();
@@ -321,7 +326,7 @@ class QueryBuilderService
     }
 
     /**
-     * Fires the configured queries to the datbase and migrates the results back to one resultsset.
+     * Fires the configured queries to the database and migrates the results back to one resultSet.
      *
      * @return array
      * @throws \Doctrine\ORM\Mapping\MappingException
@@ -333,6 +338,8 @@ class QueryBuilderService
 
         $sourceEntityMetaData = $this->entityMetadataHelper->getEntityMetadata($this->sourceEntityName);
         $primaryKey = $sourceEntityMetaData->getSingleIdentifierFieldName();
+
+        $this->getEventManager()->trigger(DataGridEvents::DATAGRID_PRE_GETRESULTSET, $this, array('queryBuilder' => $this->queryBuilder, 'sourceEntityMetaData' => $sourceEntityMetaData, 'entityShortName' => $this->getEntityShortName($this->sourceEntityName)));
 
         // if we have any prioritized Sub Queries, the results will become a where clause for our main query
         if (!empty($this->prioritizedSubQueries)) {
@@ -403,7 +410,7 @@ class QueryBuilderService
         $query = clone $this->queryBuilder;
         $entityMetaData = $this->entityMetadataHelper->getEntityMetadata($this->sourceEntityName);
 
-        $query->resetDQLParts(array('select', 'orderBy'));
+        $query->resetDQLParts(array('select', 'groupBy', 'orderBy'));
         $query->setFirstResult(0);
         $query->setMaxResults(null);
         $query->select(sprintf(
@@ -446,7 +453,7 @@ class QueryBuilderService
     {
         $nameSpaceSegments = explode('\\', $entityName);
 
-        return 'En_'.strtoupper(end($nameSpaceSegments));
+        return 'En_' . strtoupper(end($nameSpaceSegments));
     }
 
 

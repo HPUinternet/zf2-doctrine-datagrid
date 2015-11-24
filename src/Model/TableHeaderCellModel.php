@@ -2,8 +2,12 @@
 
 class TableHeaderCellModel extends TableCellModel
 {
+    /** @var TableFilterModel */
     protected $filter = null;
+    /** @var int  */
     protected $width = 0;
+    /** @var bool */
+    protected $orderable = true;
 
     /**
      * @return TableFilterModel
@@ -35,5 +39,21 @@ class TableHeaderCellModel extends TableCellModel
     public function setWidth($width)
     {
         $this->width = $width;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isOrderable()
+    {
+        return $this->orderable;
+    }
+
+    /**
+     * @param boolean $orderable
+     */
+    public function setOrderable($orderable)
+    {
+        $this->orderable = $orderable;
     }
 }
