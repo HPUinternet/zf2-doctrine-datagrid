@@ -1,6 +1,5 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper\DataGrid;
 
-
 use Zend\Di\ServiceLocator;
 use Zend\Form\Element;
 
@@ -25,7 +24,11 @@ abstract class TablePaginator
 
         for ($i = 1; $i <= $maxPages; $i++) {
             $html .= $i == $currentPage ? '<li class="active">' : '<li>';
-            $html .= sprintf('<a href="%s">%d</a></li>', $tableHelper->getView()->UrlWithQuery(array('page' => $i)), $i);
+            $html .= sprintf(
+                '<a href="%s">%d</a></li>',
+                $tableHelper->getView()->UrlWithQuery(array('page' => $i)),
+                $i
+            );
         }
 
         $html .= sprintf(

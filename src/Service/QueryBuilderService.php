@@ -339,7 +339,14 @@ class QueryBuilderService implements EventManagerAwareInterface
         $sourceEntityMetaData = $this->entityMetadataHelper->getEntityMetadata($this->sourceEntityName);
         $primaryKey = $sourceEntityMetaData->getSingleIdentifierFieldName();
 
-        $this->getEventManager()->trigger(DataGridEvents::DATAGRID_PRE_GETRESULTSET, $this, array('queryBuilder' => $this->queryBuilder, 'sourceEntityMetaData' => $sourceEntityMetaData, 'entityShortName' => $this->getEntityShortName($this->sourceEntityName)));
+        $this->getEventManager()->trigger(
+            DataGridEvents::DATAGRID_PRE_GETRESULTSET,
+            $this, array(
+                'queryBuilder' => $this->queryBuilder,
+                'sourceEntityMetaData' => $sourceEntityMetaData,
+                'entityShortName' => $this->getEntityShortName($this->sourceEntityName)
+            )
+        );
 
         // if we have any prioritized Sub Queries, the results will become a where clause for our main query
         if (!empty($this->prioritizedSubQueries)) {

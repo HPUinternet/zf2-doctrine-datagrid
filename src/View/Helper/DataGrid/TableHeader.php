@@ -14,8 +14,10 @@ abstract class TableHeader
      * @param string $classes
      * @return string
      */
-    public static function printTableStart($displaySettings, $classes = "table tabelVerkenner table-striped table-hover table-condensed")
-    {
+    public static function printTableStart(
+        $displaySettings,
+        $classes = "table tabelVerkenner table-striped table-hover table-condensed"
+    ) {
         $html = '';
         if (in_array('simpleSearch', $displaySettings)) {
             $html .= '<form method="GET">';

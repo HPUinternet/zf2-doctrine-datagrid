@@ -65,7 +65,10 @@ abstract class TableBody
         if (in_array('simpleSearch', $tableHelper->getDisplaySettings())) {
             /** @var TableFilterModel $filter */
             foreach ($tableHelper->getAdditionalFilters() as $filter) {
-                $html .= self::printTableCell($tableHelper->getDataStrategyResolver(), $filter->getInstance()->getFilterCellValue($tableRow));
+                $html .= self::printTableCell(
+                    $tableHelper->getDataStrategyResolver(),
+                    $filter->getInstance()->getFilterCellValue($tableRow)
+                );
             }
         }
 
@@ -90,8 +93,11 @@ abstract class TableBody
      * @param string $tdClass
      * @return string
      */
-    public static function printTableCell(StrategyResolver $dataStrategyResolver, TableCellModel $cell, $tdClass = "kolom")
-    {
+    public static function printTableCell(
+        StrategyResolver $dataStrategyResolver,
+        TableCellModel $cell,
+        $tdClass = "kolom"
+    ) {
         return
             sprintf("<td class=\"%s\">", $tdClass . " " . $cell->getSafeName()) .
             $dataStrategyResolver->resolveAndParse($cell->getValue(), $cell->getName()) .
@@ -106,8 +112,11 @@ abstract class TableBody
      * @param string $tdClass
      * @return string
      */
-    public static function printCustomTableCell(TableHeaderCellModel $tableHeader, TableRowModel $tableRow, $tdClass = "kolom")
-    {
+    public static function printCustomTableCell(
+        TableHeaderCellModel $tableHeader,
+        TableRowModel $tableRow,
+        $tdClass = "kolom"
+    ) {
         $tdClass = empty($tableHeader->getHtmlClass()) ? $tdClass : $tableHeader->getHtmlClass();
         $string =
             "<td class=\"%1\$s\">" .

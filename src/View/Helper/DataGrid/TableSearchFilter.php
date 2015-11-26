@@ -115,7 +115,9 @@ abstract class TableSearchFilter
         }
 
         if (method_exists($element, 'setEmptyOption')) {
-            $emptyLabel = $tableHelper->getView()->Translate('Select') . ' ' . $tableHelper->getView()->Translate($fieldName);
+            $emptyLabel =
+                $tableHelper->getView()->Translate('Select') . ' ' .
+                $tableHelper->getView()->Translate($fieldName);
             $element->setEmptyOption($emptyLabel);
         }
 
