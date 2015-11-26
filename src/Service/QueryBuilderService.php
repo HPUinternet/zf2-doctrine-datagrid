@@ -341,7 +341,8 @@ class QueryBuilderService implements EventManagerAwareInterface
 
         $this->getEventManager()->trigger(
             DataGridEvents::DATAGRID_PRE_GETRESULTSET,
-            $this, array(
+            $this,
+            array(
                 'queryBuilder' => $this->queryBuilder,
                 'sourceEntityMetaData' => $sourceEntityMetaData,
                 'entityShortName' => $this->getEntityShortName($this->sourceEntityName)
