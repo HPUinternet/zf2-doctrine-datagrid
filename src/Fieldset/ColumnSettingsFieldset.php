@@ -77,7 +77,7 @@ class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInte
             'label' => '<span class="glyphicon glyphicon glyphicon-refresh"></span>',
             'attributes' => array(
                 'value' => 'Apply',
-                'class' => 'btn knopSearch',
+                'class' => 'btn btn-default',
             ),
         ));
     }

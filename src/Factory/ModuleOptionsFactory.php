@@ -36,7 +36,8 @@ class ModuleOptionsFactory implements FactoryInterface
             throw new \Exception('Missing the bare minimum entityName and defaultColumns in your configuration');
         }
 
-        return new ModuleOptions($moduleOptions);
+        $moduleOptionsClass = $this->getModuleOptionsClass($serviceLocator);
+        return new $moduleOptionsClass($moduleOptions);
     }
 
     /**
@@ -65,5 +66,20 @@ class ModuleOptionsFactory implements FactoryInterface
         }
 
         return false;
+    }
+
+    /**
+     * @param ServiceLocatorInterface $serviceLocator
+     * @return mixed
+     * @throws \Exception
+     */
+    protected function getModuleOptionsClass(ServiceLocatorInterface $serviceLocator)
+    {
+        $moduleOptionsClass = $serviceLocator->get('DataGrid_ModuleOptionsClass');
+        $reflector = new \ReflectionClass($moduleOptionsClass);
+        if (!$reflector->isSubclassOf(ModuleOptions::class)) {
+            throw new \Exception($moduleOptionsClass . ' must be an instance of ' . ModuleOptions::class);
+        }
+        return $moduleOptionsClass;
     }
 }

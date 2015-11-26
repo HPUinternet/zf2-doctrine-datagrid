@@ -3,6 +3,9 @@ namespace Wms\Admin\DataGrid;
 
 return array(
     'service_manager' => array(
+        'invokables' => array(
+            'DataGrid_ModuleOptionsClass' => 'Wms\Admin\DataGrid\Options\ModuleOptions'
+        ),
         'factories' => array(
             'DataGrid_QueryFilterHelper' => 'Wms\Admin\DataGrid\Factory\QueryFilterHelperFactory',
             'DataGrid_SearchFilterHelper' => 'Wms\Admin\DataGrid\Factory\SearchFilterHelperFactory',
@@ -10,7 +13,7 @@ return array(
             'DataGrid_EntityMetadataHelper' => 'Wms\Admin\DataGrid\Factory\EntityMetadataHelperFactory',
             'DataGrid_TableBuilderService' => 'Wms\Admin\DataGrid\Factory\TableBuilderServiceFactory',
             'DataGrid_ModuleOptions' => 'Wms\Admin\DataGrid\Factory\ModuleOptionsFactory',
-        )
+        ),
     ),
     'controller_plugins' => array(
         'factories' => array(
