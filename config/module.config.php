@@ -33,9 +33,8 @@ return array(
             'DataGridTable' => 'Wms\Admin\DataGrid\View\Helper\DataGrid\Table',
             'UrlWithQuery' => 'Wms\Admin\DataGrid\View\Helper\UrlWithQuery',
             'DataGridForm' => 'Wms\Admin\DataGrid\View\Form\Form',
-            'DataGridFormRow' => 'Wms\Admin\DataGrid\View\Form\FormRow',
-            'DataGridFormCollection' => 'Wms\Admin\DataGrid\View\Form\FormCollection',
-            'DataGridNestedFormCollection' => 'Wms\Admin\DataGrid\View\Form\NestedFormCollection',
+            'DataGridDisplaySettings' => 'Wms\Admin\DataGrid\View\Form\DisplaySettings',
+            'DataGridNestedSettings' => 'Wms\Admin\DataGrid\View\Form\NestedSettings',
         ),
     ),
 );

@@ -35,12 +35,7 @@ class Form extends BaseFormHelper
                     $element->getName()
                 );
 
-                if ($element instanceof NestedFieldsetInterface) {
-                    $formContent .= $this->getView()->DataGridNestedFormCollection($element);
-                    continue;
-                }
-
-                $formContent .= $this->getView()->DataGridFormCollection($element);
+                $formContent .= $this->getView()->DataGridDisplaySettings($element);
             }
         }
         $tabHeading .= '</ul>';

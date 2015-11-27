@@ -7,7 +7,7 @@ use Zend\Form\Element;
 use Zend\Form\Form;
 use Zend\View\Helper\AbstractHelper;
 use Wms\Admin\DataGrid\Model\TableModel;
-use Wms\Admin\DataGrid\Fieldset\ColumnSettingsFieldset;
+use Wms\Admin\DataGrid\Fieldset\DisplaySettingsFieldset;
 use Wms\Admin\DataGrid\View\Helper\DataStrategy\StrategyResolver;
 use Zend\Escaper\Escaper;
 
@@ -100,7 +100,7 @@ class Table extends AbstractHelper implements EventManagerAwareInterface
         if (!in_array('columnsForm', $this->displaySettings)) {
             return $settingsForm;
         }
-        return $settingsForm->add(new ColumnSettingsFieldset($this->tableModel));
+        return $settingsForm->add(new DisplaySettingsFieldset($this->tableModel));
     }
 
     /**
