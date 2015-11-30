@@ -1,6 +1,5 @@
 <?php namespace Wms\Admin\DataGrid\View\Form;
 
-use Zend\Form\Fieldset;
 use Zend\Form\FieldsetInterface;
 use Zend\Form\FormInterface;
 use Zend\Form\View\Helper\Form as BaseFormHelper;
@@ -24,7 +23,7 @@ class Form extends BaseFormHelper
         }
 
         $formContent = '';
-        $formContent .= '<div id="myTabContent" class="tab-content">';
+        $formContent .= '<div id="my-tab-content" class="tab-content">';
 
         // Print tabs per fieldset
         $tabHeading = '<ul class="nav nav-tabs">';
@@ -36,12 +35,7 @@ class Form extends BaseFormHelper
                     $element->getName()
                 );
 
-                if ($element instanceof NestedFieldsetInterface) {
-                    $formContent .= $this->getView()->DataGridNestedFormCollection($element);
-                    continue;
-                }
-
-                $formContent .= $this->getView()->DataGridFormCollection($element);
+                $formContent .= $this->getView()->DataGridDisplaySettings($element);
             }
         }
         $tabHeading .= '</ul>';

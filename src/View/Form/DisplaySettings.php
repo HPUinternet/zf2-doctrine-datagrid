@@ -3,9 +3,8 @@
 use Zend\Form\ElementInterface;
 use Zend\Form\View\Helper\FormCollection as BaseFormCollectionHelper;
 
-class FormCollection extends BaseFormCollectionHelper
+class DisplaySettings extends BaseFormCollectionHelper
 {
-    protected $defaultElementHelper = 'DataGridFormRow';
 
     /**
      * @inheritdoc
@@ -21,6 +20,8 @@ class FormCollection extends BaseFormCollectionHelper
         $this->setWrapper(
             '<div class="tab-pane" id="' . str_replace(" ", "_", $element->getName()) . 'Tab" %4$s>%2$s%1$s%3$s</div>'
         );
+
+        $this->setFieldsetHelper($this->getView()->DataGridNestedSettings());
 
         return $this->render($element);
     }

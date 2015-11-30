@@ -1,64 +1,37 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper\DataGrid;
 
-use Wms\Admin\DataGrid\Model\TableCellModel;
-use Wms\Admin\DataGrid\Model\TableHeaderCellModel;
-use Wms\Admin\DataGrid\Model\TableRowModel;
-use Wms\Admin\DataGrid\Model\TableFilterModel;
 use Zend\Di\ServiceLocator;
+use Zend\EventManager\EventManagerAwareInterface;
+use Zend\EventManager\EventManagerAwareTrait;
 use Zend\Form\Element;
 use Zend\Form\Form;
 use Zend\View\Helper\AbstractHelper;
 use Wms\Admin\DataGrid\Model\TableModel;
-use Wms\Admin\DataGrid\Fieldset\ColumnSettingsFieldset;
+use Wms\Admin\DataGrid\Fieldset\DisplaySettingsFieldset;
 use Wms\Admin\DataGrid\View\Helper\DataStrategy\StrategyResolver;
 use Zend\Escaper\Escaper;
 
-class Table extends AbstractHelper
+class Table extends AbstractHelper implements EventManagerAwareInterface
 {
-    private $displayedHeaders = array();
-    private $additionalFilters = array();
-    private $addSearchColumn = false;
+    use EventManagerAwareTrait;
 
-    /**
-     * @var array
-     */
+    /** @var array */
+    protected $displayedHeaders = array();
+
+    /** @var array */
+    protected $additionalFilters = array();
+
+    /** @var array */
     protected $displaySettings;
 
-    /**
-     * @var TableModel;
-     */
+    /** @var TableModel */
     protected $tableModel;
 
-    /**
-     * @var StrategyResolver
-     */
+    /** @var StrategyResolver */
     protected $dataStrategyResolver;
 
-    /**
-     * @var Form
-     */
-    protected $settingsForm;
-
-    /**
-     * @var Escaper
-     */
+    /** @var Escaper */
     protected $escaper;
-
-    /**
-     * @return TableModel
-     */
-    public function getTableModel()
-    {
-        return $this->tableModel;
-    }
-
-    /**
-     * @param TableModel $tableModel
-     */
-    public function setTableModel($tableModel)
-    {
-        $this->tableModel = $tableModel;
-    }
 
     /**
      * Execution of the view helper
@@ -78,40 +51,71 @@ class Table extends AbstractHelper
         $this->dataStrategyResolver = new StrategyResolver($tableModel->getDataTypes());
         $this->dataStrategyResolver->addDependency($this->getView(), 'Zend\View\Renderer\RendererInterface');
 
-        $output = '<div class="datagrid before col-md-12">';
-        $this->prepareForm();
-        $output .= $this->prepareForm();
-        $output .= $this->printForm();
-        $output .= '</div>';
+        $output = $this->printSettings();
+        $output .= $this->printTable();
+        $output .= $this->printPaginator();
 
-        $output .= '<div class="datagrid table col-md-12">';
-        $this->prepareTable();
-        $output .= $this->printTableStart();
-        $output .= $this->printTableHeadRow();
-        $output .= $this->printTableContent();
-        $output .= $this->printTableEnd();
-        $output .= '</div>';
-
-        $output .= '<div class="datagrid after col-md-12">';
-        $output .= $this->printPagination();
-        $output .= '</div>';
-
-        $this->printStyling();
+        $this->addStylingToView();
 
         return $output;
     }
 
     /**
-     * Prepares a new instance of \Zend\Form
+     * Prints the DataGridTable Zend Form instance by calling the DataGridForm helper.
+     * @return string
      */
-    public function prepareForm()
+    protected function printSettings()
     {
-        $this->settingsForm = new Form($this->getView()->Translate('settings'));
-        $this->settingsForm->setAttribute('method', 'get');
-        if (!in_array('columnsForm', $this->displaySettings)) {
-            return;
+        $settingsForm = $this->getSettingsForm();
+        // @todo: need to find a better way of implementing this ugly piece of code
+        if (in_array('pagination', $this->displaySettings)) {
+            $queryParams = array();
+            parse_str(parse_url($this->getView()->ServerUrl(true), PHP_URL_QUERY), $queryParams);
+            if (isset($queryParams['page']) && !is_null($queryParams['page']) && is_numeric($queryParams['page'])) {
+                $settingsForm->add(array(
+                    'name' => 'page',
+                    'type' => 'hidden',
+                    'attributes' => array(
+                        'value' => $this->getView()->EscapeUrl($queryParams['page']),
+                    ),
+                ));
+            }
         }
-        $this->settingsForm->add(new ColumnSettingsFieldset($this->tableModel));
+
+        return
+            '<div class="datagrid before col-md-12">' .
+            $this->getView()->DataGridForm($settingsForm) .
+            '</div>';
+    }
+
+    /**
+     * Prepares a new instance of \Zend\Form
+     *
+     * @return Form
+     */
+    public function getSettingsForm()
+    {
+        $settingsForm = new Form($this->getView()->Translate('settings'));
+        $settingsForm->setAttribute('method', 'get');
+        if (!in_array('columnsForm', $this->displaySettings)) {
+            return $settingsForm;
+        }
+        return $settingsForm->add(new DisplaySettingsFieldset($this->tableModel));
+    }
+
+    /**
+     * @return string
+     */
+    protected function printTable()
+    {
+        $this->prepareTable();
+        return
+            '<div class="datagrid table col-md-12">' .
+            TableHeader::printTableStart($this->displaySettings) .
+            TableHeader::printTableHeadRow($this) .
+            TableBody::printTableBody($this) .
+            $this->printTableEnd() .
+            '</div>';
     }
 
     /**
@@ -131,218 +135,7 @@ class Table extends AbstractHelper
                 $this->additionalFilters[$filter->getName()] = $filter;
             }
         }
-
-        $this->addSearchColumn = (
-            in_array('simpleSearch', $this->displaySettings) ||
-            in_array('actionRoutes', $this->displaySettings)
-        );
     }
-
-    /**
-     * Prints the DataGridTable Zend Form instance by calling the DataGridForm helper.
-     */
-    public function printForm()
-    {
-        // @todo: need to find a better way of implementing this ugly piece of code
-        if (in_array('pagination', $this->displaySettings)) {
-            $queryParams = array();
-            parse_str(parse_url($this->getView()->ServerUrl(true), PHP_URL_QUERY), $queryParams);
-            if (isset($queryParams['page']) && !is_null($queryParams['page']) && is_numeric($queryParams['page'])) {
-                $this->settingsForm->add(array(
-                    'name' => 'page',
-                    'type' => 'hidden',
-                    'attributes' => array(
-                        'value' => $this->getView()->EscapeUrl($queryParams['page']),
-                    ),
-                ));
-            }
-        }
-
-        return $this->getView()->DataGridForm($this->settingsForm);
-    }
-
-    /**
-     * returns the opening table element
-     * @param string $classes
-     * @return string
-     */
-    protected function printTableStart($classes = "table tabelVerkenner table-striped table-hover table-condensed")
-    {
-        $html = '';
-        if (in_array('simpleSearch', $this->displaySettings)) {
-            $html .= '<form method="GET">';
-        }
-        $html .= sprintf('<table class="%s">', $classes);
-
-        return $html;
-    }
-
-    /**
-     * returns the table heading, containing the named table columns
-     *
-     * @param string $classes
-     * @return string
-     */
-    protected function printTableHeadRow($classes = "tabelHeader")
-    {
-        $html = '<thead>';
-        $html .= '<tr>';
-
-        /** @var TableHeaderCellModel $tableHeader */
-        foreach ($this->displayedHeaders as $tableHeader) {
-            $html .= sprintf(
-                '<th class="%s" ',
-                $classes . " " . $tableHeader->getSafeName()
-            );
-
-            if ($tableHeader->getWidth() > 0) {
-                $html .= 'style="width: ' . $tableHeader->getWidth() . 'px;"';
-            }
-
-            $html .= '>';
-            $html .= $this->view->translate($tableHeader->getName());
-
-            if ($tableHeader->getName() == $tableHeader->getAccessor()) {
-                $html .= $this->printOrderOption($tableHeader->getName());
-            }
-
-            $html .= '</th>';
-        }
-
-        /** @var TableFilterModel $filter */
-        foreach ($this->additionalFilters as $filter) {
-            $html .= sprintf(
-                '<th class="%s customFilter">%s</th>',
-                $classes . " " . $filter->getSafeName(),
-                $filter->getName()
-            );
-        }
-
-        if ($this->addSearchColumn) {
-            $html .= '<th class="tabelHeader rowOptions"></th>';
-        }
-
-        $html .= '</tr>';
-
-        $html .= $this->getView()->DataGridSearchFilter(
-            $this->tableModel,
-            $this->displayedHeaders,
-            $this->additionalFilters,
-            $this->dataStrategyResolver
-        );
-
-        $html .= '</thead>';
-
-        return $html;
-    }
-
-    /**
-     * Looper for the table content
-     *
-     * @param string $trClass
-     * @return string
-     */
-    protected function printTableContent($trClass = "")
-    {
-        $html = '';
-        $rows = $this->tableModel->getTableRows();
-
-        if (empty($rows)) {
-            $html .= '<tr><td colspan="42">';
-            $html .= $this->view->translate('No data found matching your criteria');
-            $html .= '</td></tr>';
-        }
-
-        foreach ($rows as $row) {
-            $html .= '<tr class="' . $trClass . '">';
-            $html .= $this->printTableContentRow($row);
-            $html .= "</tr>";
-        }
-
-        return $html;
-    }
-
-    /**
-     * Wrapper foreach row in the table
-     *
-     * @param TableRowModel $tableRow
-     * @return string
-     */
-    protected function printTableContentRow(TableRowModel $tableRow)
-    {
-        $html = '';
-
-        /** @var TableHeaderCellModel $tableHeader */
-        foreach ($this->displayedHeaders as $tableHeader) {
-            $cell = $tableRow->getCell($tableHeader->getSafeName());
-            if (!$cell) {
-                $cell = null;
-            }
-            $html .= $this->printTableContentCell($cell);
-        }
-
-        if (in_array('simpleSearch', $this->displaySettings)) {
-            /** @var TableFilterModel $filter */
-            foreach ($this->additionalFilters as $filter) {
-                $html .= $this->printTableContentCell($filter->getInstance()->getFilterCellValue($tableRow));
-            }
-        }
-
-        if (in_array('actionRoutes', $this->displaySettings)) {
-            $links = $this->tableModel->getOptionRoutes();
-            $html .= '<td class="kolom rowOptions"><span class="pull-right iconenNaarLinks">';
-            foreach ($links as $action => $url) {
-                $html .= $this->getActionLink($action, $url, $tableRow->getCellValue('id'));
-            }
-            $html .= '</span></td>';
-        }
-
-        return $html;
-    }
-
-    /**
-     * Wraps the content cell in a <td> element
-     *
-     * @param TableCellModel $cell
-     * @param string $tdClass
-     * @return string
-     * @internal param $cellValue
-     * @internal param string $cellName
-     */
-    protected function printTableContentCell(TableCellModel $cell = null, $tdClass = "kolom")
-    {
-        $html = '<td class="' . $tdClass . '">';
-        if (!is_null($cell)) {
-            $html = sprintf("<td class=\"%s\">", $tdClass . " " . $cell->getSafeName());
-            $html .= $this->dataStrategyResolver->resolveAndParse($cell->getValue(), $cell->getName());
-        }
-        $html .= '</td>';
-
-        return $html;
-    }
-
-    /**
-     * if configured, Prints the "order by" icons in each table heading cell
-     * @param $columName
-     * @return string|void
-     */
-    protected function printOrderOption($columName)
-    {
-        if (!in_array('ordering', $this->displaySettings)) {
-            return;
-        }
-
-        $downUrl = $this->getView()->UrlWithQuery(array('sort' => $columName, 'order' => 'desc'));
-        $upUrl = $this->getView()->UrlWithQuery(array('sort' => $columName, 'order' => 'asc'));
-        $iconClass = 'glyphicon glyphicon-chevron';
-        $html = '<span class="pull-right">';
-        $html .= '<a href="' . $downUrl . '" class="tabelHeadOpties"><i class="' . $iconClass . '-down"></i></a>';
-        $html .= '<a href="' . $upUrl . '" class="tabelHeadOpties"><i class="' . $iconClass . '-up"></i></a>';
-        $html .= '</span>';
-
-        return $html;
-    }
-
 
     /**
      * Closes the table by printing a </table> statement
@@ -382,10 +175,24 @@ class Table extends AbstractHelper
         return $html;
     }
 
+
+    /**
+     * @return string
+     */
+    protected function printPaginator()
+    {
+        $output = '<div class="datagrid after col-md-12">';
+        if (in_array('pagination', $this->displaySettings)) {
+            $output .= TablePaginator::printPagination($this);
+        }
+        $output .= '</div>';
+        return $output;
+    }
+
     /**
      * Appends / Prepends CSS and JS files for an enhanced UI/UX
      */
-    protected function printStyling()
+    protected function addStylingToView()
     {
         if (!in_array('noStyling', $this->displaySettings)) {
             $this->view->headLink()->prependStylesheet(
@@ -400,74 +207,58 @@ class Table extends AbstractHelper
     }
 
     /**
-     * Tries to add a glyph icon to an action link
-     *
-     * @param $action
-     * @param $url
-     * @param $id
-     * @return string
+     * @return TableModel
      */
-    protected function getActionLink($action, $url, $id)
+    public function getTableModel()
     {
-        $knownActions = array(
-            'edit' => 'pencil',
-            'delete' => 'trash',
-            'view' => 'search',
-        );
-
-        if (in_array('noStyling', $this->displaySettings) || !array_key_exists($action, $knownActions)) {
-            return sprintf(
-                '<a class="options btn btn-mini %s" href="%s" title="%s" data-id="%s">%s</a>',
-                $action,
-                $this->view->url($url, array('action' => $action, 'id' => $id)),
-                $action,
-                $id,
-                $action
-            );
-        }
-
-        return sprintf(
-            '<a href="%s" title="%s" data-id="%s"><i class="glyphicon glyphicon-%s icoonNaarLinks %s"></i></a>',
-            $this->view->url($url, array('action' => $action, 'id' => $id)),
-            $action,
-            $id,
-            $knownActions[$action],
-            $action
-        );
+        return $this->tableModel;
     }
 
     /**
-     * If configured, prints the table pagination to navigate to a next set of data
+     * @param TableModel $tableModel
      */
-    public function printPagination()
+    public function setTableModel($tableModel)
     {
-        if (!in_array('pagination', $this->displaySettings)) {
-            return;
-        }
+        $this->tableModel = $tableModel;
+    }
 
-        $maxPages = $this->getTableModel()->getMaxPageNumber();
-        $currentPage = $this->getTableModel()->getPageNumber();
+    /**
+     * @return array
+     */
+    public function getDisplayedHeaders()
+    {
+        return $this->displayedHeaders;
+    }
 
-        $html = '<nav class="text-center"><ul class="pagination">';
-        $html .= sprintf(
-            '<li class="%s"><a href="%s" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>',
-            $currentPage <= 1 ? 'disabled' : '',
-            $this->getView()->UrlWithQuery(array('page' => ($currentPage - 1)))
-        );
+    /**
+     * @param array $displayedHeaders
+     */
+    public function setDisplayedHeaders($displayedHeaders)
+    {
+        $this->displayedHeaders = $displayedHeaders;
+    }
 
-        for ($i = 1; $i <= $maxPages; $i++) {
-            $html .= $i == $currentPage ? '<li class="active">' : '<li>';
-            $html .= sprintf('<a href="%s">%d</a></li>', $this->getView()->UrlWithQuery(array('page' => $i)), $i);
-        }
+    /**
+     * @return array
+     */
+    public function getAdditionalFilters()
+    {
+        return $this->additionalFilters;
+    }
 
-        $html .= sprintf(
-            '<li class="%s"><a href="%s" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>',
-            $currentPage >= $maxPages ? 'disabled' : '',
-            $this->getView()->UrlWithQuery(array('page' => ($currentPage + 1)))
-        );
+    /**
+     * @return array
+     */
+    public function getDisplaySettings()
+    {
+        return $this->displaySettings;
+    }
 
-        $html .= '</ul></nav>';
-
-        return $html;
+    /**
+     * @return StrategyResolver
+     */
+    public function getDataStrategyResolver()
+    {
+        return $this->dataStrategyResolver;
     }
 }

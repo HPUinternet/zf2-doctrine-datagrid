@@ -1,10 +1,8 @@
 <?php namespace Wms\Admin\DataGrid\View\Helper\DataStrategy;
 
 use DateTime;
-use Zend\Di\Di;
 use Doctrine\ORM\Proxy\Proxy;
-use Zend\Di\Exception\ClassNotFoundException;
-use Zend\Di\Exception\RuntimeException;
+use Zend\Di\Di;
 use Zend\Form\Element;
 use Zend\Form\ElementInterface;
 
@@ -109,6 +107,7 @@ class StrategyResolver
     /**
      * Resolve a strategy by checking if someone configured a strategy for the property
      *
+     * @param $data
      * @param $propertyName
      * @return bool
      */
