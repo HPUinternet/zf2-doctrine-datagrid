@@ -70,15 +70,15 @@ class ModuleOptionsFactory implements FactoryInterface
 
     /**
      * @param ServiceLocatorInterface $serviceLocator
-     * @return mixed
+     * @return ModuleOptions
      * @throws \Exception
      */
     protected function getModuleOptionsClass(ServiceLocatorInterface $serviceLocator)
     {
         $moduleOptionsClass = $serviceLocator->get('DataGrid_ModuleOptionsClass');
         $reflector = new \ReflectionClass($moduleOptionsClass);
-        if (!$reflector->isSubclassOf(ModuleOptions::class)) {
-            throw new \Exception($moduleOptionsClass . ' must be an instance of ' . ModuleOptions::class);
+        if (!$moduleOptionsClass instanceof ModuleOptions) {
+            throw new \Exception($reflector->getName() . ' must be an instance of ' . ModuleOptions::class);
         }
         return $moduleOptionsClass;
     }
