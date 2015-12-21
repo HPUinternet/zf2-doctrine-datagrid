@@ -1,5 +1,5 @@
 {
-	"name": "hpu/wms-admin-datagrid",
+	"name": "hpu/zf2-doctrine-datagrid",
 	"description": "DataGrid module for the HPU WMS. provides the display of entities and relations in an accessible and extensible overview.",
 	"type": "zend-wms-admin-module",
 	"keywords": [ "hpu", "wms", "cms", "zf2", "data", "table", "grid", "overview" ],
