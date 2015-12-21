@@ -110,7 +110,7 @@ class Table extends AbstractHelper implements EventManagerAwareInterface
     {
         $this->prepareTable();
         return
-            '<div class="datagrid table col-md-12">' .
+            '<div class="datagrid table">' .
             TableHeader::printTableStart($this->displaySettings) .
             TableHeader::printTableHeadRow($this) .
             TableBody::printTableBody($this) .

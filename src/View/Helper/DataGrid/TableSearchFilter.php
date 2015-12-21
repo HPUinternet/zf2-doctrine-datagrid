@@ -26,7 +26,7 @@ abstract class TableSearchFilter
         $output .= '<td>
                     <span class="pull-right">
                         <button type="submit" class="btn knopSearch">
-                            <span class="glyphicon glyphicon-search"></span> Search
+                            <span class="glyphicon glyphicon-search"></span> ' . _('Search') . '
                         </button>
                     </span>
                     </td>';
