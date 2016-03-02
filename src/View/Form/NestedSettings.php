@@ -3,6 +3,12 @@
 use Zend\Form\ElementInterface;
 use Zend\Form\View\Helper\FormCollection as BaseFormCollectionHelper;
 
+/**
+ * TODO: make recusrive
+ *
+ * Class NestedSettings
+ * @package Wms\Admin\DataGrid\View\Form
+ */
 class NestedSettings extends BaseFormCollectionHelper
 {
     private $count = 1;
