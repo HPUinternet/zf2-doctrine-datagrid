@@ -1,7 +1,6 @@
-<?php namespace Wms\Admin\DataGrid\Tests;
+<?php namespace Wms\Admin\DataGrid\Tests\Bootstrap;
 
 use Wms\Admin\DataGrid\Options\ModuleOptions;
-use Wms\Admin\DataGrid\Tests\Bootstrap\Bootstrap;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\ArrayUtils;
 
