@@ -26,7 +26,7 @@ abstract class TableBody
 
         if (empty($rows)) {
             $html .= '<tr><td colspan="42">';
-            $html .= $tableHelper->getView()->translate('No data found matching your criteria');
+            $html .= $tableHelper->translator->translate('No data found matching your criteria');
             $html .= '</td></tr>';
         }
 
@@ -142,12 +142,14 @@ abstract class TableBody
             'view' => 'search',
         );
 
+        $title = $tableHelper->translator->translate($action);
+
         if (in_array('noStyling', $tableHelper->getDisplaySettings()) || !array_key_exists($action, $knownActions)) {
             return sprintf(
                 '<a class="options btn btn-mini %s" href="%s" title="%s" data-id="%s">%s</a>',
                 $action,
                 $tableHelper->getView()->url($url, array('action' => $action, 'id' => $id)),
-                $action,
+                $title,
                 $id,
                 $action
             );
@@ -156,7 +158,7 @@ abstract class TableBody
         return sprintf(
             '<a href="%s" title="%s" data-id="%s"><i class="glyphicon glyphicon-%s icoonNaarLinks %s"></i></a>',
             $tableHelper->getView()->url($url, array('action' => $action, 'id' => $id)),
-            $action,
+            $title,
             $id,
             $knownActions[$action],
             $action

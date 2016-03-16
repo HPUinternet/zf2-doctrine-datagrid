@@ -5,6 +5,8 @@ use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerAwareTrait;
 use Zend\Form\Element;
 use Zend\Form\Form;
+use Zend\I18n\View\Helper\Translate;
+use Zend\Mvc\I18n\Translator;
 use Zend\View\Helper\AbstractHelper;
 use Wms\Admin\DataGrid\Model\TableModel;
 use Wms\Admin\DataGrid\Fieldset\DisplaySettingsFieldset;
@@ -33,6 +35,9 @@ class Table extends AbstractHelper implements EventManagerAwareInterface
     /** @var Escaper */
     protected $escaper;
 
+    /** @var  Translator */
+    public $translator;
+
     /**
      * Execution of the view helper
      *
@@ -45,6 +50,7 @@ class Table extends AbstractHelper implements EventManagerAwareInterface
         $displaySettings = array('columnsForm', 'pagination', 'ordering', 'simpleSearch', 'actionRoutes')
     ) {
         $this->escaper = new Escaper('utf-8');
+        $this->translator = $this->getView()->plugin('translate')->getTranslator();
 
         $this->setTableModel($tableModel);
         $this->displaySettings = $displaySettings;
@@ -110,7 +116,7 @@ class Table extends AbstractHelper implements EventManagerAwareInterface
     {
         $this->prepareTable();
         return
-            '<div class="datagrid table">' .
+            '<div class="datagrid table col-md-12">' .
             TableHeader::printTableStart($this->displaySettings) .
             TableHeader::printTableHeadRow($this) .
             TableBody::printTableBody($this) .
