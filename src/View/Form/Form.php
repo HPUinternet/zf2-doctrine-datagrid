@@ -44,7 +44,7 @@ class Form extends BaseFormHelper
         // Remaining elements
         foreach ($form as $element) {
             if ($element instanceof FieldsetInterface == false) {
-                $formContent .= $this->getView()->DataGridFormRow($element);
+                $formContent .= $this->getView()->FormRow($element);
             }
         }
 
