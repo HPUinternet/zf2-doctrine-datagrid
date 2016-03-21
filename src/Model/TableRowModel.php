@@ -27,7 +27,7 @@ class TableRowModel
             return $this->cells[$cellName];
         }
 
-        return null;
+        return false;
     }
 
     /**
