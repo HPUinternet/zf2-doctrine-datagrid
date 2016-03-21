@@ -1,3 +1,7 @@
 .table .options.btn {
     display: inline;
 }
+
+.datagrid .rowOptions a {
+    padding: 0 5px;
+}

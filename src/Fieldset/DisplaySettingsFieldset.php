@@ -1,18 +1,20 @@
 <?php namespace Wms\Admin\DataGrid\Fieldset;
 
-use ReflectionFunction;
 use Wms\Admin\DataGrid\Model\TableHeaderCellModel;
 use Wms\Admin\DataGrid\Model\TableModel;
-use Zend\Form\Element\MultiCheckbox;
 use Zend\Form\ElementPrepareAwareInterface;
 use Zend\Form\Fieldset;
 use Zend\Form\FormInterface;
 use Zend\InputFilter\InputFilterProviderInterface;
 
-class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInterface
+/**
+ * This class is used to to build the Display settings form
+ *
+ * Class DisplaySettingsFieldset
+ * @package Wms\Admin\DataGrid\Fieldset
+ */
+class DisplaySettingsFieldset extends Fieldset implements InputFilterProviderInterface
 {
-    public $checkboxName = 'columns';
-
     /**
      * @var TableModel
      */
@@ -32,20 +34,24 @@ class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInte
         foreach ($tableHeaders as $tableHeader) {
             /** @var TableHeaderCellModel $tableHeader */
             $columnNameSegments = explode('.', $tableHeader->getName());
-            if (!array_key_exists($columnNameSegments[0], $columnGroups)) {
-                $columnGroups[$columnNameSegments[0]] = array();
-            }
-        }
 
-        // Create all values for each property
-        foreach ($tableHeaders as $tableHeader) {
-            $columnNameSegments = explode('.', $tableHeader->getName());
+            if (!is_array($columnNameSegments) || empty($columnNameSegments)) {
+                continue;
+            }
+
+            // Create all values for each property
             $label = $tableHeader->getName();
 
+            $columnGroupName = 'base';
             if (count($columnNameSegments) > 1) {
+                $columnGroupName = $columnNameSegments[0];
                 $segments = $columnNameSegments;
                 unset($segments[0]);
                 $label = implode('.', $segments);
+            }
+
+            if (!array_key_exists($columnGroupName, $columnGroups)) {
+                $columnGroups[$columnGroupName] = array();
             }
 
             $valueOption = array(
@@ -54,21 +60,13 @@ class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInte
                 'selected' => $tableHeader->isVisible(),
             );
 
-            $columnGroups[$columnNameSegments[0]][] = $valueOption;
+            $columnGroups[$columnGroupName][] = $valueOption;
         }
 
         // Create the actual form element per property
         foreach ($columnGroups as $property => $checkboxValues) {
-            $multiCheckbox = new MultiCheckbox($this->checkboxName);
-            $multiCheckbox->setOptions(array('inline' => false, 'value_options' => $checkboxValues));
-
-            $isParentField = (strpos($checkboxValues[0]['value'], ".") !== false);
-            if (count($checkboxValues) >= 2 || (count($checkboxValues) == 1 && $isParentField)) {
-                $multiCheckbox->setLabel($property);
-            }
-
-            // Dirty hack, because this->add() does not detect element or fieldset naming conflicts
-            $this->iterator->insert($property, $multiCheckbox, 0);
+            $entityColumn = new NestedSettingsFieldset($property, $checkboxValues);
+            $this->add($entityColumn);
         }
 
         $this->add(array(
@@ -77,7 +75,7 @@ class ColumnSettingsFieldset extends Fieldset implements InputFilterProviderInte
             'label' => '<span class="glyphicon glyphicon glyphicon-refresh"></span>',
             'attributes' => array(
                 'value' => 'Apply',
-                'class' => 'btn knopSearch',
+                'class' => 'btn btn-default',
             ),
         ));
     }

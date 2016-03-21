@@ -310,8 +310,7 @@ class TableModel
         if (isset($this->tableHeaders[$name])) {
             return $this->tableHeaders[$name];
         }
-
-        return false;
+        throw new \Exception('missing column header information for "' . $name . '" in datagrid config..');
     }
 
     /**

@@ -2,7 +2,7 @@
 
 use Wms\Admin\DataGrid\Controller\Plugin\DataGridPlugin;
 use Wms\Admin\DataGrid\Factory\DataGridControllerPluginFactory;
-use Wms\Admin\DataGrid\Tests\AbstractTestCase;
+use Wms\Admin\DataGrid\Tests\Bootstrap\AbstractTestCase;
 use Wms\Admin\DataGrid\Tests\Bootstrap\Application\Controller\IndexController;
 
 class ControllerPluginTest extends AbstractTestCase
@@ -30,10 +30,9 @@ class ControllerPluginTest extends AbstractTestCase
     {
         /** @var IndexController $controller */
         $controller = $this->getServiceManger()->get('ControllerManager')->get('Application\Controller\Index');
-        $plugin = $controller->getPluginManager()->get('DataGridPLugin');
-
-
         /** @var DataGridPlugin $plugin */
+        $plugin = $controller->DataGridPlugin();
+
         $this->assertInstanceOf('Wms\Admin\DataGrid\Service\TableBuilderInterface', $plugin->getTableBuilderService());
 
         $mock = $this->getTableBuilderMock();

@@ -2,11 +2,26 @@
 
 class TableCellModel
 {
+    /** @var string  */
     protected $name = '';
+
+    /** @var string  */
     protected $safeName = '';
+
+    /** @var string  */
     protected $accessor = '';
+
+    /** @var string  */
     protected $dataType = '';
+
+    /** @var bool  */
     protected $visible = true;
+
+    /** @var string  */
+    protected $htmlClass = '';
+
+    /** @var string  */
+    protected $htmlContent = '';
 
     /**
      * Create's a new instance of the TableCellModel
@@ -117,5 +132,37 @@ class TableCellModel
     public function setAccessor($accessor)
     {
         $this->accessor = $accessor;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHtmlClass()
+    {
+        return $this->htmlClass;
+    }
+
+    /**
+     * @param string $htmlClass
+     */
+    public function setHtmlClass($htmlClass)
+    {
+        $this->htmlClass = $htmlClass;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHtmlContent()
+    {
+        return $this->htmlContent;
+    }
+
+    /**
+     * @param string $htmlContent
+     */
+    public function setHtmlContent($htmlContent)
+    {
+        $this->htmlContent = $htmlContent;
     }
 }
