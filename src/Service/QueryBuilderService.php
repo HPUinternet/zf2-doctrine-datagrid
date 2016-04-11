@@ -12,6 +12,7 @@ class QueryBuilderService implements EventManagerAwareInterface
 {
     use EventManagerAwareTrait;
 
+    protected $specialTableColumns = array();
     protected $availableTableColumns = array();
     protected $selectedTableColumns = array();
     protected $additionalWhereColumns = array();
@@ -73,6 +74,17 @@ class QueryBuilderService implements EventManagerAwareInterface
     public function getAvailableTableColumns()
     {
         return array_keys($this->availableTableColumns);
+    }
+
+    public function addSpecialTableColumn($fieldName, $type = 'string')
+    {
+        $this->specialTableColumns[$fieldName] = $type;
+        return $this;
+    }
+
+    protected function isSpecialTableColumn($fieldName)
+    {
+        return array_key_exists($fieldName, $this->specialTableColumns);
     }
 
     /**
@@ -250,6 +262,10 @@ class QueryBuilderService implements EventManagerAwareInterface
     public function where($fieldName, $fieldValue, $clause = "LIKE")
     {
         if (!$this->isSelectedField($fieldName)) {
+            if ($this->isSpecialTableColumn($fieldName)) {
+                $this->specialFieldWhere($fieldName, $fieldValue, $clause);
+                return $this;
+            }
             return false;
         }
 
@@ -273,6 +289,26 @@ class QueryBuilderService implements EventManagerAwareInterface
         }
 
         return $this;
+    }
+
+    /**
+     * @param string $fieldName
+     * @param string $fieldValue
+     * @param string $clause
+     */
+    protected function specialFieldWhere($fieldName, $fieldValue, $clause)
+    {
+        $query = $this->queryBuilder;
+        $selector = $fieldName;
+
+        if ($fieldValue == 'NULL' || $fieldValue == 'NOT NULL') {
+            $query->andWhere($selector . ' ' . $clause . ' ' . $fieldValue);
+            return;
+        }
+        $parameterName = 'value' . $this->iterator;
+        $query->andWhere($selector . ' ' . $clause . ' :' . $parameterName);
+        $query->setParameter($parameterName, $fieldValue);
+        $this->iterator++;
     }
 
     /**
@@ -307,6 +343,11 @@ class QueryBuilderService implements EventManagerAwareInterface
         }
 
         return $this;
+    }
+
+    public function specialOrderBy($column, $order = null)
+    {
+        $this->queryBuilder->orderBy($column, $order);
     }
 
     /**

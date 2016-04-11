@@ -68,7 +68,7 @@ abstract class TableHeader
             $html .= sprintf(
                 '<th class="%s customFilter">%s</th>',
                 $classes . " " . $filter->getSafeName(),
-                $filter->getName()
+                $tableHelper->getView()->translate($filter->getName())
             );
         }
 
