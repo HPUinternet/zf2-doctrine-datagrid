@@ -22,7 +22,7 @@
 	},
 	"require": {
 		"doctrine/doctrine-orm-module": "0.*",
-		"zendframework/zendframework": "~2.5",
+		"zendframework/zendframework": "~3.0",
 		"rwoverdijk/assetmanager": "~1.4"
 	},
   	"require-dev": {
